@@ -57,6 +57,8 @@ namespace Structorian.Engine
             BinaryReader reader = new BinaryReader(stream);
             foreach (StructField field in _fields)
             {
+                if (field.IsLinked) continue;
+                
                 try
                 {
                     field.LoadData(reader, instance);

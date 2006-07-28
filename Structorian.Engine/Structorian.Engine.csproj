@@ -43,6 +43,7 @@
     <Compile Include="Fields\BitfieldField.cs" />
     <Compile Include="Fields\CalcField.cs" />
     <Compile Include="Fields\CaseField.cs" />
+    <Compile Include="Fields\ElseField.cs" />
     <Compile Include="Fields\EnumField.cs" />
     <Compile Include="Fields\FieldFactory.cs" />
     <Compile Include="Fields\ChildField.cs" />
