@@ -8,7 +8,8 @@ namespace Structorian.Engine.Fields
         {
             switch(name)
             {
-                case "str": return new StrField(structDef);
+                case "str": return new StrField(structDef, false);
+                case "wstr": return new StrField(structDef, true);
                 case "child": return new ChildField(structDef, false);
                 case "sibling": return new ChildField(structDef, true);
                 case "seek": return new SeekField(structDef, false);
