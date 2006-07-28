@@ -28,6 +28,22 @@ namespace Structorian.Engine.Fields
             {
                 LoadChildFields(reader, instance);
             }
+            else if (_linkedFields != null)
+            {
+                foreach(StructField field in _linkedFields)
+                {
+                    if (field is ElseField)
+                    {
+                        field.LoadData(reader, instance);
+                        break;
+                    }
+                }
+            }
+        }
+
+        protected internal override bool CanLinkField(StructField nextField)
+        {
+            return nextField is ElseField;
         }
     }
 }

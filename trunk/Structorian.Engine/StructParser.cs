@@ -69,14 +69,24 @@ namespace Structorian.Engine
         private void LoadFieldGroup(StructLexer lexer, StructDef structDef, StructField parentField)
         {
             lexer.GetNextToken(StructTokenType.OpenCurly);
+            StructField linkToField = null;
             while(lexer.PeekNextToken() != StructTokenType.CloseCurly)
             {
-                LoadField(lexer, structDef, parentField);
+                StructField field = LoadField(lexer, structDef, parentField);
+
+                bool isLinked = false;
+                if (linkToField != null)
+                    isLinked = linkToField.CanLinkField(field);
+
+                if (isLinked)
+                    linkToField.LinkField(field);
+                else
+                    linkToField = field;
             }
             lexer.GetNextToken(StructTokenType.CloseCurly);
         }
 
-        private void LoadField(StructLexer lexer, StructDef structDef, StructField parentField)
+        private StructField LoadField(StructLexer lexer, StructDef structDef, StructField parentField)
         {
             List<Attribute> attrs = new List<Attribute>();
             LoadAttributes(lexer, attrs);
@@ -102,6 +112,7 @@ namespace Structorian.Engine
                 structDef.AddField(field);
             else
                 parentField.AddChildField(field);
+            return field;
         }
 
         private void LoadAttributes(StructLexer lexer, List<Attribute> attrs)

@@ -452,5 +452,22 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("BM", instance.Cells[0].Value);
             Assert.AreEqual("5", instance.Cells[1].Value);
         }
+        
+        [Test] public void IfElseFalse()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 a; if (a == 2) { str [len=1] b; } else { u8 c; } }",
+                new byte[] { 3, 17 });
+            Assert.AreEqual("17", instance.Cells[1].Value);
+        }
+        
+        [Test] public void IfElseTrue()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 a; if (a == 2) { str [len=1] b; } else { u8 c; } }",
+                new byte[] { 2, (byte) 'B' });
+            Assert.AreEqual("B", instance.Cells[1].Value);
+            Assert.AreEqual(2, instance.Cells.Count);
+        }
     }
 }

@@ -8,6 +8,8 @@ namespace Structorian.Engine
     {
         protected StructDef _structDef;
         private List<StructField> _childFields = null;
+        private StructField _linkedToField = null;
+        protected List<StructField> _linkedFields = null;
         private string _tag;
         private string _id;
         private string _defaultAttribute = "tag";
@@ -105,5 +107,24 @@ namespace Structorian.Engine
         {
             instance.AddCell(new StructCell(this, value, displayValue), _hidden);
         }
+        
+        protected internal virtual bool CanLinkField(StructField nextField)
+        {
+            return false;
+        }
+
+        internal void LinkField(StructField field)
+        {
+            if (_linkedFields == null)
+                _linkedFields = new List<StructField>();
+            _linkedFields.Add(field);
+            field._linkedToField = this;
+        }
+        
+        internal bool IsLinked
+        {
+            get { return _linkedToField != null; }
+        }
     }
 }
+
