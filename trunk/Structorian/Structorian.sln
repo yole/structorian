@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Structorian", "Structorian.csproj", "{9611FB89-311D-4584-A9DD-2AFE303B7901}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Structorian.Engine", "..\Structorian.Engine\Structorian.Engine.csproj", "{7275C649-8EDB-4BD2-AC99-9E0D2B610DE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Structorian.Engine.Tests", "..\Structorian.Engine.Tests\Structorian.Engine.Tests.csproj", "{FAC91E7B-4FF2-47EB-B99A-6B29D9261F20}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9611FB89-311D-4584-A9DD-2AFE303B7901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9611FB89-311D-4584-A9DD-2AFE303B7901}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9611FB89-311D-4584-A9DD-2AFE303B7901}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9611FB89-311D-4584-A9DD-2AFE303B7901}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7275C649-8EDB-4BD2-AC99-9E0D2B610DE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7275C649-8EDB-4BD2-AC99-9E0D2B610DE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7275C649-8EDB-4BD2-AC99-9E0D2B610DE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7275C649-8EDB-4BD2-AC99-9E0D2B610DE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAC91E7B-4FF2-47EB-B99A-6B29D9261F20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAC91E7B-4FF2-47EB-B99A-6B29D9261F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAC91E7B-4FF2-47EB-B99A-6B29D9261F20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAC91E7B-4FF2-47EB-B99A-6B29D9261F20}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,276 @@
+[filemask="*.exe;*.dll"]
+struct MZHeader
+{
+  str [len=2] Signature;
+  i16 "Bytes on the last page";
+  i16 "Pages in file";
+  i16 Relocations;
+  i16 "Size of header in paragraphs";
+  i16 "Minimum memory";
+  i16 "Maximum memory";
+  x16 ss;
+  x16 sp;
+  x16 Checksum;
+  x16 cs;
+  x16 ip;
+  x16 "Relocation offset";
+  i16 "Overlay number";
+  seek 0x3C;
+  x32 "New header offset" [id=NewHdrOffset];
+  seek NewHdrOffset;
+  [hidden] str [len=2] PESignature;
+  if (PESignature == "PE")
+  {
+    child PEHeader [offset=NewHdrOffset];
+  }
+}
+
+enum PEMachine
+{
+  "Intel 386"=0x014c, "Intel 860"=0x014d, "MIPS R3000 little-endian"=0x0162,
+  "MIPS R4000 little-endian"=0x0166, "MIPS R10000 little-endian"=0x0168,
+  "WCE MIPS little-endian"=0x0169, "Alpha AXP"=0x0184,
+  "SH3 little-endian"=0x01a2, "SH3 DSP"=0x01a3, "SH3E little-endian"=0x01a4,
+  "SH4 little-endian"=0x01a6, "SH5"=0x01a8, "ARM little-endian"=0x01c0,
+  "THUMB"=0x01c2, "AM33"=0x01d3
+}
+
+enum PECharacteristics
+{
+  RELOCS_STRIPPED, EXECUTABLE_IMAGE, LINE_NUMS_STRIPPED, LOCAL_SYMS_STRIPPED,
+  AGGRESIVE_WS_TRIM, LARGE_ADDRESS_AWARE, BYTES_REVERSED_LO=7,
+  32BIT_MACHINE, DEBUG_STRIPPED, REMOVABLE_RUN_FROM_SWAP, NET_RUN_FROM_SWAP,
+  SYSTEM, DLL, UP_SYSTEM_ONLY, BYTES_REVERSED_HI
+}
+
+enum PESubsystem
+{
+  Unknown, Native, "Windows GUI", "Windows CUI", "OS/2 CUI"=5,
+  "POSIX CUI"=7, "Native Windows", "Windows CE GUI", "EFI Application",
+  "EFI Boot service driver", "EFI Runtime driver", "EFI ROM", "XBox"
+}
+
+enum PEDLLCharacteristics
+{
+}
+
+enum PELoaderFlags
+{
+  BREAK_ON_LOAD, DEBUG_ON_LOAD
+}
+
+struct PEHeader
+{
+  str [len=4] Signature;
+  enum16  Machine [enum=PEMachine];
+  u16     NumberOfSections;
+  unixtime TimeDateStamp;
+  x32     PointerToSymbolTable;
+  u32     NumberOfSymbols;
+  u16     SizeOfOptionalHeader;
+  set16   Characteristics [enum=PECharacteristics];
+  include IMAGE_OPTIONAL_HEADER;
+}
+
+struct IMAGE_OPTIONAL_HEADER
+{
+  x16     Magic;
+  u8      MajorLinkerVersion;
+  u8      MinorLinkerVersion;
+  u32     SizeOfCode;
+  u32     SizeOfInitializedData;
+  u32     SizeOfUninitializedData;
+  x32     AddressOfEntryPoint;
+  x32     BaseOfCode;
+  x32     BaseOfData;
+  x32     ImageBase;
+  x32     SectionAlignment;
+  x32     FileAlignment;
+  u16     MajorOperatingSystemVersion;
+  u16     MinorOperatingSystemVersion;
+  u16     MajorImageVersion;
+  u16     MinorImageVersion;
+  u16     MajorSubsystemVersion;
+  u16     MinorSubsystemVersion;
+  x32     Win32VersionValue;
+  u32     SizeOfImage;
+  u32     SizeOfHeaders;
+  u32     Checksum;
+  enum16  Subsystem            [enum=PESubsystem];
+  set16   DllCharacteristics   [enum=PEDLLCharacteristics];
+  u32     SizeOfStackReserve;
+  u32     SizeOfStackCommit;
+  u32     SizeOfHeapReserve;
+  u32     SizeOfHeapCommit;
+  set32   LoaderFlags          [enum=PELoaderFlags];
+  x32     NumberOfRvaAndSizes;
+  x32     ExportDirectoryVA           [id=ExportDirVA];
+  u32     ExportDirectorySize         [id=ExportDirSize];
+  x32     ImportDirectoryVA           [id=ImportDirVA];
+  u32     ImportDirectorySize         [id=ImportDirSize];
+  x32     ResourceDirectoryVA         [id=ResDirVA];
+  u32     ResourceDirectorySize;
+  x32     ExceptionDirectoryVA;
+  u32     ExceptionDirectorySize;
+  x32     SecurityDirectoryVA;
+  u32     SecurityDirectorySize;
+  x32     BaseRelocDirectoryVA;
+  u32     BaseRelocDirectorySize;
+  x32     DebugDirectoryVA;
+  u32     DebugDirectorySize;
+  x32     ArchitectureDirectoryVA;
+  u32     ArchitectureDirectorySize;
+  x32     GlobalPtrDirectoryVA;
+  u32     GlobalPtrDirectorySize;
+  x32     TLSDirectoryVA              [id=TLSDirVA];
+  u32     TLSDirectorySize            [id=TLSDirSize];
+  repeat(6)
+  {
+    x32 VirtualAddress;
+    u32 Size;
+  }
+  child   PESection [count=NumberOfSections];
+}
+
+enum PESectionCharacteristics
+{
+  TYPE_NO_PAD=3, CNT_CODE=5, CNT_INITIALIZED_DATA, CNT_UNINITIALIZED_DATA,
+  LNK_OTHER, LNK_INFO, LNK_REMOVE=11,
+  LNK_COMDAT, NO_DEFER_SPEC_EXC=14, MEM_FARDATA,
+  MEM_PURGEABLE=17, MEM_LOCKED, MEM_PRELOAD,
+  LNK_NRELOC_OVFL=24, MEM_DISCARDABLE, MEM_NOT_CACHED, MEM_NOT_PAGED,
+  MEM_SHARED, MEM_EXECUTE, MEM_READ, MEM_WRITE
+}
+
+struct PESection
+{
+  str [len=8] Name;
+  nodename Name;
+  x32     PhysicalAddress;
+  x32     VirtualAddress   [id=VA];
+  u32     SizeOfRawData    [id=RawSize];
+  x32     PointerToRawData [id=RawData];
+  x32     PointerToRelocations;
+  x32     PointerToLinenumbers;
+  u16     NumberOfRelocations;
+  u16     NumberOfLinenumbers;
+  bitfield (4)
+  {
+    set32 Characteristics [enum=PESectionCharacteristics, frombit=0, tobit=31];
+    u32   Alignment [frombit=20, tobit=24];
+  }
+  if (Parent.ExportDirVA >= VA && Parent.ExportDirVA+Parent.ExportDirSize < VA+RawSize)
+  {
+    global ExportDelta [value=(VA - RawData)];
+    child  IMAGE_EXPORT_DIRECTORY [offset=Parent.ExportDirVA-ExportDelta];
+  }
+  if (Parent.ImportDirVA >= VA && (Parent.ImportDirVA+Parent.ImportDirSize) < VA+RawSize)
+  {
+    global ImportDelta [value=(VA - RawData)];
+    child  IMAGE_IMPORT_DESCRIPTOR [offset=Parent.ImportDirVA-ImportDelta];
+  }
+  if (Parent.ResDirVA == VA)
+  {
+    global ResourceDirStart [value=RawData];
+    global ResourceBase     [value=RawData-VA];
+    child IMAGE_RESOURCE_DIRECTORY [offset=RawData];
+  }
+  if (Parent.TLSDirVA >= VA && (Parent.TLSDirVA+Parent.TLSDirSize) < VA+RawSize)
+  {
+    child IMAGE_TLS_DIRECTORY32 [offset=Parent.TLSDirVA-VA+RawData];
+  }
+}
+
+struct PEDirHeader
+{
+  x32 Characteristics;
+  unixtime TimeDateStamp;
+  u16 MajorVersion;
+  u16 MinorVersion;
+}
+
+struct IMAGE_EXPORT_DIRECTORY
+{
+  include PEDirHeader;
+  x32 NameOffset;
+  seek NameOffset-ExportDelta;
+  str Name;
+  rewind;
+  x32 Base;
+  u32 NumberOfFunctions;
+  u32 NumberOfNames;
+  x32 AddressOfFunctions;
+  x32 AddressOfNames;
+  x32 AddressOfNameOrdinals;
+  child PEExportedFunction [offset=AddressOfFunctions-ExportDelta,
+                            count=NumberOfFunctions];
+}
+
+struct PEExportedFunction
+{
+  x32 Address;
+  local SelfOffset [value=(StructOffset - Parent.AddressOfFunctions + ExportDelta)];
+  seek (Parent.AddressOfNames - ExportDelta + SelfOffset);
+  x32 NameOffset;
+  seek NameOffset-ExportDelta;
+  str Name;
+  seek (Parent.AddressOfNameOrdinals - ExportDelta + SelfOffset/2);
+  [hidden] u16 _Ordinal;
+  calc Ordinal [value=_Ordinal+Parent.Base];
+}
+
+struct IMAGE_IMPORT_DESCRIPTOR
+{
+  x32 Characteristics;
+  i32 TimeDateStamp;
+  i32 ForwarderChain;
+  x32 NameOffset;
+  if (NameOffset != 0)
+  {
+    seek NameOffset-ImportDelta;
+    str Name;
+    rewind;
+  }
+  x32 FirstThunk;
+  if (FirstThunk != 0)
+  {
+    child IMAGE_IMPORT_BY_NAME [offset=FirstThunk-ImportDelta];
+  }
+  if (Characteristics != 0 || FirstThunk != 0)
+  {
+    sibling IMAGE_IMPORT_DESCRIPTOR;
+  }
+}
+
+struct IMAGE_IMPORT_BY_NAME
+{
+  x32 StructPtr;
+  if (StructPtr != 0)
+  {
+    seek StructPtr-ImportDelta;
+    u16 Hint;
+    str Name;
+    rewind;
+    sibling IMAGE_IMPORT_BY_NAME;
+  }
+}
+
+struct IMAGE_TLS_DIRECTORY32
+{
+  x32 StartAddressOfRawData;
+  x32 EndAddressOfRawData;
+  x32 AddressOfIndex;
+  x32 AddressOfCallBacks;
+  u32 SizeOfZeroFill;
+  x32 Characteristics;
+}
+
+// -- Resource directory -----------------------------------------------------
+
+struct IMAGE_RESOURCE_DIRECTORY
+{
+  include PEDirHeader;
+  u16 NumberOfNamedEntries;
+  u16 NumberOfIdEntries;
+  child PEResDirEntry [count=(NumberOfNamedEntries+NumberOfIdEntries)];
+}

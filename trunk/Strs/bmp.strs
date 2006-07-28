@@ -1,0 +1,25 @@
+[filemask="*.bmp"]
+struct BITMAPFILEHEADER
+{
+  str [len=2] bfType;
+  u32 bfSize;
+  u16 bfReserved1;
+  u16 bfReserved2;
+  x32 bfOffBits;
+  child BITMAPINFOHEADER;
+}
+
+struct BITMAPINFOHEADER
+{
+  u32 biSize;
+  i32 biWidth;
+  i32 biHeight;
+  u16 biPlanes;
+  u16 biBitCount;
+  u32 biCompression;
+  u32 biSizeImage;
+  i32 biXPelsPerMeter;
+  i32 biYPelsPerMeter;
+  u32 biClrUsed;
+  u32 biClrImportant;
+}
