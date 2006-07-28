@@ -1,0 +1,85 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7275C649-8EDB-4BD2-AC99-9E0D2B610DE0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Structorian.Engine</RootNamespace>
+    <AssemblyName>Structorian.Engine</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BaseLexer.cs" />
+    <Compile Include="EnumDef.cs" />
+    <Compile Include="Expression.cs" />
+    <Compile Include="ExpressionFunctions.cs" />
+    <Compile Include="ExpressionLexer.cs" />
+    <Compile Include="ExpressionParser.cs" />
+    <Compile Include="Fields\AssertField.cs" />
+    <Compile Include="Fields\BitfieldField.cs" />
+    <Compile Include="Fields\CalcField.cs" />
+    <Compile Include="Fields\CaseField.cs" />
+    <Compile Include="Fields\EnumField.cs" />
+    <Compile Include="Fields\FieldFactory.cs" />
+    <Compile Include="Fields\ChildField.cs" />
+    <Compile Include="Fields\GlobalField.cs" />
+    <Compile Include="Fields\IfField.cs" />
+    <Compile Include="Fields\IncludeField.cs" />
+    <Compile Include="Fields\IntBasedField.cs" />
+    <Compile Include="Fields\NodenameField.cs" />
+    <Compile Include="Fields\RepeatField.cs" />
+    <Compile Include="Fields\RewindField.cs" />
+    <Compile Include="Fields\IntField.cs" />
+    <Compile Include="Fields\SeekField.cs" />
+    <Compile Include="Fields\SetField.cs" />
+    <Compile Include="Fields\StrField.cs" />
+    <Compile Include="Fields\SwitchField.cs" />
+    <Compile Include="Fields\UnixTimeField.cs" />
+    <Compile Include="GroupContainer.cs" />
+    <Compile Include="InstanceTree.cs" />
+    <Compile Include="InstanceTreeNode.cs" />
+    <Compile Include="LoadDataException.cs" />
+    <Compile Include="ParseException.cs" />
+    <Compile Include="StructCell.cs" />
+    <Compile Include="StructDef.cs" />
+    <Compile Include="StructField.cs" />
+    <Compile Include="StructFile.cs" />
+    <Compile Include="StructInstance.cs" />
+    <Compile Include="StructLexer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StructParser.cs" />
+    <Compile Include="TextPosition.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

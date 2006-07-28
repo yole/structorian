@@ -1,0 +1,181 @@
+using System;
+using System.Globalization;
+
+namespace Structorian.Engine
+{
+    public interface IEvaluateContext
+    {
+        IConvertible EvaluateSymbol(string symbol);
+        IEvaluateContext EvaluateContext(string symbol);
+    }
+    
+    public delegate IConvertible EvaluateDelegate(IEvaluateContext context, string param);
+    
+    public abstract class Expression
+    {
+        private string _source;
+        public abstract IConvertible Evaluate(IEvaluateContext context);
+        
+        public int EvaluateInt(IEvaluateContext context)
+        {
+            return Evaluate(context).ToInt32(CultureInfo.CurrentCulture);
+        }
+
+        public long EvaluateLong(IEvaluateContext context)
+        {
+            return Evaluate(context).ToInt64(CultureInfo.CurrentCulture);
+        }
+
+        public bool EvaluateBool(IEvaluateContext context)
+        {
+            return Evaluate(context).ToBoolean(CultureInfo.CurrentCulture);
+        }
+
+        public string EvaluateString(IEvaluateContext context)
+        {
+            return Evaluate(context).ToString(CultureInfo.CurrentCulture);
+        }
+        
+        public IComparable EvaluateComparable(IEvaluateContext context)
+        {
+            IConvertible result = Evaluate(context);
+            if (result.GetTypeCode() == TypeCode.String)
+                return result.ToString(CultureInfo.CurrentCulture);
+            else
+                return result.ToInt32(CultureInfo.CurrentCulture);
+        }
+
+        public string Source
+        {
+            get { return _source; }
+            set { _source = value; }
+        }
+
+        public override string ToString()
+        {
+            if (_source != null) return _source;
+            return base.ToString();
+        }
+    }
+    
+    public class PrimitiveExpression: Expression
+    {
+        private IConvertible _value;
+
+        internal PrimitiveExpression(IConvertible value)
+        {
+            _value = value;
+        }
+
+        public override IConvertible Evaluate(IEvaluateContext context)
+        {
+            return _value;
+        }
+    }
+    
+    public class SymbolExpression: Expression
+    {
+        private string _symbol;
+
+        public SymbolExpression(string symbol)
+        {
+            _symbol = symbol;
+        }
+
+        public override IConvertible Evaluate(IEvaluateContext context)
+        {
+            return context.EvaluateSymbol(_symbol);
+        }
+    }
+    
+    class BinaryExpression: Expression
+    {
+        protected ExprTokenType _operation;
+        protected Expression _lhs;
+        protected Expression _rhs;
+
+        public BinaryExpression(ExprTokenType operation, Expression lhs, Expression rhs)
+        {
+            _operation = operation;
+            _lhs = lhs;
+            _rhs = rhs;
+        }
+
+        public override IConvertible Evaluate(IEvaluateContext context)
+        {
+            int lhs = _lhs.EvaluateInt(context);
+            int rhs = _rhs.EvaluateInt(context);
+            switch(_operation)
+            {
+                case ExprTokenType.Plus: return lhs + rhs;
+                case ExprTokenType.Minus: return lhs - rhs;
+                case ExprTokenType.Mult: return lhs * rhs;
+                case ExprTokenType.Div: return lhs / rhs;
+            }
+            throw new Exception("Unknown binary operation");
+        }
+    }
+    
+    class CompareExpression: BinaryExpression
+    {
+        public CompareExpression(ExprTokenType operation, Expression lhs, Expression rhs)
+            : base(operation, lhs, rhs)
+        {
+        }
+
+        public override IConvertible Evaluate(IEvaluateContext context)
+        {
+            IComparable lhs = _lhs.EvaluateComparable(context);
+            IComparable rhs = _rhs.EvaluateComparable(context);
+            int result = lhs.CompareTo(rhs);
+            switch(_operation)
+            {
+                case ExprTokenType.EQ: return result == 0;
+                case ExprTokenType.NE: return result != 0;
+                case ExprTokenType.GT: return result > 0;
+                case ExprTokenType.GE: return result >= 0;
+                case ExprTokenType.LT: return result < 0;
+                case ExprTokenType.LE: return result <= 0;
+            }
+            throw new Exception("Unknown compare operation");
+        }
+    }
+    
+    class LogicalExpression: BinaryExpression
+    {
+        public LogicalExpression(ExprTokenType operation, Expression lhs, Expression rhs)
+            : base(operation, lhs, rhs)
+        {
+        }
+
+        public override IConvertible Evaluate(IEvaluateContext context)
+        {
+            bool lhs = _lhs.EvaluateBool(context);
+            bool rhs = _rhs.EvaluateBool(context);
+            switch(_operation)
+            {
+                case ExprTokenType.AND: return lhs && rhs;
+                case ExprTokenType.OR: return lhs || rhs;
+            }
+            throw new Exception("Unknown logical operation");
+        }
+    }
+
+    class ContextExpression: Expression
+    {
+        private string _contextExpr;
+        private Expression _expr;
+
+        public ContextExpression(string contextExpr, Expression expr)
+        {
+            _contextExpr = contextExpr;
+            _expr = expr;
+        }
+
+        public override IConvertible Evaluate(IEvaluateContext context)
+        {
+            IEvaluateContext ctx = context.EvaluateContext(_contextExpr);
+            return _expr.Evaluate(ctx);
+        }
+    }
+}

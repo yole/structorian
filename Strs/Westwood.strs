@@ -1,0 +1,17 @@
+// Structures for Westwood games (for example, Legend of Kyrandia)
+// Based on scummvm source code
+
+struct EMCScript
+{
+  str [len=4] signature;
+}
+
+struct WSAMovie
+{
+  u16 numFrames;
+  u16 width;
+  u16 height;
+  u16 deltaBufferSize;
+  x32 frameDataOffs;
+}
+

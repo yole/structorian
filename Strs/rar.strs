@@ -1,0 +1,17 @@
+// RAR archive structures
+// Compiled by Dmitry Jemerov <yole@yole.ru>
+// Based on TECHNOTE.TXT from the RAR archiver distribution
+
+enum RarBlockType
+{
+  MARK_HEAD=0x72, MAIN_HEAD, FILE_HEAD, COMMENT_HEAD, AV_OLD,
+  SUBBLOCK, RECOVERY_RECORD, AV
+}
+
+[filemask="*.rar"]
+struct RarBlock
+{
+  x16    HEAD_CRC;
+  enum8  HEAD_TYPE [enum=RarBlockType];
+  nodename HEAD_TYPE;
+}
