@@ -8,10 +8,12 @@ namespace Structorian.Engine.Fields
     public class StrField: StructField
     {
         private Expression _lengthExpr;
+        private bool _wide;
 
-        public StrField(StructDef structDef)
+        public StrField(StructDef structDef, bool wide)
             : base(structDef)
         {
+            _wide = wide;
         }
 
         public Expression LengthExpression
@@ -29,6 +31,9 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
+            if (_wide)
+                reader = new BinaryReader(reader.BaseStream, Encoding.Unicode);
+            
             string value;
             if (_lengthExpr != null)
             {
