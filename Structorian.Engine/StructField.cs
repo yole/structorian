@@ -15,6 +15,7 @@ namespace Structorian.Engine
         private string _defaultAttribute = "tag";
         private bool _acceptsChildren = false;
         protected bool _hidden;
+        private Dictionary<string, object> _attributeValues = new Dictionary<string, object>();
 
         protected StructField(StructDef structDef)
         {
@@ -52,6 +53,19 @@ namespace Structorian.Engine
                 _hidden = (Int32.Parse(value) > 0);
             else
                 throw new Exception("Unknown attribute " + key);
+        }
+        
+        internal void SetAttributeValue(string key, object value)
+        {
+            _attributeValues[key] = value;
+        }
+        
+        public Expression GetExpressionAttribute(string key)
+        {
+            object result;
+            if (!_attributeValues.TryGetValue(key, out result))
+                return null;
+            return (Expression) result;
         }
         
         public virtual string DefaultAttribute

@@ -40,6 +40,7 @@
     <Compile Include="ExpressionLexer.cs" />
     <Compile Include="ExpressionParser.cs" />
     <Compile Include="Fields\AssertField.cs" />
+    <Compile Include="AttributeRegistry.cs" />
     <Compile Include="Fields\BitfieldField.cs" />
     <Compile Include="Fields\CalcField.cs" />
     <Compile Include="Fields\CaseField.cs" />

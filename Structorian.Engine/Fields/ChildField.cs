@@ -6,8 +6,6 @@ namespace Structorian.Engine.Fields
 {
     public class ChildField: StructField, IChildSeed
     {
-        private Expression _offsetExpr;
-        private Expression _countExpr;
         private string _childStruct;
         private string _groupName;
         private bool _isSibling;
@@ -27,10 +25,6 @@ namespace Structorian.Engine.Fields
         {
             if (key == "struct")
                 _childStruct = value;
-            else if (key == "offset")
-                _offsetExpr = ExpressionParser.Parse(value);
-            else if (key == "count")
-                _countExpr = ExpressionParser.Parse(value);
             else if (key == "group")
                 _groupName = value;
             else
@@ -66,9 +60,10 @@ namespace Structorian.Engine.Fields
             }
             
             int count;
-            if (_countExpr != null)
+            Expression countExpr = GetExpressionAttribute("count");
+            if (countExpr != null)
             {
-                count = _countExpr.EvaluateInt(instance);
+                count = countExpr.EvaluateInt(instance);
                 if (count == 0) return;
             }
             else
@@ -85,9 +80,10 @@ namespace Structorian.Engine.Fields
                 childDef = _structDef;
             
             StructInstance childInstance;
-            if (_offsetExpr != null)
+            Expression offsetExpr = GetExpressionAttribute("offset");
+            if (offsetExpr != null)
             {
-                long childOffset = _offsetExpr.EvaluateLong(instance);
+                long childOffset = offsetExpr.EvaluateLong(instance);
                 childInstance = new StructInstance(childDef, parent, stream, childOffset);
             }
             else
