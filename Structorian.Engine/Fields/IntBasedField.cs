@@ -7,33 +7,11 @@ namespace Structorian.Engine.Fields
     {
         protected int _size;
         protected bool _unsigned;
-        protected int _frombit;
-        protected int _tobit;
         
         protected IntBasedField(StructDef structDef, int size, bool unsigned) : base(structDef)
         {
             _size = size;
             _unsigned = unsigned;
-        }
-
-        public int FromBit
-        {
-            get { return _frombit; }
-        }
-
-        public int ToBit
-        {
-            get { return _tobit; }
-        }
-
-        public override void SetAttribute(string key, string value)
-        {
-            if (key == "frombit")
-                _frombit = Int32.Parse(value);
-            else if (key == "tobit")
-                _tobit = Int32.Parse(value);
-            else
-                base.SetAttribute(key, value);
         }
 
         protected IConvertible ReadIntValue(BinaryReader reader)

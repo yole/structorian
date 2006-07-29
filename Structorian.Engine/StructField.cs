@@ -60,14 +60,29 @@ namespace Structorian.Engine
             _attributeValues[key] = value;
         }
         
-        public Expression GetExpressionAttribute(string key)
+        public object GetAttribute(string key)
         {
             object result;
             if (!_attributeValues.TryGetValue(key, out result))
                 return null;
-            return (Expression) result;
+            return result;
         }
         
+        public Expression GetExpressionAttribute(string key)
+        {
+            return (Expression) GetAttribute(key);
+        }
+
+        public string GetStringAttribute(string key)
+        {
+            return (string) GetAttribute(key);
+        }
+
+        public int? GetIntAttribute(string key)
+        {
+            return (int?)GetAttribute(key);
+        }
+
         public virtual string DefaultAttribute
         {
             get { return _defaultAttribute;  }
