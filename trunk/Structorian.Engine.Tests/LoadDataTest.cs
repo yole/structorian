@@ -469,5 +469,13 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("B", instance.Cells[1].Value);
             Assert.AreEqual(2, instance.Cells.Count);
         }
+        
+        [Test] public void ParentCount()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 a; child B; } struct B { calc c [value=ParentCount]; }",
+                new byte[] { 2, 17 });
+            Assert.AreEqual("1", instance.Children[0].Cells[0].Value);
+        }
     }
 }

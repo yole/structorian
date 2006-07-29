@@ -111,6 +111,21 @@ namespace Structorian.Engine
             }
         }
 
+        public int ParentCount
+        {
+            get
+            {
+                int count = 0;
+                StructInstance p = EvaluateParent();
+                while(p != null)
+                {
+                    count++;
+                    p = p.EvaluateParent();
+                }
+                return count;
+            }
+        }
+
         internal void AddChildSeed(IChildSeed childSeed)
         {
             if (_childSeeds == null)
@@ -188,15 +203,21 @@ namespace Structorian.Engine
         {
             if (symbol.ToLowerInvariant() == "parent")
             {
-                InstanceTreeNode parent = _parent;
-                while(parent != null && !(parent is StructInstance))
-                {
-                    parent = parent.Parent;
-                }
+                StructInstance parent = EvaluateParent();
                 if (parent == null) throw new Exception("Expression does not have a parent");
-                return (StructInstance) parent;
+                return parent;
             }
             throw new Exception("Unknown context " + symbol);
+        }
+
+        private StructInstance EvaluateParent()
+        {
+            InstanceTreeNode parent = _parent;
+            while(parent != null && !(parent is StructInstance))
+            {
+                parent = parent.Parent;
+            }
+            return (StructInstance) parent;
         }
 
         public void RegisterGlobal(string id, int result)
