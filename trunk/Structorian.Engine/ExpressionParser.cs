@@ -105,6 +105,11 @@ namespace Structorian.Engine
                 lexer.GetNextToken(ExprTokenType.Close);
                 return result;
             }
+            if (tokenType == ExprTokenType.Minus)
+            {
+                lexer.GetNextToken(tokenType);
+                return new UnaryExpression(ParseFactor(lexer), tokenType);
+            }
             throw new ParseException("Unexpected token " + tokenType, lexer.CurrentPosition);
         }
     }
