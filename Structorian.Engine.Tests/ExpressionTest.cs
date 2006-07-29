@@ -128,5 +128,10 @@ namespace Structorian.Engine.Tests
         {
             Assert.AreEqual(21, ExpressionParser.Parse("(5+2)*3").EvaluateInt(null));
         }
+
+        [Test] public void EvaluateUnaryMinus()
+        {
+            Assert.AreEqual(-4, ExpressionParser.Parse("-4").EvaluateInt(null));
+        }
     }
 }

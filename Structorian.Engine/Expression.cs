@@ -178,4 +178,26 @@ namespace Structorian.Engine
             return _expr.Evaluate(ctx);
         }
     }
+    
+    class UnaryExpression: Expression
+    {
+        private Expression _operand;
+        private ExprTokenType _operation;
+
+        public UnaryExpression(Expression operand, ExprTokenType operation)
+        {
+            _operand = operand;
+            _operation = operation;
+        }
+
+        public override IConvertible Evaluate(IEvaluateContext context)
+        {
+            switch(_operation)
+            {
+                case ExprTokenType.Minus:
+                    return -_operand.EvaluateInt(context);
+            }
+            throw new Exception("Unexpected unary operation " + _operation);
+        }
+    }
 }
