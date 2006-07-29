@@ -80,5 +80,21 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("b", enumDef.ValueToString(5));
             Assert.AreEqual("c", enumDef.ValueToString(8));
         }
+        
+        [Test] public void ErrorInExpression()
+        {
+            ParseException parseException = null;
+            try
+            {
+                new StructParser().LoadStructs("struct A\n{  \n  calc x [value=)];\n}");
+            }
+            catch(ParseException ex)
+            {
+                parseException = ex;
+            }
+            Assert.IsNotNull(parseException);
+            Assert.AreEqual(3, parseException.Position.Line);
+            Assert.AreEqual(16, parseException.Position.Col);
+        }
     }
 }

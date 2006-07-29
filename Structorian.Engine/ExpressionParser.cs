@@ -105,7 +105,7 @@ namespace Structorian.Engine
                 lexer.GetNextToken(ExprTokenType.Close);
                 return result;
             }
-            throw new Exception("Unexpected token " + tokenType);
+            throw new ParseException("Unexpected token " + tokenType, lexer.CurrentPosition);
         }
     }
 }
