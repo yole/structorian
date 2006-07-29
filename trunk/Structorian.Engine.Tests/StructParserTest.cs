@@ -36,7 +36,7 @@ namespace Structorian.Engine.Tests
             Assert.IsInstanceOfType(typeof(StrField), structDef.Fields [0]);
             StrField field = (StrField) structDef.Fields[0];
             Assert.AreEqual("bfType", field.Tag);
-            Assert.AreEqual("2", field.LengthExpression.ToString());
+            Assert.AreEqual("2", field.GetExpressionAttribute("len").ToString());
         }
         
         [Test, ExpectedException(typeof(Exception))] public void DuplicateStructName()

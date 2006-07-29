@@ -7,23 +7,13 @@ namespace Structorian.Engine.Fields
 {
     class BitfieldField: StructField
     {
-        private Expression _sizeExpr;
-        
         public BitfieldField(StructDef structDef) : base(structDef, "size", true)
         {
         }
 
-        public override void SetAttribute(string key, string value)
-        {
-            if (key == "size")
-                _sizeExpr = ExpressionParser.Parse(value);
-            else
-                base.SetAttribute(key, value);
-        }
-
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
-            int size = _sizeExpr.EvaluateInt(instance);
+            int size = GetExpressionAttribute("size").EvaluateInt(instance);
             uint baseValue;
             switch(size)
             {

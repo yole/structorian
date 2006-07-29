@@ -7,7 +7,6 @@ namespace Structorian.Engine.Fields
 {
     public class StrField: StructField
     {
-        private Expression _lengthExpr;
         private bool _wide;
 
         public StrField(StructDef structDef, bool wide)
@@ -16,31 +15,19 @@ namespace Structorian.Engine.Fields
             _wide = wide;
         }
 
-        public Expression LengthExpression
-        {
-            get { return _lengthExpr; }
-        }
-
-        public override void SetAttribute(string key, string value)
-        {
-            if (key == "len")
-                _lengthExpr = ExpressionParser.Parse(value);
-            else
-                base.SetAttribute(key, value);
-        }
-
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             if (_wide)
                 reader = new BinaryReader(reader.BaseStream, Encoding.Unicode);
             
             string value;
-            if (_lengthExpr != null)
+            Expression lengthExpr = GetExpressionAttribute("len");
+            if (lengthExpr != null)
             {
-                int length = (int)_lengthExpr.Evaluate(instance);
+                int length = (int)lengthExpr.Evaluate(instance);
                 if (reader.BaseStream.Length - reader.BaseStream.Position < length)
                 {
-                    throw new LoadDataException("Length expression " + _lengthExpr.ToString() +
+                    throw new LoadDataException("Length expression " + lengthExpr.ToString() +
                                                 " has the result of " + length + " and points outside the file");
                 }
                 char[] chars = reader.ReadChars(length);

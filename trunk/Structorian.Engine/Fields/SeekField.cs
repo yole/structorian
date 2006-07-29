@@ -7,7 +7,6 @@ namespace Structorian.Engine.Fields
 {
     class SeekField: StructField
     {
-        private Expression _offsetExpr;
         private bool _relative;
         
         public SeekField(StructDef structDef, bool relative) : base(structDef, "offset", false)
@@ -15,17 +14,9 @@ namespace Structorian.Engine.Fields
             _relative = relative;
         }
 
-        public override void SetAttribute(string key, string value)
-        {
-            if (key == "offset")
-                _offsetExpr = ExpressionParser.Parse(value);
-            else
-                base.SetAttribute(key, value);
-        }
-
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
-            long offset = _offsetExpr.EvaluateLong(instance);
+            long offset = GetExpressionAttribute("offset").EvaluateLong(instance);
             if (_relative)
                 reader.BaseStream.Seek(offset, SeekOrigin.Current);
             else

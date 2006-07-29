@@ -31,6 +31,7 @@ namespace Structorian.Engine
         
         private StructFile _curStructFile;
         private FieldFactory _fieldFactory = new FieldFactory();
+        private AttributeRegistry _attributeRegistry = new AttributeRegistry();
         
         public StructFile LoadStructs(string strsText)
         {
@@ -97,11 +98,11 @@ namespace Structorian.Engine
             {
                 string tag = lexer.GetNextToken(StructTokenType.String);
                 LoadAttributes(lexer, attrs);
-                field.SetAttribute(field.DefaultAttribute, tag);
+                _attributeRegistry.SetFieldAttribute(field, field.DefaultAttribute, tag);
             }
 
-            foreach(Attribute attr in attrs)
-                field.SetAttribute(attr.Key, attr.Value);
+            foreach (Attribute attr in attrs)
+                _attributeRegistry.SetFieldAttribute(field, attr.Key, attr.Value);
             
             if (lexer.PeekNextToken() == StructTokenType.OpenCurly)
                 LoadFieldGroup(lexer, structDef, field);
