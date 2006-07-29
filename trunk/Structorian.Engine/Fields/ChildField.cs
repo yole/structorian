@@ -7,7 +7,6 @@ namespace Structorian.Engine.Fields
     public class ChildField: StructField, IChildSeed
     {
         private string _childStruct;
-        private string _groupName;
         private bool _isSibling;
         
         public ChildField(StructDef structDef, bool isSibling)
@@ -25,8 +24,6 @@ namespace Structorian.Engine.Fields
         {
             if (key == "struct")
                 _childStruct = value;
-            else if (key == "group")
-                _groupName = value;
             else
                 base.SetAttribute(key, value);
         }
@@ -52,9 +49,10 @@ namespace Structorian.Engine.Fields
 
         private void DoLoadChildren(StructInstance instance, InstanceTreeNode parent, Stream stream)
         {
-            if (_groupName != null)
+            string groupName = GetStringAttribute("group");
+            if (groupName != null)
             {
-                GroupContainer container = new GroupContainer(parent, _groupName);
+                GroupContainer container = new GroupContainer(parent, groupName);
                 parent.AddChild(container);
                 parent = container;
             }

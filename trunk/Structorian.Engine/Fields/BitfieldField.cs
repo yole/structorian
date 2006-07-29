@@ -30,7 +30,9 @@ namespace Structorian.Engine.Fields
                 if (field is IntBasedField)
                 {
                     IntBasedField intBasedField = (IntBasedField) field;
-                    bitFieldReader.SetBits(intBasedField.FromBit, intBasedField.ToBit);
+                    int? fromBit = intBasedField.GetIntAttribute("frombit");
+                    int? toBit = intBasedField.GetIntAttribute("tobit");
+                    bitFieldReader.SetBits(fromBit.Value, toBit.Value);
                 }
                 field.LoadData(bitFieldReader, instance);
             }
