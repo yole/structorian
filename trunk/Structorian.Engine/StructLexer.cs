@@ -90,8 +90,9 @@ namespace Structorian.Engine
             return NextToken.TokenType == StructTokenType.EOF;
         }
         
-        public string GetAttributeValue()
+        public string GetAttributeValue(out TextPosition pos)
         {
+            pos = BuildTextPosition(_position);
             int startPosition = _position;
             while(_position < _text.Length && !IsAttributeEnd(_text [_position]))
                 _position++;

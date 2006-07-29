@@ -41,7 +41,7 @@ namespace Structorian.Engine
             fieldsForType.Add(attrName, type);
         }
 
-        internal void SetFieldAttribute(StructField field, string key, string value)
+        internal void SetFieldAttribute(StructField field, string key, string value, TextPosition pos)
         {
             Type fieldType = field.GetType();
             
@@ -53,7 +53,7 @@ namespace Structorian.Engine
                     AttributeType attrType;
                     if (fieldsForType.TryGetValue(key, out attrType))
                     {
-                        SetFieldAttributeValue(field, key, attrType, value);
+                        SetFieldAttributeValue(field, key, attrType, value, pos);
                         return;
                     }
                 }
@@ -64,12 +64,20 @@ namespace Structorian.Engine
             field.SetAttribute(key, value);
         }
 
-        private void SetFieldAttributeValue(StructField field, string key, AttributeType type, string value)
+        private void SetFieldAttributeValue(StructField field, string key, AttributeType type, string value,
+            TextPosition pos)
         {
             switch(type)
             {
                 case AttributeType.Expression:
-                    field.SetAttributeValue(key, ExpressionParser.Parse(value));
+                    try
+                    {
+                        field.SetAttributeValue(key, ExpressionParser.Parse(value));
+                    }
+                    catch(ParseException ex)
+                    {
+                        throw new ParseException(ex.Message, pos.OffsetBy(ex.Position));
+                    }
                     break;
                 case AttributeType.String:
                     field.SetAttributeValue(key, value);

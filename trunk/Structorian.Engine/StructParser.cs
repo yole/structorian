@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Structorian.Engine.Fields;
 
 namespace Structorian.Engine
@@ -11,11 +10,13 @@ namespace Structorian.Engine
         {
             string _key;
             string _value;
+            TextPosition _position;
 
-            public Attribute(string name, string value)
+            public Attribute(string name, string value, TextPosition position)
             {
                 _key = name;
                 _value = value;
+                _position = position;
             }
 
             public string Key
@@ -27,17 +28,27 @@ namespace Structorian.Engine
             {
                 get { return _value; }
             }
+
+            public TextPosition Position
+            {
+                get { return _position; }
+            }
         }
         
         private StructFile _curStructFile;
         private FieldFactory _fieldFactory = new FieldFactory();
         private AttributeRegistry _attributeRegistry = new AttributeRegistry();
-        
+
         public StructFile LoadStructs(string strsText)
+        {
+            return LoadStructs(null, strsText);
+        }
+        
+        public StructFile LoadStructs(string fileName, string strsText)
         {
             StructFile result = new StructFile();
             _curStructFile = result;
-            StructLexer lexer = new StructLexer(strsText);
+            StructLexer lexer = new StructLexer(fileName, strsText);
             while(!lexer.EndOfStream())
             {
                 List<Attribute> attrs = new List<Attribute>();
@@ -96,13 +107,14 @@ namespace Structorian.Engine
             LoadAttributes(lexer, attrs);
             if (lexer.PeekNextToken() != StructTokenType.Semicolon && lexer.PeekNextToken() != StructTokenType.OpenCurly)
             {
+                TextPosition pos = lexer.CurrentPosition;
                 string tag = lexer.GetNextToken(StructTokenType.String);
                 LoadAttributes(lexer, attrs);
-                _attributeRegistry.SetFieldAttribute(field, field.DefaultAttribute, tag);
+                _attributeRegistry.SetFieldAttribute(field, field.DefaultAttribute, tag, pos);
             }
 
             foreach (Attribute attr in attrs)
-                _attributeRegistry.SetFieldAttribute(field, attr.Key, attr.Value);
+                _attributeRegistry.SetFieldAttribute(field, attr.Key, attr.Value, attr.Position);
             
             if (lexer.PeekNextToken() == StructTokenType.OpenCurly)
                 LoadFieldGroup(lexer, structDef, field);
@@ -123,17 +135,18 @@ namespace Structorian.Engine
                 lexer.GetNextToken(StructTokenType.OpenSquare);
                 while(true)
                 {
+                    TextPosition pos = lexer.CurrentPosition;
                     string attrName = lexer.GetNextToken(StructTokenType.String);
                     string attrValue;
                     if (lexer.CheckNextToken(StructTokenType.Equals))
                     {
-                        attrValue = lexer.GetAttributeValue();
+                        attrValue = lexer.GetAttributeValue(out pos);
                     }
                     else
                     {
                         attrValue = "1";
                     }
-                    attrs.Add(new Attribute(attrName, attrValue));
+                    attrs.Add(new Attribute(attrName, attrValue, pos));
                     if (lexer.CheckNextToken(StructTokenType.CloseSquare)) break;
                     if (!lexer.CheckNextToken(StructTokenType.Comma))
                     {

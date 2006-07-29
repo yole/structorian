@@ -32,7 +32,11 @@ namespace Structorian
                     string strs = new StreamReader(stream).ReadToEnd();
                     try
                     {
-                        _structFile = parser.LoadStructs(strs);
+                        _structFile = parser.LoadStructs(_openStructsDialog.FileName, strs);
+                    }
+                    catch(ParseException ex)
+                    {
+                        MessageBox.Show(this, "Error in " + ex.Position + ": " + ex.Message);
                     }
                     catch(Exception ex)
                     {
