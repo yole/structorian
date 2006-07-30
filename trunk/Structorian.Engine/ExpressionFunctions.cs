@@ -12,6 +12,7 @@ namespace Structorian.Engine
             Dictionary<string, EvaluateDelegate> result = new Dictionary<string, EvaluateDelegate>();
             result.Add("StructOffset", new EvaluateDelegate(StructOffset));
             result.Add("ParentCount", new EvaluateDelegate(ParentCount));
+            result.Add("CurOffset", new EvaluateDelegate(CurOffset));
             return result;
         }
         
@@ -28,6 +29,15 @@ namespace Structorian.Engine
             if (context is StructInstance)
             {
                 return ((StructInstance) context).Offset;
+            }
+            throw new LoadDataException("Invalid StructOffset context");
+        }
+
+        private static IConvertible CurOffset(IEvaluateContext context, string param)
+        {
+            if (context is StructInstance)
+            {
+                return ((StructInstance)context).CurOffset;
             }
             throw new LoadDataException("Invalid StructOffset context");
         }
