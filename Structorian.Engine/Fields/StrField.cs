@@ -24,7 +24,7 @@ namespace Structorian.Engine.Fields
             Expression lengthExpr = GetExpressionAttribute("len");
             if (lengthExpr != null)
             {
-                int length = (int)lengthExpr.Evaluate(instance);
+                int length = lengthExpr.EvaluateInt(instance);
                 if (reader.BaseStream.Length - reader.BaseStream.Position < length)
                 {
                     throw new LoadDataException("Length expression " + lengthExpr.ToString() +

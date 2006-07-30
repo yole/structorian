@@ -485,5 +485,13 @@ namespace Structorian.Engine.Tests
                 new byte[] { 2, 17 });
             Assert.AreEqual("2", instance.Children[0].Children [0].Cells[0].Value);
         }
+        
+        [Test] public void LoadStrCalcSize()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 a; str [len=a] b; }",
+                new byte[] { 1, (byte) 'B' });
+            Assert.AreEqual("B", instance.Cells[1].Value);
+        }
     }
 }
