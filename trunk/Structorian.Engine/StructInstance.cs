@@ -182,9 +182,9 @@ namespace Structorian.Engine
         {
             NeedData();
             Predicate<StructCell> predicate = delegate(StructCell aCell) { return aCell.GetStructDef().Id == symbol; };
-            StructCell cell = _cells.Find(predicate);
+            StructCell cell = _cells.FindLast(predicate);
             if (cell == null && _hiddenCells != null)
-                cell = _hiddenCells.Find(predicate);
+                cell = _hiddenCells.FindLast(predicate);
             if (cell != null)
                 return cell.GetValue();
 
