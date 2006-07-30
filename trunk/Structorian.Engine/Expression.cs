@@ -111,6 +111,8 @@ namespace Structorian.Engine
                 case ExprTokenType.Minus: return lhs - rhs;
                 case ExprTokenType.Mult: return lhs * rhs;
                 case ExprTokenType.Div: return lhs / rhs;
+                case ExprTokenType.BitAND: return lhs & rhs;
+                case ExprTokenType.BitOR: return lhs | rhs;
             }
             throw new Exception("Unknown binary operation");
         }

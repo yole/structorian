@@ -133,5 +133,11 @@ namespace Structorian.Engine.Tests
         {
             Assert.AreEqual(-4, ExpressionParser.Parse("-4").EvaluateInt(null));
         }
+        
+        [Test] public void EvaluateBitOps()
+        {
+            Assert.AreEqual(2, ExpressionParser.Parse("6 & 3").EvaluateInt(null));
+            Assert.AreEqual(7, ExpressionParser.Parse("6 | 3").EvaluateInt(null));
+        }
     }
 }
