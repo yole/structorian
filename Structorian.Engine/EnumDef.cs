@@ -10,6 +10,7 @@ namespace Structorian.Engine
         private string _name;
         private Dictionary<int, string> _values = new Dictionary<int, string>();
         private string _inherit;
+        private bool _global;
         private EnumDef _baseEnum;
 
         public EnumDef(StructFile file, string name)
@@ -22,10 +23,12 @@ namespace Structorian.Engine
         {
             get { return _name; }
         }
-        
+
         public void AddValue(string name, int value)
         {
             _values.Add(value, name);
+            if (_global)
+                _structFile.RegisterGlobalEnumConstant(name, value);
         }
 
         public string ValueToString(int value)
@@ -50,6 +53,8 @@ namespace Structorian.Engine
         {
             if (key == "inherit")
                 _inherit = value;
+            else if (key == "global")
+                _global = (Int32.Parse(value) > 0);
             else
                 throw new Exception("Unknown attribute " + key);
         }

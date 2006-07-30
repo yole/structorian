@@ -509,5 +509,14 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("17", instance.Cells [1].Value);
             Assert.AreEqual("b", instance.Cells [1].Tag);
         }
+        
+        [Test] public void EvalGlobalEnum()
+        {
+            StructInstance instance = PrepareInstance(
+                "[global] enum E { o, p, q } struct A { enum8 [enum=E] a; if (a == q) { u8 b; } }",
+                new byte[] { 2, 17, 37 });
+            Assert.AreEqual(2, instance.Cells.Count);
+            Assert.AreEqual("17", instance.Cells[1].Value);
+        }
     }
 }

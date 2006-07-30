@@ -192,6 +192,10 @@ namespace Structorian.Engine
             if (global.HasValue)
                 return global.Value;
 
+            int? enumValue = _def.StructFile.EvaluateGlobalEnumConstant(symbol);
+            if (enumValue.HasValue)
+                return enumValue.Value;
+
             IConvertible funcValue = ExpressionFunctions.Evaluate(symbol, this);
             if (funcValue != null)
                 return funcValue;
