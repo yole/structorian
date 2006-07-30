@@ -94,6 +94,8 @@ namespace Structorian.Engine
                     linkToField.LinkField(field);
                 else
                     linkToField = field;
+
+                field.Validate();
             }
             lexer.GetNextToken(StructTokenType.CloseCurly);
         }
@@ -102,8 +104,10 @@ namespace Structorian.Engine
         {
             List<Attribute> attrs = new List<Attribute>();
             LoadAttributes(lexer, attrs);
+            TextPosition fieldPosition = lexer.CurrentPosition;
             string fieldType = lexer.GetNextToken(StructTokenType.String);
             StructField field = _fieldFactory.CreateField(structDef, fieldType);
+            field.Position = fieldPosition;
             LoadAttributes(lexer, attrs);
             if (lexer.PeekNextToken() != StructTokenType.Semicolon && lexer.PeekNextToken() != StructTokenType.OpenCurly)
             {
@@ -120,7 +124,7 @@ namespace Structorian.Engine
                 LoadFieldGroup(lexer, structDef, field);
             else
                 lexer.GetNextToken(StructTokenType.Semicolon);
-
+            
             if (parentField == null)
                 structDef.AddField(field);
             else

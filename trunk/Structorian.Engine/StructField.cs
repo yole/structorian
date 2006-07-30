@@ -13,6 +13,7 @@ namespace Structorian.Engine
         private string _tag;
         private string _id;
         private string _defaultAttribute = "tag";
+        private TextPosition _position;
         private bool _acceptsChildren = false;
         protected bool _hidden;
         private Dictionary<string, object> _attributeValues = new Dictionary<string, object>();
@@ -42,7 +43,13 @@ namespace Structorian.Engine
         {
             get { return _tag; }
         }
-        
+
+        public TextPosition Position
+        {
+            get { return _position; }
+            set { _position = value; }
+        }
+
         public virtual void SetAttribute(string key, string value)
         {
             if (key == "tag")
@@ -96,6 +103,10 @@ namespace Structorian.Engine
                     _childFields = new List<StructField>();
                 return _childFields;
             }
+        }
+        
+        public virtual void Validate()
+        {
         }
 
         public abstract void LoadData(BinaryReader reader, StructInstance instance);

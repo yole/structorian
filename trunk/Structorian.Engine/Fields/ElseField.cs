@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Structorian.Engine.Fields
 {
@@ -14,6 +12,12 @@ namespace Structorian.Engine.Fields
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             LoadChildFields(reader, instance);
+        }
+
+        public override void Validate()
+        {
+            if (!IsLinked)
+                throw new ParseException("'else' without 'if'", Position);
         }
     }
 }
