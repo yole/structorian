@@ -198,6 +198,8 @@ namespace Structorian.Engine
             {
                 case ExprTokenType.Minus:
                     return -_operand.EvaluateInt(context);
+                case ExprTokenType.NOT:
+                    return !_operand.EvaluateBool(context);
             }
             throw new Exception("Unexpected unary operation " + _operation);
         }

@@ -104,7 +104,7 @@ namespace Structorian.Engine
                 lexer.GetNextToken(ExprTokenType.Close);
                 return result;
             }
-            if (tokenType == ExprTokenType.Minus)
+            if (tokenType == ExprTokenType.Minus || tokenType == ExprTokenType.NOT)
             {
                 lexer.GetNextToken(tokenType);
                 return new UnaryExpression(ParseFactor(lexer), tokenType);
