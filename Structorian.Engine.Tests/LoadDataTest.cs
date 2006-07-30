@@ -493,5 +493,11 @@ namespace Structorian.Engine.Tests
                 new byte[] { 1, (byte) 'B' });
             Assert.AreEqual("B", instance.Cells[1].Value);
         }
+        
+        [Test, ExpectedException(typeof(ParseException))] 
+        public void ElseWithoutIf()
+        {
+            PrepareInstance("struct A { else { u8 a; } }", new byte[] {1});
+        }
     }
 }
