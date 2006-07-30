@@ -139,5 +139,10 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(2, ExpressionParser.Parse("6 & 3").EvaluateInt(null));
             Assert.AreEqual(7, ExpressionParser.Parse("6 | 3").EvaluateInt(null));
         }
+        
+        [Test] public void EvaluateNot()
+        {
+            Assert.IsFalse(ExpressionParser.Parse("!(2 == 2)").EvaluateBool(null));
+        }
     }
 }
