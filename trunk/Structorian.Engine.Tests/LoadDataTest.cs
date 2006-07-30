@@ -518,5 +518,15 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(2, instance.Cells.Count);
             Assert.AreEqual("17", instance.Cells[1].Value);
         }
+        
+        [Test] public void OverrideLocal()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { calc a [value=0]; repeat(3) { calc a [value=a+1]; } }",
+                new byte[0]);
+            Assert.AreEqual(4, instance.Cells.Count);
+            Assert.AreEqual("1", instance.Cells[1].Value);
+            Assert.AreEqual("3", instance.Cells[3].Value);
+        }
     }
 }
