@@ -528,5 +528,13 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("1", instance.Cells[1].Value);
             Assert.AreEqual("3", instance.Cells[3].Value);
         }
+        
+        [Test] public void CurOffset()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u16 x; calc y [value=CurOffset]; }",
+                new byte[2] {4, 0});
+            Assert.AreEqual("2", instance.Cells[1].Value);
+        }
     }
 }

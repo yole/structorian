@@ -85,6 +85,11 @@ namespace Structorian.Engine
             get { return _rewindOffset; }
             set { _rewindOffset = value; }
         }
+        
+        public long CurOffset
+        {
+            get { return _stream.Position; }
+        }
 
         public override string NodeName
         {
