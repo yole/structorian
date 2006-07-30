@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Structorian.Engine
 {
@@ -11,6 +10,7 @@ namespace Structorian.Engine
         private Dictionary<int, string> _values = new Dictionary<int, string>();
         private string _inherit;
         private bool _global;
+        private bool _globalMask;
         private EnumDef _baseEnum;
 
         public EnumDef(StructFile file, string name)
@@ -29,6 +29,8 @@ namespace Structorian.Engine
             _values.Add(value, name);
             if (_global)
                 _structFile.RegisterGlobalEnumConstant(name, value);
+            if (_globalMask)
+                _structFile.RegisterGlobalEnumConstant(name, 1 << value);
         }
 
         public string ValueToString(int value)
@@ -55,6 +57,8 @@ namespace Structorian.Engine
                 _inherit = value;
             else if (key == "global")
                 _global = (Int32.Parse(value) > 0);
+            else if (key == "globalmask")
+                _globalMask = (Int32.Parse(value) > 0);
             else
                 throw new Exception("Unknown attribute " + key);
         }

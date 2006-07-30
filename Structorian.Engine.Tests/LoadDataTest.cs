@@ -519,6 +519,15 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("17", instance.Cells[1].Value);
         }
         
+        [Test] public void EvalGlobalMaskEnum()
+        {
+            StructInstance instance = PrepareInstance(
+                "[globalmask] enum E { o, p, q } struct A { enum8 [enum=E] a; if (a == q) { u8 b; } }",
+                new byte[] { 4, 17, 37 });
+            Assert.AreEqual(2, instance.Cells.Count);
+            Assert.AreEqual("17", instance.Cells[1].Value);
+        }
+        
         [Test] public void OverrideLocal()
         {
             StructInstance instance = PrepareInstance(
