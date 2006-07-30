@@ -125,7 +125,8 @@ namespace Structorian.Engine
         {
             foreach (StructField field in ChildFields)
             {
-                field.LoadData(reader, instance);
+                if (!field.IsLinked)
+                    field.LoadData(reader, instance);
             }
         }
         
