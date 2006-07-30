@@ -499,5 +499,15 @@ namespace Structorian.Engine.Tests
         {
             PrepareInstance("struct A { else { u8 a; } }", new byte[] {1});
         }
+        
+        [Test] public void IfElseInsideIf()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 a; if (a > 0) { if (a == 2) { u8 b; } else { u8 c; } } }",
+                new byte[] {2, 17, 37});
+            Assert.AreEqual(2, instance.Cells.Count);
+            Assert.AreEqual("17", instance.Cells [1].Value);
+            Assert.AreEqual("b", instance.Cells [1].Tag);
+        }
     }
 }
