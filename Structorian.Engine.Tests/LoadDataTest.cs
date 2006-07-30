@@ -477,5 +477,13 @@ namespace Structorian.Engine.Tests
                 new byte[] { 2, 17 });
             Assert.AreEqual("1", instance.Children[0].Cells[0].Value);
         }
+        
+        [Test] public void ParentDotParent()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 a; child B; } struct B { u8 b; child C; } struct C { calc x [value=Parent.Parent.a]; }",
+                new byte[] { 2, 17 });
+            Assert.AreEqual("2", instance.Children[0].Children [0].Cells[0].Value);
+        }
     }
 }

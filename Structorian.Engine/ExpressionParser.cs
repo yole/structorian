@@ -91,8 +91,7 @@ namespace Structorian.Engine
                 if (lexer.PeekNextToken() == ExprTokenType.Dot)
                 {
                     lexer.GetNextToken(ExprTokenType.Dot);
-                    string symbolInContext = (string) lexer.GetNextToken(ExprTokenType.Symbol);
-                    Expression exprInContext = new SymbolExpression(symbolInContext);
+                    Expression exprInContext = ParseFactor(lexer);
                     return new ContextExpression(symbol, exprInContext);
                 }
                 else
