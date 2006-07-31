@@ -13,6 +13,7 @@ namespace Structorian.Engine
             result.Add("StructOffset", new EvaluateDelegate(StructOffset));
             result.Add("ParentCount", new EvaluateDelegate(ParentCount));
             result.Add("CurOffset", new EvaluateDelegate(CurOffset));
+            result.Add("StructName", new EvaluateDelegate(StructName));
             return result;
         }
         
@@ -39,7 +40,7 @@ namespace Structorian.Engine
             {
                 return ((StructInstance)context).CurOffset;
             }
-            throw new LoadDataException("Invalid StructOffset context");
+            throw new LoadDataException("Invalid CurOffset context");
         }
 
         private static IConvertible ParentCount(IEvaluateContext context, string param)
@@ -48,7 +49,16 @@ namespace Structorian.Engine
             {
                 return ((StructInstance)context).ParentCount;
             }
-            throw new LoadDataException("Invalid StructOffset context");
+            throw new LoadDataException("Invalid ParentCount context");
+        }
+
+        private static IConvertible StructName(IEvaluateContext context, string param)
+        {
+            if (context is StructInstance)
+            {
+                return ((StructInstance)context).Def.Name;
+            }
+            throw new LoadDataException("Invalid StructName context");
         }
     }
 }

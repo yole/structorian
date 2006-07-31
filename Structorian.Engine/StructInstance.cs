@@ -42,6 +42,11 @@ namespace Structorian.Engine
             _followInstance = followInstance;
         }
 
+        public StructDef Def
+        {
+            get { return _def; }
+        }
+
         public override ReadOnlyCollection<StructCell> Cells
         {
             get
