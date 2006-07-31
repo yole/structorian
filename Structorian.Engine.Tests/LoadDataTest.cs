@@ -375,7 +375,7 @@ namespace Structorian.Engine.Tests
             StructInstance instance = PrepareInstance(
                 "struct A { set8 a [enum=E]; } enum E { f, g, h }",
                 new byte[] { 6 });
-            Assert.AreEqual("g, h", instance.Cells[0].ToString());
+            Assert.AreEqual("g, h", instance.Cells[0].Value);
         }
         
         [Test] public void UnixTime()
@@ -544,6 +544,14 @@ namespace Structorian.Engine.Tests
                 "struct A { u16 x; calc y [value=CurOffset]; }",
                 new byte[2] {4, 0});
             Assert.AreEqual("2", instance.Cells[1].Value);
+        }
+        
+        [Test] public void SetInExpression()
+        {
+            StructInstance instance = PrepareInstance(
+                "[globalmask] enum E { o, p, q } struct A { set8 [enum=E] x; if (x & q != 0) { u8 y; } }",
+                new byte[] {4, 17});
+            Assert.AreEqual("17", instance.Cells[1].Value);
         }
     }
 }
