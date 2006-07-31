@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -25,13 +24,13 @@ namespace Structorian.Engine.Fields
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             IConvertible iValue = ReadIntValue(reader);
-            int value = iValue.ToInt32(CultureInfo.CurrentCulture);
+            uint value = iValue.ToUInt32(CultureInfo.CurrentCulture);
             EnumDef enumDef = _structDef.StructFile.GetEnumByName(_enumName);
             if (enumDef == null)
                 throw new LoadDataException("Enum '" + _enumName + "' not found");
             
             StringBuilder result = new StringBuilder();
-            for(int i=0; i<_size*8-1; i++)
+            for(int i=0; i<_size*8; i++)
             {
                 if ((value & (1 << i)) != 0)
                 {
@@ -40,7 +39,7 @@ namespace Structorian.Engine.Fields
                     result.Append(enumDef.ValueToString(i));
                 }
             }
-            AddCell(instance, new EnumValue(value, result.ToString()));
+            AddCell(instance, new EnumValue((int) value, result.ToString()));
         }
     }
 }

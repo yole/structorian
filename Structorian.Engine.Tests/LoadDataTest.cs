@@ -580,5 +580,12 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("B", instance.NodeName);
         }
         
+        [Test] public void SetHighBit()
+        {
+            StructInstance instance = PrepareInstance(
+                "enum E { q=31 } struct A { set32 [enum=E] x; }",
+                new byte[] { 0xFF, 0xFF, 0xFF, 0xFf });
+            Assert.AreEqual("q", instance.Cells[0].Value);
+        }
     }
 }
