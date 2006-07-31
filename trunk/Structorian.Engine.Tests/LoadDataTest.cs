@@ -587,5 +587,13 @@ namespace Structorian.Engine.Tests
                 new byte[] { 0xFF, 0xFF, 0xFF, 0xFf });
             Assert.AreEqual("q", instance.Cells[0].Value);
         }
+        
+        [Test] public void EvaluateStructName()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { calc x [value=StructName]; }",
+                new byte[] { });
+            Assert.AreEqual("A", instance.Cells[0].Value);
+        }
     }
 }
