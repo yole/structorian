@@ -39,6 +39,7 @@
     <Compile Include="ExpressionFunctions.cs" />
     <Compile Include="ExpressionLexer.cs" />
     <Compile Include="ExpressionParser.cs" />
+    <Compile Include="Fields\AlignField.cs" />
     <Compile Include="Fields\AssertField.cs" />
     <Compile Include="AttributeRegistry.cs" />
     <Compile Include="Fields\BitfieldField.cs" />

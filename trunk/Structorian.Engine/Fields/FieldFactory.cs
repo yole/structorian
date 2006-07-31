@@ -29,6 +29,7 @@ namespace Structorian.Engine.Fields
                 case "global": return new GlobalField(structDef);
                 case "local": return new CalcField(structDef, true);
                 case "calc": return new CalcField(structDef, false);
+                case "align": return new AlignField(structDef);
             }
             
             int size = 0;

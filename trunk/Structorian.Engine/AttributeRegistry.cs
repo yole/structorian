@@ -12,6 +12,7 @@ namespace Structorian.Engine
 
         internal AttributeRegistry()
         {
+            RegisterAttribute(typeof(AlignField), "bytes", AttributeType.Int);
             RegisterAttribute(typeof(AssertField), "expr", AttributeType.Expression);
             RegisterAttribute(typeof(BitfieldField), "size", AttributeType.Expression);
             RegisterAttribute(typeof(CalcField), "value", AttributeType.Expression);

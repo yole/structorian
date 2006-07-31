@@ -553,5 +553,13 @@ namespace Structorian.Engine.Tests
                 new byte[] {4, 17});
             Assert.AreEqual("17", instance.Cells[1].Value);
         }
+        
+        [Test] public void Align()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 x; align 4; u8 y; align 4; calc z [value=CurOffset]; }",
+                new byte[] {7, 0, 0, 0, 17, 0, 0, 0});
+            Assert.AreEqual("8", instance.Cells[2].Value);
+        }
     }
 }
