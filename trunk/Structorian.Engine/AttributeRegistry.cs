@@ -4,7 +4,7 @@ using Structorian.Engine.Fields;
 
 namespace Structorian.Engine
 {
-    enum AttributeType { Expression, Int, String };
+    enum AttributeType { Expression, Int, String, Bool };
 
     class AttributeRegistry
     {
@@ -22,6 +22,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(ChildField), "group", AttributeType.String);
             RegisterAttribute(typeof(GlobalField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(IfField), "expr", AttributeType.Expression);
+            RegisterAttribute(typeof(IncludeField), "replace", AttributeType.Bool);
             RegisterAttribute(typeof(IntBasedField), "frombit", AttributeType.Int);
             RegisterAttribute(typeof(IntBasedField), "tobit", AttributeType.Int);
             RegisterAttribute(typeof(NodenameField), "name", AttributeType.Expression);
@@ -85,6 +86,9 @@ namespace Structorian.Engine
                     break;
                 case AttributeType.Int:
                     field.SetAttributeValue(key, Int32.Parse(value));
+                    break;
+                case AttributeType.Bool:
+                    field.SetAttributeValue(key, (Int32.Parse(value) != 0));
                     break;
             }
         }

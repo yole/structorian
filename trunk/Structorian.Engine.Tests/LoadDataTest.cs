@@ -561,5 +561,14 @@ namespace Structorian.Engine.Tests
                 new byte[] {7, 0, 0, 0, 17, 0, 0, 0});
             Assert.AreEqual("8", instance.Cells[2].Value);
         }
+        
+        [Test] public void IncludeReplace()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 x; include [replace] B; } struct B { u8 y; }",
+                new byte[] {17, 37});
+            Assert.AreEqual(2, instance.Cells.Count);
+            Assert.AreEqual("B", instance.NodeName);
+        }
     }
 }

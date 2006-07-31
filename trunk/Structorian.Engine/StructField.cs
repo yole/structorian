@@ -90,6 +90,11 @@ namespace Structorian.Engine
             return (int?)GetAttribute(key);
         }
 
+        public bool? GetBoolAttribute(string key)
+        {
+            return (bool?)GetAttribute(key);
+        }
+
         public virtual string DefaultAttribute
         {
             get { return _defaultAttribute;  }
