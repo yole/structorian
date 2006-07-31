@@ -16,7 +16,7 @@ namespace Structorian.Engine.Fields
             CaseField defaultField = null;
             foreach(CaseField field in ChildFields)
             {
-                if (field.IsDefault)
+                if (field.GetBoolAttribute("default"))
                     defaultField = field;
                 else
                 {

@@ -23,8 +23,7 @@ namespace Structorian.Engine.Fields
         {
             StructDef structDef = GetIncludedStruct();
             structDef.LoadInstanceData(instance, reader.BaseStream);
-            bool? replace = GetBoolAttribute("replace");
-            if (replace.HasValue && replace.Value)
+            if (GetBoolAttribute("replace"))
                 instance.SetNodeName(structDef.Name);
         }
 

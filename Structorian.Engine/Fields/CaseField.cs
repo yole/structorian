@@ -7,17 +7,10 @@ namespace Structorian.Engine.Fields
 {
     class CaseField: StructField
     {
-        private bool _default;
-
         public CaseField(StructDef structDef, bool isDefault) 
             : base(structDef, "expr", true)
         {
-            _default = isDefault;
-        }
-
-        public bool IsDefault
-        {
-            get { return _default; }
+            SetAttributeValue("default", isDefault);
         }
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
