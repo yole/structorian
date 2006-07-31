@@ -25,7 +25,7 @@ namespace Structorian.Engine.Fields
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             IConvertible iValue = ReadIntValue(reader);
-            uint value = iValue.ToUInt32(CultureInfo.CurrentCulture);
+            int value = iValue.ToInt32(CultureInfo.CurrentCulture);
             EnumDef enumDef = _structDef.StructFile.GetEnumByName(_enumName);
             if (enumDef == null)
                 throw new LoadDataException("Enum '" + _enumName + "' not found");
@@ -40,7 +40,7 @@ namespace Structorian.Engine.Fields
                     result.Append(enumDef.ValueToString(i));
                 }
             }
-            AddCell(instance, result.ToString());
+            AddCell(instance, new EnumValue(value, result.ToString()));
         }
     }
 }
