@@ -17,6 +17,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(BitfieldField), "size", AttributeType.Expression);
             RegisterAttribute(typeof(CalcField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(CaseField), "expr", AttributeType.Expression);
+            RegisterAttribute(typeof(CaseField), "default", AttributeType.Bool);
             RegisterAttribute(typeof(ChildField), "offset", AttributeType.Expression);
             RegisterAttribute(typeof(ChildField), "count", AttributeType.Expression);
             RegisterAttribute(typeof(ChildField), "group", AttributeType.String);

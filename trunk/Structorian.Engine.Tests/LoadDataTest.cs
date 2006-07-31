@@ -352,7 +352,16 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(2, instance.Cells.Count);
             Assert.AreEqual("b", instance.Cells[1].Tag);
         }
-        
+
+        [Test] public void SwitchCaseDefault()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 a; switch(a) { case 0 { u8 x; } case [default] { u8 b; } } }",
+                new byte[] { 2, 17 });
+            Assert.AreEqual(2, instance.Cells.Count);
+            Assert.AreEqual("b", instance.Cells[1].Tag);
+        }
+
         [Test] public void SwitchOnString()
         {
             StructInstance instance = PrepareInstance(
@@ -570,5 +579,6 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(2, instance.Cells.Count);
             Assert.AreEqual("B", instance.NodeName);
         }
+        
     }
 }
