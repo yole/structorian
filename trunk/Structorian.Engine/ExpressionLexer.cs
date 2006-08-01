@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace Structorian.Engine
 {
-    enum ExprTokenType { Symbol, Number, String, Plus,  Minus, Mult, Div, Dot, 
+    enum ExprTokenType { Symbol, Number, String, Plus,  Minus, Mult, Div, Mod, Dot, 
         Open, Close, EQ, NE, GT, GE, LT, LE, 
         AND, OR, NOT, BitAND, BitOR, EOF };
     
@@ -20,6 +20,7 @@ namespace Structorian.Engine
             RegisterCharToken('-', ExprTokenType.Minus);
             RegisterCharToken('*', ExprTokenType.Mult);
             RegisterCharToken('/', ExprTokenType.Div);
+            RegisterCharToken('%', ExprTokenType.Mod);
             RegisterCharToken('.', ExprTokenType.Dot);
             RegisterCharToken('(', ExprTokenType.Open);
             RegisterCharToken(')', ExprTokenType.Close);
