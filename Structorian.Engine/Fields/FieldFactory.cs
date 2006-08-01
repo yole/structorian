@@ -26,6 +26,7 @@ namespace Structorian.Engine.Fields
                 case "case": return new CaseField(structDef, false);
                 case "default": return new CaseField(structDef, true);
                 case "unixtime": return new UnixTimeField(structDef);
+                case "dosdatetime": return new DosDateTimeField(structDef);
                 case "global": return new GlobalField(structDef);
                 case "local": return new CalcField(structDef, true);
                 case "calc": return new CalcField(structDef, false);
