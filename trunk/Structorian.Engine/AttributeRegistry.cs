@@ -21,6 +21,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(ChildField), "offset", AttributeType.Expression);
             RegisterAttribute(typeof(ChildField), "count", AttributeType.Expression);
             RegisterAttribute(typeof(ChildField), "group", AttributeType.String);
+            RegisterAttribute(typeof(DosDateTimeField), "timefirst", AttributeType.Bool);
             RegisterAttribute(typeof(GlobalField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(IfField), "expr", AttributeType.Expression);
             RegisterAttribute(typeof(IncludeField), "replace", AttributeType.Bool);

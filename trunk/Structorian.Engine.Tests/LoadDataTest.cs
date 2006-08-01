@@ -611,5 +611,13 @@ namespace Structorian.Engine.Tests
                 new byte[] {2, 17, 37});
             Assert.AreEqual("3", instance.Cells[0].Value);
         }
+        
+        [Test] public void DosDateTime()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { dosdatetime a [timefirst]; }",
+                new byte[] {0x57, 0xB4, 0x69, 0x2D});
+            Assert.AreEqual(new DateTime(2002, 11, 9, 22, 34, 46), instance.Cells[0].GetValue());
+        }
     }
 }
