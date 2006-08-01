@@ -53,6 +53,7 @@ namespace Structorian.Engine.Fields
                 case "x":    return new IntField(structDef, size, true, true);
                 case "enum": return new EnumField(structDef, size);
                 case "set":  return new SetField(structDef, size);
+                case "bits": return new BitsField(structDef, size);
             }
             throw new Exception("Unknown field type " + name);
         }

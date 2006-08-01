@@ -43,6 +43,7 @@
     <Compile Include="Fields\AssertField.cs" />
     <Compile Include="AttributeRegistry.cs" />
     <Compile Include="Fields\BitfieldField.cs" />
+    <Compile Include="Fields\BitsField.cs" />
     <Compile Include="Fields\CalcField.cs" />
     <Compile Include="Fields\CaseField.cs" />
     <Compile Include="Fields\ElseField.cs" />
