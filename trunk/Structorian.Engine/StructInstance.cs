@@ -47,6 +47,11 @@ namespace Structorian.Engine
             get { return _def; }
         }
 
+        public Stream Stream
+        {
+            get { return _stream; }
+        }
+
         public override ReadOnlyCollection<StructCell> Cells
         {
             get

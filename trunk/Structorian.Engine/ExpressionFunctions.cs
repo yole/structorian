@@ -14,6 +14,7 @@ namespace Structorian.Engine
             result.Add("ParentCount", new EvaluateDelegate(ParentCount));
             result.Add("CurOffset", new EvaluateDelegate(CurOffset));
             result.Add("StructName", new EvaluateDelegate(StructName));
+            result.Add("FileSize", new EvaluateDelegate(FileSize));
             return result;
         }
         
@@ -59,6 +60,15 @@ namespace Structorian.Engine
                 return ((StructInstance)context).Def.Name;
             }
             throw new LoadDataException("Invalid StructName context");
+        }
+
+        private static IConvertible FileSize(IEvaluateContext context, string param)
+        {
+            if (context is StructInstance)
+            {
+                return ((StructInstance) context).Stream.Length;
+            }
+            throw new LoadDataException("Invalid FileSize context");
         }
     }
 }
