@@ -595,5 +595,13 @@ namespace Structorian.Engine.Tests
                 new byte[] { });
             Assert.AreEqual("A", instance.Cells[0].Value);
         }
+        
+        [Test] public void Bits()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { bits8 a; }",
+                new byte[] {6});
+            Assert.AreEqual("00000110", instance.Cells[0].Value);
+        }
     }
 }
