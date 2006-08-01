@@ -12,116 +12,75 @@ namespace Structorian
 {
     public partial class MainForm : Form
     {
+        private string _structFileName;
         private StructFile _structFile;
-        private InstanceTree _instanceTree;
-        private InstanceTreeNode _activeInstance;
-        private Dictionary<InstanceTreeNode, TreeNode> _nodeMap = new Dictionary<InstanceTreeNode, TreeNode>();
+        private DataView _dataView;
         
         public MainForm()
         {
             InitializeComponent();
+            _dataView = new DataView();
+            _dataView.Dock = DockStyle.Fill;
+            splitContainer2.Panel2.Controls.Add(_dataView);
         }
 
         private void loadStructuresToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_openStructsDialog.ShowDialog(this) == DialogResult.OK)
             {
-                StructParser parser = new StructParser();
+                _structFileName = Path.GetFullPath(_openStructsDialog.FileName);
                 using(Stream stream = _openStructsDialog.OpenFile())
                 {
                     string strs = new StreamReader(stream).ReadToEnd();
-                    try
-                    {
-                        _structFile = parser.LoadStructs(_openStructsDialog.FileName, strs);
-                    }
-                    catch(ParseException ex)
-                    {
-                        MessageBox.Show(this, "Error in " + ex.Position + ": " + ex.Message);
-                    }
-                    catch(Exception ex)
-                    {
-                        MessageBox.Show(this, "Error loading structures: " + ex.Message);
-                    }
+                    _structEditControl.Text = strs;
+                    _structEditControl.ShowEOLMarkers = false;
+                    _structEditControl.ShowInvalidLines = false;
+                    ParseStructures();
                 }
+                _btnSaveStructures.Enabled = true;
             }
         }
 
+        private void ParseStructures()
+        {
+            StructParser parser = new StructParser();
+            try
+            {
+                _structFile = parser.LoadStructs(_structFileName, _structEditControl.Text);
+            }
+            catch(ParseException ex)
+            {
+                MessageBox.Show(this, "Error in " + ex.Position + ": " + ex.Message);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(this, "Error loading structures: " + ex.Message);
+            }
+        }
+
+        private void _btnSaveStructures_Click(object sender, EventArgs e)
+        {
+            StreamWriter writer = new StreamWriter(_structFileName);
+            try
+            {
+                writer.Write(_structEditControl.Text);
+            }
+            finally
+            {
+                writer.Close();
+            }
+            ParseStructures();
+            
+            _dataView.ReloadData(_structFile.Structs [0], true);
+        }
+        
         private void loadDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_structFile == null || _structFile.Structs.Count == 0) return;
             if (_openDataDialog.ShowDialog(this) == DialogResult.OK)
             {
-                Stream stream = _openDataDialog.OpenFile();
-                if (_instanceTree != null)
-                {
-                    _instanceTree.InstanceAdded -= new InstanceAddedEventHandler(HandleInstanceAdded);
-                    _instanceTree.NodeNameChanged -= new NodeNameChangedEventHandler(HandleNodeNameChanged);
-                    _nodeMap.Clear();
-                }
-                _instanceTree = _structFile.Structs[0].LoadData(stream);
-                _instanceTree.InstanceAdded += new InstanceAddedEventHandler(HandleInstanceAdded);
-                _instanceTree.NodeNameChanged += new NodeNameChangedEventHandler(HandleNodeNameChanged);
-                FillStructureTree();
+                _dataView.LoadData(Path.GetFullPath(_openDataDialog.FileName), _structFile.Structs[0]);
             }
-        }
-
-        private void HandleInstanceAdded(object sender, InstanceAddedEventArgs e)
-        {
-            if (e.Parent is InstanceTree)
-                AddInstanceNode(null, e.Child);
-            else
-            {
-                TreeNode parent = _nodeMap[e.Parent];
-                AddInstanceNode(parent, e.Child);
-            }
-        }
-
-        private void HandleNodeNameChanged(object sender, NodeNameChangedEventArgs e)
-        {
-            TreeNode node = _nodeMap[e.Node];
-            node.Text = e.Node.NodeName;
-        }
-
-        private void FillStructureTree()
-        {
-            _structTreeView.Nodes.Clear();
-            foreach(InstanceTreeNode instance in _instanceTree.Children)
-            {
-                AddInstanceNode(null, instance);
-            }
-        }
-
-        private void AddInstanceNode(TreeNode parent, InstanceTreeNode instance)
-        {
-            TreeNode node;
-            if (parent == null)
-                node = _structTreeView.Nodes.Add(instance.NodeName);
-            else
-                node = parent.Nodes.Add(instance.NodeName);
-            
-            _nodeMap.Add(instance, node);
-            node.Tag = instance;
-            if (instance.HasChildren)
-            {
-                WindowsAPI.SetHasChildren(node, true);
-            }
-        }
-
-        private void _structTreeView_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            _activeInstance = (InstanceTreeNode) e.Node.Tag;
-            _structGridView.DataSource = _activeInstance.Cells;
-        }
-
-        private void _structTreeView_BeforeExpand(object sender, TreeViewCancelEventArgs e)
-        {
-            if (e.Node.Nodes.Count == 0)
-            {
-                InstanceTreeNode instance = (InstanceTreeNode)e.Node.Tag;
-                instance.NeedChildren();
-                if (instance.Children.Count == 0)
-                    WindowsAPI.SetHasChildren(e.Node, false);
-           }
         }
     }
 }

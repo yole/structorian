@@ -28,20 +28,22 @@ namespace Structorian
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadStructuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._openStructsDialog = new System.Windows.Forms.OpenFileDialog();
             this._openDataDialog = new System.Windows.Forms.OpenFileDialog();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this._structTreeView = new System.Windows.Forms.TreeView();
-            this._structGridView = new System.Windows.Forms.DataGridView();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this._structEditControl = new ICSharpCode.TextEditor.TextEditorControl();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this._btnLoadStuctures = new System.Windows.Forms.ToolStripButton();
+            this._btnSaveStructures = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._structGridView)).BeginInit();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -50,7 +52,7 @@ namespace Structorian
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(292, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(438, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -81,59 +83,84 @@ namespace Structorian
             // 
             this._openStructsDialog.Filter = "Structure Definitions (*.strs)|*.strs|All files|*.*";
             // 
-            // splitContainer1
+            // splitContainer2
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 24);
-            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer2.Location = new System.Drawing.Point(0, 24);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // splitContainer1.Panel1
+            // splitContainer2.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this._structTreeView);
+            this.splitContainer2.Panel1.Controls.Add(this._structEditControl);
+            this.splitContainer2.Panel1.Controls.Add(this.toolStrip1);
+            this.splitContainer2.Size = new System.Drawing.Size(438, 400);
+            this.splitContainer2.SplitterDistance = 108;
+            this.splitContainer2.TabIndex = 4;
             // 
-            // splitContainer1.Panel2
+            // _structEditControl
             // 
-            this.splitContainer1.Panel2.Controls.Add(this._structGridView);
-            this.splitContainer1.Size = new System.Drawing.Size(292, 247);
-            this.splitContainer1.SplitterDistance = 97;
-            this.splitContainer1.TabIndex = 3;
+            this._structEditControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._structEditControl.Location = new System.Drawing.Point(0, 25);
+            this._structEditControl.Name = "_structEditControl";
+            this._structEditControl.ShowInvalidLines = false;
+            this._structEditControl.ShowLineNumbers = false;
+            this._structEditControl.ShowSpaces = true;
+            this._structEditControl.ShowTabs = true;
+            this._structEditControl.ShowVRuler = true;
+            this._structEditControl.Size = new System.Drawing.Size(438, 83);
+            this._structEditControl.TabIndex = 0;
             // 
-            // _structTreeView
+            // toolStrip1
             // 
-            this._structTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._structTreeView.Location = new System.Drawing.Point(0, 0);
-            this._structTreeView.Name = "_structTreeView";
-            this._structTreeView.Size = new System.Drawing.Size(97, 247);
-            this._structTreeView.TabIndex = 3;
-            this._structTreeView.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this._structTreeView_BeforeExpand);
-            this._structTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this._structTreeView_AfterSelect);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this._btnLoadStuctures,
+            this._btnSaveStructures});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(438, 25);
+            this.toolStrip1.TabIndex = 1;
+            this.toolStrip1.Text = "toolStrip1";
             // 
-            // _structGridView
+            // _btnLoadStuctures
             // 
-            this._structGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this._structGridView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._structGridView.Location = new System.Drawing.Point(0, 0);
-            this._structGridView.Name = "_structGridView";
-            this._structGridView.RowHeadersVisible = false;
-            this._structGridView.Size = new System.Drawing.Size(191, 247);
-            this._structGridView.TabIndex = 2;
+            this._btnLoadStuctures.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this._btnLoadStuctures.Image = ((System.Drawing.Image)(resources.GetObject("_btnLoadStuctures.Image")));
+            this._btnLoadStuctures.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this._btnLoadStuctures.Name = "_btnLoadStuctures";
+            this._btnLoadStuctures.Size = new System.Drawing.Size(23, 22);
+            this._btnLoadStuctures.Text = "toolStripButton1";
+            this._btnLoadStuctures.ToolTipText = "Load Structure Definitions";
+            this._btnLoadStuctures.Click += new System.EventHandler(this.loadStructuresToolStripMenuItem_Click);
+            // 
+            // _btnSaveStructures
+            // 
+            this._btnSaveStructures.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this._btnSaveStructures.Enabled = false;
+            this._btnSaveStructures.Image = ((System.Drawing.Image)(resources.GetObject("_btnSaveStructures.Image")));
+            this._btnSaveStructures.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this._btnSaveStructures.Name = "_btnSaveStructures";
+            this._btnSaveStructures.Size = new System.Drawing.Size(23, 22);
+            this._btnSaveStructures.Text = "Save Structure Definitions";
+            this._btnSaveStructures.Click += new System.EventHandler(this._btnSaveStructures_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(292, 271);
-            this.Controls.Add(this.splitContainer1);
+            this.ClientSize = new System.Drawing.Size(438, 424);
+            this.Controls.Add(this.splitContainer2);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "Structorian";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            this.splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this._structGridView)).EndInit();
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel1.PerformLayout();
+            this.splitContainer2.ResumeLayout(false);
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -147,9 +174,11 @@ namespace Structorian
         private System.Windows.Forms.OpenFileDialog _openStructsDialog;
         private System.Windows.Forms.OpenFileDialog _openDataDialog;
         private System.Windows.Forms.ToolStripMenuItem loadDataToolStripMenuItem;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.TreeView _structTreeView;
-        private System.Windows.Forms.DataGridView _structGridView;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private ICSharpCode.TextEditor.TextEditorControl _structEditControl;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripButton _btnLoadStuctures;
+        private System.Windows.Forms.ToolStripButton _btnSaveStructures;
     }
 }
 
