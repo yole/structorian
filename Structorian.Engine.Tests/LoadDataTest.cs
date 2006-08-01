@@ -603,5 +603,13 @@ namespace Structorian.Engine.Tests
                 new byte[] {6});
             Assert.AreEqual("00000110", instance.Cells[0].Value);
         }
+        
+        [Test] public void EvaluateFileSize()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { calc x [value=FileSize]; }",
+                new byte[] {2, 17, 37});
+            Assert.AreEqual("3", instance.Cells[0].Value);
+        }
     }
 }
