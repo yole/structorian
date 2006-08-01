@@ -2,10 +2,34 @@
 // Compiled by Dmitry Jemerov <yole@yole.ru>
 // Based on TECHNOTE.TXT from the RAR archiver distribution
 
-enum RarBlockType
+[global] enum RarBlockType
 {
   MARK_HEAD=0x72, MAIN_HEAD, FILE_HEAD, COMMENT_HEAD, AV_OLD,
   SUBBLOCK, RECOVERY_RECORD, AV
+}
+
+enum CommonBlockFlags
+{
+  OLD_VERSION_IGNORE=14, ADD_SIZE_PRESENT=15
+}
+
+enum MainHeadFlags [inherit=CommonBlockFlags]
+{
+  ARCHIVE_VOLUME, ARCHIVE_COMMENT_PRESENT, ARCHIVE_LOCKED,
+  ARCHIVE_SOLID, NEW_VOLUME_NAMING, AV_PRESENT, RECOVERY_PRESENT,
+  BLOCK_HEADERS_ENCRYPTED
+}
+
+enum FileHeadFlags [inherit=CommonBlockFlags]
+{
+  FROM_PREV_VOLUME, TO_NEXT_VOLUME, PASSWORD_ENCRYPTED, COMMENT_PRESENT,
+  SOLID, HAVE_HIGH_SIZE=8, HAVE_UNICODE_FILENAME, HAVE_ENCRYPTION_SALT,
+  VERSION_FLAG
+}
+
+enum FileDictType
+{
+  "64K", "128K", "256K", "512K", "1024K", "2048K", "4096K", Directory
 }
 
 [filemask="*.rar"]
@@ -14,4 +38,61 @@ struct RarBlock
   x16    HEAD_CRC;
   enum8  HEAD_TYPE [enum=RarBlockType];
   nodename HEAD_TYPE;
+  switch (HEAD_TYPE)
+  {
+    case MAIN_HEAD  { set16  HEAD_FLAGS [enum=MainHeadFlags]; }
+    case FILE_HEAD
+    {
+      bitfield(2)
+      {
+        set16 HEAD_FLAGS [enum=FileHeadFlags, frombit=0, tobit=15];
+        enum8 DICT_FLAGS [enum=FileDictType, frombit=5, tobit=7];
+      }
+    }
+    default { bits16 HEAD_FLAGS; }
+  }
+  u16    HEAD_SIZE;
+  if (HEAD_FLAGS & 0x8000)
+  {
+    u32 ADD_SIZE;
+  }
+  else
+  {
+    local ADD_SIZE [value=0];
+  }
+  switch (HEAD_TYPE)
+  {
+    case FILE_HEAD { include FileHeadBlock; }
+  }
+  local block_end [value=StructOffset + HEAD_SIZE + ADD_SIZE];
+  if (block_end < FileSize)
+  {
+    sibling [offset=block_end];
+  }
+}
+
+enum OsType { "MS DOS", "OS/2", "Win32", "Unix", "Mac OS", "BeOS" }
+enum PackMethod { Store=0x30, Fastest, Fast, Normal, Good, Best }
+
+struct FileHeadBlock
+{
+  u32         UNP_SIZE;
+  enum8       HOST_OS   [enum=OsType];
+  x32         FILE_CRC;
+  dosdatetime FTIME     [timefirst];
+  [hidden] u8 _unp_ver;
+  calc        UNP_VER   [value=_unp_ver / 10 + "." + _unp_ver % 10];
+  enum8       METHOD    [enum=PackMethod];
+  u16         NAME_SIZE;
+  bits32      ATTR;
+  if (HEAD_FLAGS & 0x100)
+  {
+    u32       HIGH_PACK_SIZE;
+    u32       HIGH_UNP_SIZE;
+  }
+  str         FILE_NAME [len=NAME_SIZE];
+  if (HEAD_FLAGS & 0x200)
+  {
+    wstr      WFILE_NAME [len=NAME_SIZE];
+  }
 }
