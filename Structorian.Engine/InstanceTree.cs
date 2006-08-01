@@ -35,6 +35,10 @@ namespace Structorian.Engine
             get { return true;  }
         }
 
+        public override void NeedData()
+        {
+        }
+
         public override void NeedChildren()
         {
         }

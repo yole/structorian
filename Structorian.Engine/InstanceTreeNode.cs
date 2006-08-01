@@ -11,6 +11,7 @@ namespace Structorian.Engine
         public abstract void AddChild(InstanceTreeNode instance);
         public abstract string NodeName { get; }
         public abstract bool HasChildren { get; }
+        public abstract void NeedData();
         public abstract void NeedChildren();
         public abstract ReadOnlyCollection<InstanceTreeNode> Children { get; }
         public abstract ReadOnlyCollection<StructCell> Cells { get; }
