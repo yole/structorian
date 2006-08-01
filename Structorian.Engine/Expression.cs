@@ -103,7 +103,14 @@ namespace Structorian.Engine
 
         public override IConvertible Evaluate(IEvaluateContext context)
         {
-            int lhs = _lhs.EvaluateInt(context);
+            IConvertible lhsValue = _lhs.Evaluate(context);
+            if (_operation == ExprTokenType.Plus)
+            {
+                if (lhsValue.GetTypeCode() == TypeCode.String)
+                    return lhsValue.ToString(CultureInfo.CurrentCulture) + _rhs.EvaluateString(context);
+            }
+
+            int lhs = lhsValue.ToInt32(CultureInfo.CurrentCulture);
             int rhs = _rhs.EvaluateInt(context);
             switch(_operation)
             {

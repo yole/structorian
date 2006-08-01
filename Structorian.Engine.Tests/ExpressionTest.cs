@@ -144,5 +144,10 @@ namespace Structorian.Engine.Tests
         {
             Assert.IsFalse(ExpressionParser.Parse("!(2 == 2)").EvaluateBool(null));
         }
+        
+        [Test] public void EvaluateStringConcat()
+        {
+            Assert.AreEqual("B2", ExpressionParser.Parse("\"B\" + 2").EvaluateString(null));
+        }
     }
 }
