@@ -182,7 +182,7 @@ namespace Structorian.Engine
             GetInstanceTree().NotifyInstanceAdded(this, instance);
         }
         
-        private void NeedData()
+        public override void NeedData()
         {
             if (_cells == null)
             {
