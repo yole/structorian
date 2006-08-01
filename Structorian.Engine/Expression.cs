@@ -104,20 +104,23 @@ namespace Structorian.Engine
         public override IConvertible Evaluate(IEvaluateContext context)
         {
             IConvertible lhsValue = _lhs.Evaluate(context);
+            IConvertible rhsValue = _rhs.Evaluate(context);
+            CultureInfo culture = CultureInfo.CurrentCulture;
             if (_operation == ExprTokenType.Plus)
             {
-                if (lhsValue.GetTypeCode() == TypeCode.String)
-                    return lhsValue.ToString(CultureInfo.CurrentCulture) + _rhs.EvaluateString(context);
+                if (lhsValue.GetTypeCode() == TypeCode.String || rhsValue.GetTypeCode() == TypeCode.String)
+                    return lhsValue.ToString(culture) + rhsValue.ToString(culture);
             }
 
-            int lhs = lhsValue.ToInt32(CultureInfo.CurrentCulture);
-            int rhs = _rhs.EvaluateInt(context);
+            int lhs = lhsValue.ToInt32(culture);
+            int rhs = rhsValue.ToInt32(culture);
             switch(_operation)
             {
                 case ExprTokenType.Plus: return lhs + rhs;
                 case ExprTokenType.Minus: return lhs - rhs;
                 case ExprTokenType.Mult: return lhs * rhs;
                 case ExprTokenType.Div: return lhs / rhs;
+                case ExprTokenType.Mod: return lhs % rhs;
                 case ExprTokenType.BitAND: return lhs & rhs;
                 case ExprTokenType.BitOR: return lhs | rhs;
             }

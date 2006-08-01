@@ -19,7 +19,7 @@ namespace Structorian.Engine
             };
         private static ExprTokenType[] _termTokens = new ExprTokenType[]
             {
-                ExprTokenType.Mult, ExprTokenType.Div
+                ExprTokenType.Mult, ExprTokenType.Div, ExprTokenType.Mod
             };
         
         private delegate Expression StepDownDelegate(ExpressionLexer lexer);

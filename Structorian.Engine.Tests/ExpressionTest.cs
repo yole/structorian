@@ -29,8 +29,8 @@ namespace Structorian.Engine.Tests
 
         [Test] public void EvaluateDiv()
         {
-            Expression expr = ExpressionParser.Parse("6/2");
-            Assert.AreEqual(3, expr.Evaluate(null));
+            Assert.AreEqual(3, ExpressionParser.Parse("6/2").Evaluate(null));
+            Assert.AreEqual(6, ExpressionParser.Parse("16 % 10").Evaluate(null));
         }
 
         [Test] public void EvaluatePlus()
@@ -148,6 +148,7 @@ namespace Structorian.Engine.Tests
         [Test] public void EvaluateStringConcat()
         {
             Assert.AreEqual("B2", ExpressionParser.Parse("\"B\" + 2").EvaluateString(null));
+            Assert.AreEqual("2B", ExpressionParser.Parse("2 + \"B\"").EvaluateString(null));
         }
     }
 }
