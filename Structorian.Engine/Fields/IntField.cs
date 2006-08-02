@@ -15,6 +15,7 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
+            int offset = (int)reader.BaseStream.Position;
             string format = _hex ? "x" + (_size*2).ToString() : "d";
             string displayValue;
             IConvertible value;
@@ -37,7 +38,7 @@ namespace Structorian.Engine.Fields
                     throw new Exception("Unsupported integer size " + _size);
             }
             if (_hex) displayValue = "0x" + displayValue;
-            AddCell(instance, value, displayValue);
+            AddCell(instance, value, displayValue, offset);
         }
     }
 }

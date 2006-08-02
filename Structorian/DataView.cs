@@ -17,10 +17,16 @@ namespace Structorian
         private InstanceTree _instanceTree;
         private InstanceTreeNode _activeInstance;
         private Dictionary<InstanceTreeNode, TreeNode> _nodeMap = new Dictionary<InstanceTreeNode, TreeNode>();
+        private HexDump _hexDump;
 
         public DataView()
         {
             InitializeComponent();
+            _hexDump = new HexDump();
+            _hexDump.Font = new Font("Lucida Console", 9);
+            _hexDump.BackColor = SystemColors.Window;
+            _hexDump.Dock = DockStyle.Fill;
+            splitContainer2.Panel2.Controls.Add(_hexDump);
         }
 
         public TreeView StructTreeView
@@ -46,7 +52,7 @@ namespace Structorian
                 viewState = DataViewState.Save(this);
             
             _rootStructDef = def;
-            Stream stream = new FileStream(_dataFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            Stream stream = new BufferedStream(new FileStream(_dataFileName, FileMode.Open, FileAccess.Read, FileShare.Read), 16384);
             if (_instanceTree != null)
             {
                 _instanceTree.InstanceAdded -= new InstanceAddedEventHandler(HandleInstanceAdded);
@@ -57,6 +63,7 @@ namespace Structorian
             _instanceTree.InstanceAdded += new InstanceAddedEventHandler(HandleInstanceAdded);
             _instanceTree.NodeNameChanged += new NodeNameChangedEventHandler(HandleNodeNameChanged);
             FillStructureTree();
+            _hexDump.Stream = stream;
             
             if (viewState != null)
                 viewState.Restore(this);
@@ -118,6 +125,17 @@ namespace Structorian
                 instance.NeedChildren();
                 if (instance.Children.Count == 0)
                     WindowsAPI.SetHasChildren(e.Node, false);
+            }
+        }
+
+        private void _structGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            if (_structGridView.SelectedRows.Count > 0)
+            {
+                StructCell cell = (StructCell)_structGridView.SelectedRows[0].DataBoundItem;
+                int offset = cell.Offset;
+                if (offset >= 0)
+                    _hexDump.SelectBytes(offset, 1);
             }
         }
     }

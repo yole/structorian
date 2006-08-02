@@ -11,9 +11,10 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
+            int offset = (int)reader.BaseStream.Position;
             uint value = reader.ReadUInt32();
             DateTime dt = new DateTime(1970, 1, 1).AddSeconds(value);
-            AddCell(instance, dt);
+            AddCell(instance, dt, offset);
         }
     }
 }

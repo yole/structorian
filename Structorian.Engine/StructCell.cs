@@ -11,32 +11,39 @@ namespace Structorian.Engine
         private StructField _def;
         private IConvertible _value;
         private string _displayValue;
+        private int _offset;
         private bool _isError;
         
         public static StructCell CreateErrorCell(StructField def, string errorMessage)
         {
-            StructCell result = new StructCell(def, null, errorMessage);
+            StructCell result = new StructCell(def, null, errorMessage, -1);
             result._isError = true;
             return result;
         }
 
-        public StructCell(StructField def, IConvertible value)
+        public StructCell(StructField def, IConvertible value, int offset)
         {
             _def = def;
             _value = value;
-            _displayValue = _value.ToString();
+            _offset = offset;
         }
 
-        public StructCell(StructField def, IConvertible value, string displayValue)
+        public StructCell(StructField def, IConvertible value, string displayValue, int offset)
         {
             _def = def;
             _value = value;
             _displayValue = displayValue;
+            _offset = offset;
         }
 
         public StructField GetStructDef()
         {
             return _def;
+        }
+
+        public int Offset
+        {
+            get { return _offset; }
         }
 
         public string Tag
@@ -46,12 +53,17 @@ namespace Structorian.Engine
         
         public string Value
         {
-            get { return _displayValue;  }
+            get
+            {
+                if (_displayValue != null)
+                    return _displayValue;
+                return _value.ToString();
+            }
         }
 
         public override string ToString()
         {
-            return _displayValue;
+            return Value;
         }
         
         public IConvertible GetValue()
