@@ -11,6 +11,7 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
+            int offset = (int) reader.BaseStream.Position;
             ushort dosDate, dosTime;
             if (GetBoolAttribute("timefirst"))
             {
@@ -29,7 +30,7 @@ namespace Structorian.Engine.Fields
             int second = (dosTime & 0x1F) * 2;
             int minute = (dosTime >> 5) & 0x3F;
             int hour = (dosTime >> 11) & 0x1F;
-            AddCell(instance, new DateTime(year, month, day, hour, minute, second));
+            AddCell(instance, new DateTime(year, month, day, hour, minute, second), offset);
         }
     }
 }

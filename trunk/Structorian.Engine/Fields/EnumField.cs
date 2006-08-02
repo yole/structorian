@@ -22,12 +22,13 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
+            int offset = (int)reader.BaseStream.Position;
             int value = ReadIntValue(reader).ToInt32(CultureInfo.CurrentCulture);
             EnumDef enumDef = _structDef.StructFile.GetEnumByName(_enumName);
             if (enumDef == null)
                 throw new LoadDataException("Enum '" + _enumName + "' not found");
             string displayValue = enumDef.ValueToString(value);
-            AddCell(instance, new EnumValue(value, displayValue), displayValue);
+            AddCell(instance, new EnumValue(value, displayValue), displayValue, offset);
         }
     }
 

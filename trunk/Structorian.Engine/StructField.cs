@@ -146,14 +146,14 @@ namespace Structorian.Engine
             return false;
         }
 
-        protected void AddCell(StructInstance instance, IConvertible value)
+        protected void AddCell(StructInstance instance, IConvertible value, int offset)
         {
-            instance.AddCell(new StructCell(this, value), _hidden);
+            instance.AddCell(new StructCell(this, value, offset), _hidden);
         }
 
-        protected void AddCell(StructInstance instance, IConvertible value, string displayValue)
+        protected void AddCell(StructInstance instance, IConvertible value, string displayValue, int offset)
         {
-            instance.AddCell(new StructCell(this, value, displayValue), _hidden);
+            instance.AddCell(new StructCell(this, value, displayValue, offset), _hidden);
         }
         
         protected internal virtual bool CanLinkField(StructField nextField)

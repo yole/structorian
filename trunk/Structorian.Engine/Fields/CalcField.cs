@@ -14,7 +14,7 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
-            AddCell(instance, GetExpressionAttribute("value").Evaluate(instance));
+            AddCell(instance, GetExpressionAttribute("value").Evaluate(instance), -1);
         }
     }
 }

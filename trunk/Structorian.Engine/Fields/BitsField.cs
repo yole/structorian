@@ -13,6 +13,7 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
+            int offset = (int) reader.BaseStream.Position;
             IConvertible value = ReadIntValue(reader);
             uint u = value.ToUInt32(CultureInfo.CurrentCulture);
             StringBuilder displayValue = new StringBuilder(_size * 8);
@@ -23,7 +24,7 @@ namespace Structorian.Engine.Fields
                 else
                     displayValue.Append("0");
             }
-            AddCell(instance, value, displayValue.ToString());
+            AddCell(instance, value, displayValue.ToString(), offset);
         }
     }
 }

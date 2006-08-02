@@ -17,6 +17,7 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
+            int offset = (int)reader.BaseStream.Position;
             if (_wide)
                 reader = new BinaryReader(reader.BaseStream, Encoding.Unicode);
             
@@ -46,7 +47,7 @@ namespace Structorian.Engine.Fields
                 }
                 value = valueBuilder.ToString();
             }
-            AddCell(instance, value);
+            AddCell(instance, value, offset);
         }
     }
 }
