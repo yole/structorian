@@ -619,5 +619,14 @@ namespace Structorian.Engine.Tests
                 new byte[] {0x57, 0xB4, 0x69, 0x2D});
             Assert.AreEqual(new DateTime(2002, 11, 9, 22, 34, 46), instance.Cells[0].GetValue());
         }
+        
+        [Test] public void ByteOrder()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A [byteorder=motorola] { u16 x; i32 y;}",
+                new byte[] { 0, 17, 0, 0, 0, 37 });
+            Assert.AreEqual("17", instance.Cells[0].Value);
+            Assert.AreEqual("37", instance.Cells[1].Value);
+        }
     }
 }
