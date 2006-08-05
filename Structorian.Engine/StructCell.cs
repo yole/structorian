@@ -75,6 +75,11 @@ namespace Structorian.Engine
         {
             return _isError;
         }
+        
+        public int GetDataSize(StructInstance instance)
+        {
+            return _def.GetDataSize(this, instance);
+        }
 
         public static ReadOnlyCollection<StructCell> EmptyCollection()
         {

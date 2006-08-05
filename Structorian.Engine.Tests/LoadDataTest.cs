@@ -628,5 +628,16 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("17", instance.Cells[0].Value);
             Assert.AreEqual("37", instance.Cells[1].Value);
         }
+        
+        [Test] public void DataSize()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { i16 x; unixtime a; dosdatetime b; str [len=x] s;}",
+                new byte[] {3, 0, 0, 0, 0, 0, 0x57, 0xB4, 0x69, 0x2D, 0x31, 0x32, 0x33});
+            Assert.AreEqual(2, instance.Cells[0].GetDataSize(instance));
+            Assert.AreEqual(4, instance.Cells[1].GetDataSize(instance));
+            Assert.AreEqual(4, instance.Cells[2].GetDataSize(instance));
+            Assert.AreEqual(3, instance.Cells[3].GetDataSize(instance));
+        }
     }
 }

@@ -143,12 +143,11 @@ namespace Structorian
             string byteChars = Encoding.Default.GetString(bytes).Replace('\n', (char) 1).Replace('\r', (char) 1);
             byteChars = byteChars.Replace('\0', (char) 1);
             lineCharsBuilder.Append(byteChars);
-            
-            if (_selectionStart <= offset+15 && _selectionEnd >= offset)
-            {
-                int selectionStartInLine = (_selectionStart < offset) ? 0 : _selectionStart - offset;
-                int selectionEndInLine = (_selectionEnd >= offset + 16) ? 16 : _selectionEnd - offset;
 
+            int selectionStartInLine = (_selectionStart < offset) ? 0 : _selectionStart - offset;
+            int selectionEndInLine = (_selectionEnd >= offset + 16) ? 16 : _selectionEnd - offset;
+            if (selectionStartInLine < 16 && selectionEndInLine > 0)
+            {
                 Size defSize = new Size(100, 100);
                 int x = 0;
                 int bound1 = 10 + 3*selectionStartInLine;

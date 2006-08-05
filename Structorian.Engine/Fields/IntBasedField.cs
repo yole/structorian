@@ -39,6 +39,11 @@ namespace Structorian.Engine.Fields
             }
             return value;
         }
+
+        public override int GetDataSize(StructCell cell, StructInstance instance)
+        {
+            return _size;
+        }
     }
 
     internal class ReverseByteOrderReader : BinaryReader

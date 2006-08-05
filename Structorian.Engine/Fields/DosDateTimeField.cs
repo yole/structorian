@@ -32,5 +32,10 @@ namespace Structorian.Engine.Fields
             int hour = (dosTime >> 11) & 0x1F;
             AddCell(instance, new DateTime(year, month, day, hour, minute, second), offset);
         }
+
+        public override int GetDataSize(StructCell cell, StructInstance instance)
+        {
+            return 4;
+        }
     }
 }

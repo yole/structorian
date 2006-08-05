@@ -16,5 +16,10 @@ namespace Structorian.Engine.Fields
             DateTime dt = new DateTime(1970, 1, 1).AddSeconds(value);
             AddCell(instance, dt, offset);
         }
+
+        public override int GetDataSize(StructCell cell, StructInstance instance)
+        {
+            return 4;
+        }
     }
 }
