@@ -5,12 +5,15 @@ using System.IO;
 
 namespace Structorian.Engine
 {
+    public enum ByteOrder { Default, LittleEndian, BigEndian };
+    
     public class StructDef
     {
         private string _name;
         private StructFile _structFile;
         private List<StructField> _fields = new List<StructField>();
         private string _fileMask;
+        private ByteOrder _byteOrder = ByteOrder.Default;
 
         public StructDef(StructFile structFile, string name)
         {
@@ -77,6 +80,15 @@ namespace Structorian.Engine
         {
             if (name == "filemask")
                 _fileMask = value;
+            else if (name == "byteorder")
+            {
+                if (value == "intel" || value == "littleendian")
+                    _byteOrder = ByteOrder.LittleEndian;
+                else if (value == "motorola" || value == "bigendian")
+                    _byteOrder = ByteOrder.BigEndian;
+                else
+                    throw new Exception("Unknown byteorder value " + value);
+            }
             else
                 throw new Exception("Unknown attribute " + name);
         }
@@ -84,6 +96,11 @@ namespace Structorian.Engine
         public bool HasChildProvidingFields()
         {
             return _fields.Find(delegate(StructField f) { return f.ProvidesChildren(); }) != null;
+        }
+        
+        public bool IsReverseByteOrder()
+        {
+            return _byteOrder == ByteOrder.BigEndian;
         }
     }
 }

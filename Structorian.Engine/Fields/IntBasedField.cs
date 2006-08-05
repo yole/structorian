@@ -16,6 +16,9 @@ namespace Structorian.Engine.Fields
 
         protected IConvertible ReadIntValue(BinaryReader reader)
         {
+            if (_structDef.IsReverseByteOrder())
+                reader = new ReverseByteOrderReader(reader.BaseStream);
+                    
             IConvertible value;
             switch (_size)
             {
@@ -35,6 +38,37 @@ namespace Structorian.Engine.Fields
                     throw new Exception("Unsupported integer size " + _size);
             }
             return value;
+        }
+    }
+
+    internal class ReverseByteOrderReader : BinaryReader
+    {
+        public ReverseByteOrderReader(Stream stream): base(stream)
+        {
+        }
+
+        public override short ReadInt16()
+        {
+            byte[] data = ReadBytes(2);
+            return (short)(data[1] | data[0] << 8);
+        }
+
+        public override ushort ReadUInt16()
+        {
+            byte[] data = ReadBytes(2);
+            return (ushort)(data[1] | data[0] << 8);
+        }
+
+        public override int ReadInt32()
+        {
+            byte[] data = ReadBytes(4);
+            return data[3] | data[2] << 8 | data[1] << 16 | data[0] << 24;
+        }
+
+        public override uint ReadUInt32()
+        {
+            byte[] data = ReadBytes(4);
+            return (uint)(data[3] | data[2] << 8 | data[1] << 16 | data[0] << 24);
         }
     }
 }

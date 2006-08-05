@@ -69,6 +69,8 @@ namespace Structorian.Engine
             string name = lexer.GetNextToken(StructTokenType.String);
             if (_curStructFile.GetStructByName(name) != null)
                 throw new Exception("Duplicate structure name '" + name + "'");
+            
+            LoadAttributes(lexer, attrs);
 
             StructDef structDef = new StructDef(_curStructFile, name);
             foreach (Attribute attr in attrs)
