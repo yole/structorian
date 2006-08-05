@@ -146,9 +146,11 @@ namespace Structorian.Engine
             return false;
         }
 
-        protected void AddCell(StructInstance instance, IConvertible value, int offset)
+        protected StructCell AddCell(StructInstance instance, IConvertible value, int offset)
         {
-            instance.AddCell(new StructCell(this, value, offset), _hidden);
+            StructCell cell = new StructCell(this, value, offset);
+            instance.AddCell(cell, _hidden);
+            return cell;
         }
 
         protected void AddCell(StructInstance instance, IConvertible value, string displayValue, int offset)
@@ -173,6 +175,10 @@ namespace Structorian.Engine
         {
             get { return _linkedToField != null; }
         }
+
+        public virtual int GetDataSize(StructCell cell, StructInstance instance)
+        {
+            return 0;
+        }
     }
 }
-

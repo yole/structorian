@@ -23,6 +23,7 @@ namespace Structorian.Engine
         private List<StructCell> _hiddenCells = null;
         private List<InstanceTreeNode> _children = null;
         private List<IChildSeed> _childSeeds = null;
+        private Dictionary<StructCell, int> _cellSizes = null;
 
         private StructInstance _followInstance = null;
 
@@ -242,6 +243,21 @@ namespace Structorian.Engine
         public void RegisterGlobal(string id, int result)
         {
             GetInstanceTree().RegisterGlobal(id, result);
+        }
+        
+        internal void RegisterCellSize(StructCell cell, int size)
+        {
+            if (_cellSizes == null)
+                _cellSizes = new Dictionary<StructCell, int>();
+            _cellSizes[cell] = size;
+        }
+        
+        internal int? GetCellSize(StructCell cell)
+        {
+            int result;
+            if (_cellSizes.TryGetValue(cell, out result))
+                return result;
+            return null;
         }
     }
 }
