@@ -96,5 +96,13 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(3, parseException.Position.Line);
             Assert.AreEqual(16, parseException.Position.Col);
         }
+        
+        [Test] public void Alias()
+        {
+            StructFile structFile = new StructParser().LoadStructs("alias str [len=8] resref; struct A { resref r; }");
+            StructField field = structFile.Structs [0].Fields [0];
+            Assert.IsInstanceOfType(typeof(StrField), field);
+            Assert.AreEqual(8, field.GetExpressionAttribute("len").EvaluateInt(null));
+        }
     }
 }
