@@ -6,7 +6,7 @@ namespace Structorian.Engine
 {
     public class StructParser
     {
-        private class Attribute
+        internal class Attribute
         {
             string _key;
             string _value;
@@ -58,6 +58,8 @@ namespace Structorian.Engine
                     LoadStruct(lexer, attrs);
                 else if (token == "enum")
                     LoadEnum(lexer, attrs);
+                else if (token == "alias")
+                    LoadAlias(lexer, attrs);
                 else
                     throw new Exception("Unexpected top-level item " + token);
             }
@@ -108,7 +110,7 @@ namespace Structorian.Engine
             LoadAttributes(lexer, attrs);
             TextPosition fieldPosition = lexer.CurrentPosition;
             string fieldType = lexer.GetNextToken(StructTokenType.String);
-            StructField field = _fieldFactory.CreateField(structDef, fieldType);
+            StructField field = _fieldFactory.CreateField(structDef, fieldType, _attributeRegistry);
             field.Position = fieldPosition;
             LoadAttributes(lexer, attrs);
             if (lexer.PeekNextToken() != StructTokenType.Semicolon && lexer.PeekNextToken() != StructTokenType.OpenCurly)
@@ -192,6 +194,17 @@ namespace Structorian.Engine
                 }
             }
             _curStructFile.Add(enumDef);
+        }
+
+        private void LoadAlias(StructLexer lexer, List<Attribute> attrs)
+        {
+            string baseName = lexer.GetNextToken(StructTokenType.String);
+            LoadAttributes(lexer, attrs);
+            string aliasName = lexer.GetNextToken(StructTokenType.String);
+            LoadAttributes(lexer, attrs);
+            lexer.GetNextToken(StructTokenType.Semicolon);
+            
+            _fieldFactory.RegisterAlias(aliasName, baseName, attrs);
         }
     }
 }

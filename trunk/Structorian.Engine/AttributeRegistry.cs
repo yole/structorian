@@ -8,7 +8,7 @@ namespace Structorian.Engine
 
     class AttributeRegistry
     {
-        private Dictionary<Type, Dictionary<string, AttributeType>> myRegistry = new Dictionary<Type, Dictionary<string, AttributeType>>();
+        private Dictionary<Type, Dictionary<string, AttributeType>> _registry = new Dictionary<Type, Dictionary<string, AttributeType>>();
 
         internal AttributeRegistry()
         {
@@ -37,10 +37,10 @@ namespace Structorian.Engine
         internal void RegisterAttribute(Type fieldType, string attrName, AttributeType type)
         {
             Dictionary<string, AttributeType> fieldsForType;
-            if (!myRegistry.TryGetValue(fieldType, out fieldsForType))
+            if (!_registry.TryGetValue(fieldType, out fieldsForType))
             {
                 fieldsForType = new Dictionary<string, AttributeType>();
-                myRegistry.Add(fieldType, fieldsForType);
+                _registry.Add(fieldType, fieldsForType);
             }
             fieldsForType.Add(attrName, type);
         }
@@ -52,7 +52,7 @@ namespace Structorian.Engine
             while(true)
             {
                 Dictionary<string, AttributeType> fieldsForType;
-                if (myRegistry.TryGetValue(fieldType, out fieldsForType))
+                if (_registry.TryGetValue(fieldType, out fieldsForType))
                 {
                     AttributeType attrType;
                     if (fieldsForType.TryGetValue(key, out attrType))

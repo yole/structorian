@@ -1,11 +1,45 @@
 using System;
+using System.Collections.Generic;
 
 namespace Structorian.Engine.Fields
 {
     class FieldFactory
     {
-        public StructField CreateField(StructDef structDef, string name)
+        private class FieldAlias
         {
+            private string _baseName;
+            private List<StructParser.Attribute> _attrs;
+
+            public FieldAlias(string baseName, List<StructParser.Attribute> attrs)
+            {
+                _baseName = baseName;
+                _attrs = attrs;
+            }
+
+            public string BaseName
+            {
+                get { return _baseName; }
+            }
+
+            public List<StructParser.Attribute> Attrs
+            {
+                get { return _attrs; }
+            }
+        }
+        
+        private Dictionary<string, FieldAlias> _aliasRegistry = new Dictionary<string, FieldAlias>();
+        
+        public StructField CreateField(StructDef structDef, string name, AttributeRegistry registry)
+        {
+            FieldAlias alias;
+            if (_aliasRegistry.TryGetValue(name, out alias))
+            {
+                StructField baseField = CreateField(structDef, alias.BaseName, registry);
+                foreach(StructParser.Attribute attr in alias.Attrs)
+                    registry.SetFieldAttribute(baseField, attr.Key, attr.Value, attr.Position);
+                return baseField;
+            }
+            
             switch(name)
             {
                 case "str": return new StrField(structDef, false);
@@ -33,7 +67,7 @@ namespace Structorian.Engine.Fields
                 case "align": return new AlignField(structDef);
             }
             
-            int size = 0;
+            int size;
             if (name.EndsWith("8"))
             {
                 size = 1;
@@ -57,6 +91,11 @@ namespace Structorian.Engine.Fields
                 case "bits": return new BitsField(structDef, size);
             }
             throw new Exception("Unknown field type " + name);
+        }
+
+        public void RegisterAlias(string aliasName, string name, List<StructParser.Attribute> attrs)
+        {
+            _aliasRegistry [aliasName] = new FieldAlias(name, attrs);
         }
     }
 }
