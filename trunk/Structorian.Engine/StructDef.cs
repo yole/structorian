@@ -14,6 +14,8 @@ namespace Structorian.Engine
         private List<StructField> _fields = new List<StructField>();
         private string _fileMask;
         private ByteOrder _byteOrder = ByteOrder.Default;
+        private bool _hidden;
+        private bool _preload;
 
         public StructDef(StructFile structFile, string name)
         {
@@ -76,7 +78,7 @@ namespace Structorian.Engine
                 stream.Position = instance.RewindOffset;
         }
 
-        public void SetAttribute(string name, string value)
+        public void SetAttribute(string name, string value, TextPosition position)
         {
             if (name == "filemask")
                 _fileMask = value;
@@ -87,10 +89,14 @@ namespace Structorian.Engine
                 else if (value == "motorola" || value == "bigendian")
                     _byteOrder = ByteOrder.BigEndian;
                 else
-                    throw new Exception("Unknown byteorder value " + value);
+                    throw new ParseException("Unknown byteorder value " + value, position);
             }
+            else if (name == "hidden")
+                _hidden = true;
+            else if (name == "preload")
+                _preload = true;
             else
-                throw new Exception("Unknown attribute " + name);
+                throw new ParseException("Unknown attribute " + name, position);
         }
 
         public bool HasChildProvidingFields()

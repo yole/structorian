@@ -104,5 +104,20 @@ namespace Structorian.Engine.Tests
             Assert.IsInstanceOfType(typeof(StrField), field);
             Assert.AreEqual(8, field.GetExpressionAttribute("len").EvaluateInt(null));
         }
+        
+        [Test] public void BadStructAttr()
+        {
+            StructParser parser = new StructParser();
+            parser.LoadStructs("[someshit] struct A { }");
+            Assert.AreEqual(1, parser.Errors.Count);
+            Assert.AreEqual("Unknown attribute someshit", parser.Errors[0].Message);
+        }
+        
+        [Test] public void UnknownField()
+        {
+            StructParser parser = new StructParser();
+            parser.LoadStructs("struct A { someshit a; othershit b; }");
+            Assert.AreEqual(2, parser.Errors.Count);
+        }
     }
 }
