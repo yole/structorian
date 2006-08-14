@@ -8,11 +8,13 @@ namespace Structorian.Engine.Fields
     public class StrField: StructField
     {
         private bool _wide;
+        private bool _requireNullTerminated;
 
-        public StrField(StructDef structDef, bool wide)
+        public StrField(StructDef structDef, bool wide, bool requireNullTerminated)
             : base(structDef)
         {
             _wide = wide;
+            _requireNullTerminated = requireNullTerminated;
         }
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
