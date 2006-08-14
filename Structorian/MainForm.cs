@@ -56,6 +56,11 @@ namespace Structorian
             {
                 MessageBox.Show(this, "Error loading structures: " + ex.Message);
             }
+            if (parser.Errors.Count > 0)
+            {
+                ParseException ex = parser.Errors[0];
+                MessageBox.Show(this, "Error in " + ex.Position + ": " + ex.Message);
+            }
         }
 
         private void _btnSaveStructures_Click(object sender, EventArgs e)

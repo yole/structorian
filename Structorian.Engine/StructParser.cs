@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Structorian.Engine.Fields;
 
 namespace Structorian.Engine
@@ -38,6 +39,12 @@ namespace Structorian.Engine
         private StructFile _curStructFile;
         private FieldFactory _fieldFactory = new FieldFactory();
         private AttributeRegistry _attributeRegistry = new AttributeRegistry();
+        private List<ParseException> _errors = new List<ParseException>();
+
+        public ReadOnlyCollection<ParseException> Errors
+        {
+            get { return _errors.AsReadOnly(); }
+        }
 
         public StructFile LoadStructs(string strsText)
         {
@@ -63,7 +70,9 @@ namespace Structorian.Engine
                 else
                     throw new Exception("Unexpected top-level item " + token);
             }
-            return result;
+            if (_errors.Count == 0)
+                return result;
+            return null;
         }
 
         private void LoadStruct(StructLexer lexer, List<Attribute> attrs)
@@ -76,7 +85,16 @@ namespace Structorian.Engine
 
             StructDef structDef = new StructDef(_curStructFile, name);
             foreach (Attribute attr in attrs)
-                structDef.SetAttribute(attr.Key, attr.Value);
+            {
+                try
+                {
+                    structDef.SetAttribute(attr.Key, attr.Value, attr.Position);
+                }
+                catch(ParseException ex)
+                {
+                    _errors.Add(ex);
+                }
+            }
             
             LoadFieldGroup(lexer, structDef, null);
             _curStructFile.Add(structDef);
@@ -90,16 +108,19 @@ namespace Structorian.Engine
             {
                 StructField field = LoadField(lexer, structDef, parentField);
 
-                bool isLinked = false;
-                if (linkToField != null)
-                    isLinked = linkToField.CanLinkField(field);
+                if (field != null)
+                {
+                    bool isLinked = false;
+                    if (linkToField != null)
+                        isLinked = linkToField.CanLinkField(field);
 
-                if (isLinked)
-                    linkToField.LinkField(field);
-                else
-                    linkToField = field;
+                    if (isLinked)
+                        linkToField.LinkField(field);
+                    else
+                        linkToField = field;
 
-                field.Validate();
+                    field.Validate();
+                }
             }
             lexer.GetNextToken(StructTokenType.CloseCurly);
         }
@@ -110,15 +131,24 @@ namespace Structorian.Engine
             LoadAttributes(lexer, attrs);
             TextPosition fieldPosition = lexer.CurrentPosition;
             string fieldType = lexer.GetNextToken(StructTokenType.String);
-            StructField field = _fieldFactory.CreateField(structDef, fieldType, _attributeRegistry);
-            field.Position = fieldPosition;
+            StructField field = null;
+            try
+            {
+                field = _fieldFactory.CreateField(structDef, fieldType, _attributeRegistry);
+                field.Position = fieldPosition;
+            }
+            catch(Exception ex)
+            {
+                _errors.Add(new ParseException(ex.Message, fieldPosition));
+            }
             LoadAttributes(lexer, attrs);
             if (lexer.PeekNextToken() != StructTokenType.Semicolon && lexer.PeekNextToken() != StructTokenType.OpenCurly)
             {
                 TextPosition pos = lexer.CurrentPosition;
                 string tag = lexer.GetNextToken(StructTokenType.String);
                 LoadAttributes(lexer, attrs);
-                _attributeRegistry.SetFieldAttribute(field, field.DefaultAttribute, tag, pos);
+                if (field != null)
+                    _attributeRegistry.SetFieldAttribute(field, field.DefaultAttribute, tag, pos);
             }
 
             foreach (Attribute attr in attrs)
@@ -129,10 +159,13 @@ namespace Structorian.Engine
             else
                 lexer.GetNextToken(StructTokenType.Semicolon);
             
-            if (parentField == null)
-                structDef.AddField(field);
-            else
-                parentField.AddChildField(field);
+            if (field != null)
+            {
+                if (parentField == null)
+                    structDef.AddField(field);
+                else
+                    parentField.AddChildField(field);
+            }
             return field;
         }
 

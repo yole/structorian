@@ -47,6 +47,8 @@ namespace Structorian.Engine
 
         internal void SetFieldAttribute(StructField field, string key, string value, TextPosition pos)
         {
+            if (field == null) return;
+            
             Type fieldType = field.GetType();
             
             while(true)
