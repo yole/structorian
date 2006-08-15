@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -11,11 +10,11 @@ namespace Structorian
     {
         private Stream _stream;
         private int _streamSize;
-        private int _charWidth;
         private int _charHeight;
         private int _topLine;
         private int _lineCount;
         private int _visibleLines;
+        private int _visibleWholeLines;
         private int _selectionStart = 0;
         private int _selectionEnd = 1;
 
@@ -44,7 +43,23 @@ namespace Structorian
         {
             _selectionStart = Math.Max(0, Math.Min(startOffset, _streamSize - 1));
             _selectionEnd = Math.Max(1, Math.Min(startOffset+count, _streamSize));
+            ScrollInView();
             Invalidate();
+        }
+
+        private void ScrollInView()
+        {
+            int selStartLine = _selectionStart/16;
+            int selEndLine = _selectionEnd/16;
+            if (selStartLine < _topLine)
+                SetTopLine(selStartLine);
+            else if (selEndLine >= _topLine + _visibleWholeLines)
+            {
+                if (selEndLine - selStartLine >= _visibleWholeLines)
+                    SetTopLine(selStartLine);
+                else
+                    SetTopLine(selEndLine - (_visibleWholeLines-1));
+            }
         }
 
         private void AdjustScrollbars()
@@ -60,6 +75,9 @@ namespace Structorian
             if (_charHeight > 0)
             {
                 _visibleLines = Height / _charHeight;
+                _visibleWholeLines = _visibleLines;
+                if ((Height / _charHeight) * _charHeight < Height)
+                    _visibleLines++;
                 AdjustScrollbars();
             }
         }
@@ -68,7 +86,6 @@ namespace Structorian
         {
             base.OnFontChanged(e);
             Size s = TextRenderer.MeasureText("A", Font, new Size(100, 100), TextFormatFlags.NoPadding);
-            _charWidth = s.Width;
             _charHeight = s.Height;
         }
 
@@ -86,10 +103,31 @@ namespace Structorian
                     newTopLine = _topLine + 1;
                     break;
                     
+                case ScrollEventType.LargeDecrement:
+                    newTopLine = _topLine - _visibleLines + 1;
+                    break;
+                    
+                case ScrollEventType.LargeIncrement:
+                    newTopLine = _topLine + _visibleLines - 1;
+                    break;
+                    
+                case ScrollEventType.ThumbPosition:
+                    newTopLine = se.NewValue;
+                    break;
+
+                case ScrollEventType.ThumbTrack:
+                    newTopLine = se.NewValue;
+                    break;
             }
             SetTopLine(newTopLine);
         }
 
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            SetTopLine(_topLine - e.Delta/60);
+        }
+        
         private void SetTopLine(int newTopLine)
         {
             if (newTopLine < 0)
@@ -107,6 +145,38 @@ namespace Structorian
                 VerticalScroll.Value = _topLine;
                 Invalidate();
             }
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (e.Button == MouseButtons.Left)
+            {
+                int clickOffset = GetOffsetAt(e.X, e.Y);
+                if (clickOffset != -1 && (clickOffset < _selectionStart || clickOffset >= _selectionEnd))
+                {
+                    SelectBytes(clickOffset, 1);
+                }
+            }
+        }
+
+        private int GetOffsetAt(int x, int y)
+        {
+            int charsInLine = 10 + 16*4 + 2;
+            Size size = TextRenderer.MeasureText(new string('A', charsInLine), Font);
+            int col = x*charsInLine/size.Width;
+            int row = y/size.Height;
+            int byteCol;
+            if (col >= 10 && col < 10 + 3 * 16)
+                byteCol = (col - 10) / 3;
+            else if (col >= 10 + 3 * 16 + 2)
+                byteCol = col - (10 + 3 * 16 + 2);
+            else
+                return -1;
+
+            int result = _topLine*16 + row*16 + byteCol;
+            if (result >= _streamSize) return -1;
+            return result;
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -175,11 +245,6 @@ namespace Structorian
             {
                 TextRenderer.DrawText(g, lineCharsBuilder.ToString(), Font, new Point(0, top), SystemColors.WindowText);
             }
-        }
-        
-        private int GetCharX(int offset)
-        {
-            return (10 + 16*3 + 2 + offset%16)*_charWidth;
         }
     }
 }
