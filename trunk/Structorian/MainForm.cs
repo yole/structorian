@@ -22,6 +22,8 @@ namespace Structorian
             _dataView = new DataView();
             _dataView.Dock = DockStyle.Fill;
             splitContainer2.Panel2.Controls.Add(_dataView);
+            
+            Application.AddMessageFilter(new WheelMessageFilter());
         }
 
         private void loadStructuresToolStripMenuItem_Click(object sender, EventArgs e)
@@ -85,6 +87,24 @@ namespace Structorian
             if (_openDataDialog.ShowDialog(this) == DialogResult.OK)
             {
                 _dataView.LoadData(Path.GetFullPath(_openDataDialog.FileName), _structFile.Structs[0]);
+            }
+        }
+        
+        private class WheelMessageFilter: IMessageFilter
+        {
+            public bool PreFilterMessage(ref Message m)
+            {
+                if (m.Msg == WindowsAPI.WM_MOUSEWHEEL)
+                {
+                    WindowsAPI.POINTAPI ptapi = new WindowsAPI.POINTAPI(m.LParam.ToInt32());
+                    IntPtr pWnd = WindowsAPI.WindowFromPoint(ptapi);
+                    if (pWnd.ToInt32() != 0)
+                    {
+                        WindowsAPI.SendMessage(pWnd, WindowsAPI.WM_MOUSEWHEEL, m.WParam.ToInt32(), m.LParam.ToInt32());
+                        return true;
+                    }
+                }
+                return false;
             }
         }
     }

@@ -19,8 +19,24 @@ namespace Structorian
             CHILDREN = 0x0040
         }
 
+        [StructLayoutAttribute(LayoutKind.Sequential)]
+        public struct POINTAPI
+        {
+            public POINTAPI(System.Drawing.Point p) { x = p.X; y = p.Y; }
+            public POINTAPI(Int32 X, Int32 Y) { x = X; y = Y; }
+            public POINTAPI(Int32 dw)
+            {
+                x = dw & 0xFFFF;
+                y = (dw >> 16) & 0xFFFF;
+            }
+
+            public Int32 x;
+            public Int32 y;
+        }
+
         static int TV_FIRST = 0x1100;
         static int TVM_SETITEMA = (TV_FIRST + 13);
+        public static int WM_MOUSEWHEEL = 0x20A;
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         public struct TVITEM
@@ -39,6 +55,11 @@ namespace Structorian
 
         [DllImport("user32", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, ref TVITEM lParam);
+        [DllImport("user32", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
+
+        [DllImport("user32")]
+        public static extern IntPtr WindowFromPoint(POINTAPI point);
 
         public static void SetHasChildren(TreeNode node, bool hasChildren)
         {
