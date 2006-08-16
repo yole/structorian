@@ -19,5 +19,22 @@ namespace Structorian.Engine.Fields
                 LoadChildFields(reader, instance);
             }
         }
+
+        public override int GetDataSize()
+        {
+            Expression expression = GetExpressionAttribute("count");
+            if (expression.IsConstant)
+            {
+                int repeatCount = expression.EvaluateInt(null);
+                int repeatSize = 0;
+                foreach (StructField field in ChildFields)
+                {
+                    if (!field.IsLinked)
+                        repeatSize += field.GetDataSize();
+                }
+                return repeatCount*repeatSize;
+            }
+            return base.GetDataSize();
+        }
     }
 }

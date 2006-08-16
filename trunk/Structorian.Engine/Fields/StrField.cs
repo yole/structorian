@@ -60,9 +60,20 @@ namespace Structorian.Engine.Fields
             instance.RegisterCellSize(cell, cellSize);
         }
 
-        public override int GetDataSize(StructCell cell, StructInstance instance)
+        public override int GetInstanceDataSize(StructCell cell, StructInstance instance)
         {
             return instance.GetCellSize(cell).Value;
+        }
+
+        public override int GetDataSize()
+        {
+            Expression lengthExpr = GetExpressionAttribute("len");
+            if (lengthExpr.IsConstant)
+            {
+                int result = lengthExpr.EvaluateInt(null);
+                return _wide ? result*2 : result;
+            }
+            return base.GetDataSize();
         }
     }
 }

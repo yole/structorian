@@ -94,6 +94,13 @@ namespace Structorian.Engine
                     Expression exprInContext = ParseFactor(lexer);
                     return new ContextExpression(symbol, exprInContext);
                 }
+                else if (lexer.PeekNextToken() == ExprTokenType.Open)
+                {
+                    lexer.GetNextToken(ExprTokenType.Open);
+                    string param = (string) lexer.GetNextToken(ExprTokenType.Symbol);
+                    lexer.GetNextToken(ExprTokenType.Close);
+                    return new FunctionExpression(symbol, param);
+                }
                 else
                     return new SymbolExpression(symbol);
             }

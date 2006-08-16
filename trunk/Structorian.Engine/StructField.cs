@@ -175,10 +175,15 @@ namespace Structorian.Engine
         {
             get { return _linkedToField != null; }
         }
-
-        public virtual int GetDataSize(StructCell cell, StructInstance instance)
+        
+        public virtual int GetDataSize()
         {
             return 0;
+        }
+        
+        public virtual int GetInstanceDataSize(StructCell cell, StructInstance instance)
+        {
+            return GetDataSize();
         }
     }
 }
