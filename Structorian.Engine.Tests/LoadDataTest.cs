@@ -408,8 +408,8 @@ namespace Structorian.Engine.Tests
         [Test] public void StrTrailingNull()
         {
             StructInstance instance = PrepareInstance(
-                "struct A { str [len=2] a; }",
-                new byte[] { (byte) 'B', 0 });
+                "struct A { str [len=4] a; }",
+                new byte[] { (byte) 'B', 0, (byte) 'M', 0 });
             Assert.AreEqual("B", instance.Cells[0].Value);
         }
 
@@ -678,6 +678,26 @@ namespace Structorian.Engine.Tests
                 "struct A { repeat(3) { u8 x; } calc s [value=SizeOf(A)]; }",
                 new byte[] { 0, 0, 0 });
             Assert.AreEqual("3", instance.Cells[3].Value);
+        }
+        
+        [Test] public void EmptyGroup()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { child B [count=0, group=g]; } struct B { } ",
+                new byte[] {});
+            instance.NeedChildren();
+            Assert.AreEqual(1, instance.Children.Count);
+            instance.Children[0].NeedChildren();
+            Assert.AreEqual(0, instance.Children [0].Children.Count);
+        }
+        
+        [Test] public void WeirdStrBytes()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { str [len=8] s; calc o [value=CurOffset]; }",
+                new byte[] {0, 0xFF, 0, 0, 0, 0xFF, 0, 0, (byte) 'D', (byte) 'O'});
+            Assert.AreEqual("", instance.Cells[0].Value);
+            Assert.AreEqual("8", instance.Cells[1].Value);
         }
     }
 }
