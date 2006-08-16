@@ -47,6 +47,9 @@ namespace Structorian
 
         internal void ReloadData(StructDef def, bool keepState)
         {
+            if (_dataFileName == null)
+                return;
+            
             DataViewState viewState = null;
             if (keepState)
                 viewState = DataViewState.Save(this);

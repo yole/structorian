@@ -8,7 +8,7 @@ namespace Structorian.Engine
     {
         private string _groupName;
         private readonly InstanceTreeNode _parent;
-        private List<InstanceTreeNode> _children = null;
+        private List<InstanceTreeNode> _children = new List<InstanceTreeNode>();
 
         public GroupContainer(InstanceTreeNode parent, string groupName)
         {
@@ -37,13 +37,10 @@ namespace Structorian.Engine
 
         public override void NeedChildren()
         {
-            if (_children != null)
+            InstanceTree tree = GetInstanceTree();
+            foreach(InstanceTreeNode child in _children)
             {
-                InstanceTree tree = GetInstanceTree();
-                foreach(InstanceTreeNode child in _children)
-                {
-                    tree.NotifyInstanceAdded(this, child);
-                }
+                tree.NotifyInstanceAdded(this, child);
             }
         }
 
@@ -59,8 +56,6 @@ namespace Structorian.Engine
 
         public override void AddChild(InstanceTreeNode instance)
         {
-            if (_children == null)
-                _children = new List<InstanceTreeNode>();
             _children.Add(instance);
         }
     }
