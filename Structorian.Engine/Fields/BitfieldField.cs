@@ -37,7 +37,15 @@ namespace Structorian.Engine.Fields
                 field.LoadData(bitFieldReader, instance);
             }
         }
-        
+
+        public override int GetDataSize()
+        {
+            Expression expr = GetExpressionAttribute("size");
+            if (expr.IsConstant)
+                return expr.EvaluateInt(null);
+            return base.GetDataSize();
+        }
+
         private class BitfieldReader: BinaryReader
         {
             private readonly uint _baseValue;

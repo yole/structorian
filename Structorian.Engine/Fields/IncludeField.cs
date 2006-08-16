@@ -40,5 +40,13 @@ namespace Structorian.Engine.Fields
             StructDef structDef = GetIncludedStruct();
             return structDef.HasChildProvidingFields();
         }
+
+        public override int GetDataSize()
+        {
+            StructDef structDef = _structDef.StructFile.GetStructByName(_includeStructName);
+            if (structDef == null)
+                throw new LoadDataException("Unknown struct " + _includeStructName + " in include");
+            return structDef.GetDataSize();
+        }
     }
 }

@@ -108,5 +108,16 @@ namespace Structorian.Engine
         {
             return _byteOrder == ByteOrder.BigEndian;
         }
+
+        public int GetDataSize()
+        {
+            int result = 0;
+            foreach(StructField field in _fields)
+            {
+                if (!field.IsLinked)
+                    result += field.GetDataSize();
+            }
+            return result;
+        }
     }
 }

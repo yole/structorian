@@ -6,6 +6,7 @@ namespace Structorian.Engine
     public interface IEvaluateContext
     {
         IConvertible EvaluateSymbol(string symbol);
+        IConvertible EvaluateFunction(string symbol, string param);
         IEvaluateContext EvaluateContext(string symbol);
     }
     
@@ -50,6 +51,11 @@ namespace Structorian.Engine
             get { return _source; }
             set { _source = value; }
         }
+        
+        public virtual bool IsConstant
+        {
+            get { return false; }
+        }
 
         public override string ToString()
         {
@@ -70,6 +76,11 @@ namespace Structorian.Engine
         public override IConvertible Evaluate(IEvaluateContext context)
         {
             return _value;
+        }
+
+        public override bool IsConstant
+        {
+            get { return true; }
         }
     }
     
@@ -212,6 +223,23 @@ namespace Structorian.Engine
                     return !_operand.EvaluateBool(context);
             }
             throw new Exception("Unexpected unary operation " + _operation);
+        }
+    }
+    
+    class FunctionExpression: Expression
+    {
+        private string _function;
+        private string _param;
+
+        public FunctionExpression(string function, string param)
+        {
+            _function = function;
+            _param = param;
+        }
+
+        public override IConvertible Evaluate(IEvaluateContext context)
+        {
+            return context.EvaluateFunction(_function, _param);
         }
     }
 }

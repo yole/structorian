@@ -639,5 +639,45 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(4, instance.Cells[2].GetDataSize(instance));
             Assert.AreEqual(3, instance.Cells[3].GetDataSize(instance));
         }
+        
+        [Test] public void SizeOf()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { i16 x; calc s [value=SizeOf(A)]; }",
+                new byte[] {0, 0});
+            Assert.AreEqual("2", instance.Cells[1].Value);
+        }
+        
+        [Test] public void SizeOfFixedStr()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { str [len=2] x; calc s [value=SizeOf(A)]; }",
+                new byte[] { 0, 0 });
+            Assert.AreEqual("2", instance.Cells[1].Value);
+        }
+
+        [Test] public void SizeOfBitField()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { bitfield(2) { u8 x [frombit=0,tobit=2]; } calc s [value=SizeOf(A)]; }",
+                new byte[] { 0, 0 });
+            Assert.AreEqual("2", instance.Cells[1].Value);
+        }
+        
+        [Test] public void SizeOfInclude()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { include B; calc s [value=SizeOf(A)]; } struct B { u16 x; }",
+                new byte[] {0, 0});
+            Assert.AreEqual("2", instance.Cells[1].Value);
+        }
+        
+        [Test] public void SizeOfRepeat()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { repeat(3) { u8 x; } calc s [value=SizeOf(A)]; }",
+                new byte[] { 0, 0, 0 });
+            Assert.AreEqual("3", instance.Cells[3].Value);
+        }
     }
 }

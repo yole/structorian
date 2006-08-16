@@ -212,10 +212,21 @@ namespace Structorian.Engine
             if (enumValue.HasValue)
                 return enumValue.Value;
 
-            IConvertible funcValue = ExpressionFunctions.Evaluate(symbol, this);
+            IConvertible funcValue = ExpressionFunctions.Evaluate(symbol, null, this);
             if (funcValue != null)
                 return funcValue;
             
+            throw new Exception("Unknown symbol " + symbol);
+        }
+
+        public IConvertible EvaluateFunction(string symbol, string param)
+        {
+            NeedData();
+
+            IConvertible funcValue = ExpressionFunctions.Evaluate(symbol, param, this);
+            if (funcValue != null)
+                return funcValue;
+
             throw new Exception("Unknown symbol " + symbol);
         }
 

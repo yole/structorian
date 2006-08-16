@@ -40,7 +40,7 @@ namespace Structorian.Engine.Fields
             return value;
         }
 
-        public override int GetDataSize(StructCell cell, StructInstance instance)
+        public override int GetDataSize()
         {
             return _size;
         }

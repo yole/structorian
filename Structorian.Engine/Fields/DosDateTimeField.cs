@@ -33,7 +33,7 @@ namespace Structorian.Engine.Fields
             AddCell(instance, new DateTime(year, month, day, hour, minute, second), offset);
         }
 
-        public override int GetDataSize(StructCell cell, StructInstance instance)
+        public override int GetDataSize()
         {
             return 4;
         }

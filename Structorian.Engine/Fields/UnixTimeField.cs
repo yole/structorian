@@ -17,7 +17,7 @@ namespace Structorian.Engine.Fields
             AddCell(instance, dt, offset);
         }
 
-        public override int GetDataSize(StructCell cell, StructInstance instance)
+        public override int GetDataSize()
         {
             return 4;
         }
