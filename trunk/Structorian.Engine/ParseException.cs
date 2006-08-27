@@ -10,7 +10,7 @@ namespace Structorian.Engine
         public ParseException(string message, TextPosition position) : base(message)
         {
             _position = position;
-            _length = 0;
+            _length = 1;
         }
 
         public ParseException(string message, TextPosition position, int length)

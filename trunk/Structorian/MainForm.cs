@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;
-using System.Text;
 using System.Windows.Forms;
 using ICSharpCode.TextEditor.Document;
 using Structorian.Engine;
@@ -57,11 +55,16 @@ namespace Structorian
             catch(ParseException ex)
             {
                 MessageBox.Show(this, "Error in " + ex.Position + ": " + ex.Message);
+                List<ParseException> list = new List<ParseException>();
+                list.Add(ex);
+                HighlightErrors(list.AsReadOnly());
+                return;
             }
             catch(Exception ex)
             {
                 MessageBox.Show(this, "Error loading structures: " + ex.Message);
             }
+            HighlightErrors(parser.Errors);
             if (parser.Errors.Count > 0)
             {
                 ParseException ex = parser.Errors[0];
@@ -111,6 +114,26 @@ namespace Structorian
             _structEditControl.Refresh();
         }
 
+        private void HighlightErrors(ReadOnlyCollection<ParseException> exceptions)
+        {
+            IDocument doc = _structEditControl.Document;
+            doc.MarkerStrategy.RemoveAll(
+                delegate(TextMarker m) { return m.TextMarkerType == TextMarkerType.WaveLine; } );
+            foreach(ParseException ex in exceptions)
+            {
+                int offset = doc.PositionToOffset(new Point(ex.Position.Col, ex.Position.Line - 1));
+                TextMarker marker = new TextMarker(offset, ex.Length, TextMarkerType.WaveLine, Color.Red);
+                marker.ToolTip = ex.Message;
+                doc.MarkerStrategy.AddMarker(marker);
+            }
+            if (exceptions.Count > 0)
+            {
+                TextPosition pos = exceptions [0].Position;
+                _structEditControl.ActiveTextAreaControl.Caret.Position = new Point(pos.Col, pos.Line-1);
+            }
+            _structEditControl.Refresh();
+        }
+        
         private class WheelMessageFilter : IMessageFilter
         {
             public bool PreFilterMessage(ref Message m)
