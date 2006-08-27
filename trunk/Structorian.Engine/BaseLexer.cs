@@ -36,6 +36,7 @@ namespace Structorian.Engine
         protected int _position;
         private Token _nextToken;
         private int _nextTokenStartPosition;
+        private int _nextTokenEndPosition;
         private int _curLine = 1;
         private int _curLineStart;
         private T _eofTokenType;
@@ -88,6 +89,7 @@ namespace Structorian.Engine
                 else
                     result = FetchNextToken();
             } while (result == null);
+            _nextTokenEndPosition = _position;
             return result;
         }
 
@@ -149,16 +151,24 @@ namespace Structorian.Engine
                 return nextToken;
             }
             return null;
-       }
+        }
 
-       public TextPosition CurrentPosition
-       {
-           get
-           {
-               if (_nextToken == null) _nextToken = ParseNextToken();
-               return BuildTextPosition(_nextTokenStartPosition);
-           }
-       }
+        public TextPosition CurrentPosition
+        {
+            get
+            {
+                if (_nextToken == null) _nextToken = ParseNextToken();
+                return BuildTextPosition(_nextTokenStartPosition);
+            }
+        }
+        
+        public TextPosition LastTokenEndPosition
+        {
+            get 
+            {
+                return BuildTextPosition(_nextTokenEndPosition); 
+            }
+        }
 
         protected TextPosition BuildTextPosition(int position)
         {

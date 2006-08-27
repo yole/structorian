@@ -153,7 +153,7 @@ namespace Structorian.Engine
 
             foreach (Attribute attr in attrs)
                 _attributeRegistry.SetFieldAttribute(field, attr.Key, attr.Value, attr.Position);
-            
+
             if (lexer.PeekNextToken() == StructTokenType.OpenCurly)
                 LoadFieldGroup(lexer, structDef, field);
             else
@@ -161,6 +161,7 @@ namespace Structorian.Engine
             
             if (field != null)
             {
+                field.EndPosition = lexer.LastTokenEndPosition;
                 if (parentField == null)
                     structDef.AddField(field);
                 else

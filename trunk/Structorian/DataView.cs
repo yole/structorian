@@ -19,6 +19,8 @@ namespace Structorian
         private Dictionary<InstanceTreeNode, TreeNode> _nodeMap = new Dictionary<InstanceTreeNode, TreeNode>();
         private HexDump _hexDump;
 
+        public event CellSelectedEventHandler CellSelected;
+
         public DataView()
         {
             InitializeComponent();
@@ -139,7 +141,26 @@ namespace Structorian
                 int offset = cell.Offset;
                 if (offset >= 0)
                     _hexDump.SelectBytes(offset, cell.GetDataSize((StructInstance) _activeInstance));
+                if (CellSelected != null)
+                    CellSelected(this, new CellSelectedEventArgs(cell));
             }
         }
     }
+    
+    public class CellSelectedEventArgs: EventArgs
+    {
+        private StructCell _cell;
+
+        public CellSelectedEventArgs(StructCell cell)
+        {
+            _cell = cell;
+        }
+
+        public StructCell Cell
+        {
+            get { return _cell; }
+        }
+    }
+    
+    public delegate void CellSelectedEventHandler(object sender, CellSelectedEventArgs e);
 }

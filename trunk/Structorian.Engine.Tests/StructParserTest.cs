@@ -119,5 +119,13 @@ namespace Structorian.Engine.Tests
             parser.LoadStructs("struct A { someshit a; othershit b; }");
             Assert.AreEqual(2, parser.Errors.Count);
         }
+        
+        [Test] public void EndPosition()
+        {
+            StructFile file = new StructParser().LoadStructs("struct A {\r\nx32 a;    u32 b;}");
+            TextPosition endPos = file.Structs[0].Fields[0].EndPosition;
+            Assert.AreEqual(2, endPos.Line);
+            Assert.AreEqual(6, endPos.Col);
+        }
     }
 }
