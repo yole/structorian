@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using ICSharpCode.TextEditor.Document;
 using Structorian.Engine;
 
 namespace Structorian
@@ -15,11 +16,13 @@ namespace Structorian
         private string _structFileName;
         private StructFile _structFile;
         private DataView _dataView;
+        private TextMarker _currentCellMarker;
         
         public MainForm()
         {
             InitializeComponent();
             _dataView = new DataView();
+            _dataView.CellSelected += new CellSelectedEventHandler(_dataView_OnCellSelected);
             _dataView.Dock = DockStyle.Fill;
             splitContainer2.Panel2.Controls.Add(_dataView);
             
@@ -37,6 +40,7 @@ namespace Structorian
                     _structEditControl.Text = strs;
                     _structEditControl.ShowEOLMarkers = false;
                     _structEditControl.ShowInvalidLines = false;
+                    _structEditControl.ShowSpaces = false;
                     ParseStructures();
                 }
                 _btnSaveStructures.Enabled = true;
@@ -89,8 +93,25 @@ namespace Structorian
                 _dataView.LoadData(Path.GetFullPath(_openDataDialog.FileName), _structFile.Structs[0]);
             }
         }
-        
-        private class WheelMessageFilter: IMessageFilter
+
+        private void _dataView_OnCellSelected(object sender, CellSelectedEventArgs e)
+        {
+            TextPosition pos = e.Cell.GetStructDef().Position;
+            TextPosition endPos = e.Cell.GetStructDef().EndPosition;
+            IDocument doc = _structEditControl.Document;
+            
+            if (_currentCellMarker != null)
+                doc.MarkerStrategy.RemoveMarker(_currentCellMarker);
+            int offset = doc.PositionToOffset(new Point(pos.Col, pos.Line-1));
+            int endOffset = doc.PositionToOffset(new Point(endPos.Col, endPos.Line - 1));
+            _currentCellMarker = new TextMarker(offset, endOffset-offset, TextMarkerType.SolidBlock, 
+                                                Color.LightSkyBlue);
+            doc.MarkerStrategy.AddMarker(_currentCellMarker);
+            _structEditControl.ActiveTextAreaControl.ScrollTo(pos.Line-1);
+            _structEditControl.Refresh();
+        }
+
+        private class WheelMessageFilter : IMessageFilter
         {
             public bool PreFilterMessage(ref Message m)
             {
