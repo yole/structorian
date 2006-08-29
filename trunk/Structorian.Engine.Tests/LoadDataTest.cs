@@ -193,15 +193,6 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(1, tree.Children[1].Cells.Count);
         }
         
-        [Test] public void InvalidSiblingStruct()
-        {
-            InstanceTree tree = PrepareInstanceTree(
-                "struct A { u8 a; if (a > 0) { sibling NoSuchStruct; } }",
-                new byte[] { 17, 0 });
-            Assert.AreEqual(2, tree.Children[0].Cells.Count);
-            Assert.IsTrue(tree.Children[0].Cells[1].IsError());
-        }
-        
         [Test] public void Include()
         {
             StructInstance instance = PrepareInstance(

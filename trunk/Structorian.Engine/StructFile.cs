@@ -11,10 +11,16 @@ namespace Structorian.Engine
         private List<StructDef> _structDefs = new List<StructDef>();
         private List<EnumDef> _enumDefs = new List<EnumDef>();
         private Dictionary<string, int> _globalEnumConstants = new Dictionary<string, int>();
+        private List<ReferenceBase> _references = new List<ReferenceBase>();
         
         public ReadOnlyCollection<StructDef> Structs
         {
             get { return _structDefs.AsReadOnly();  }
+        }
+        
+        public ReadOnlyCollection<ReferenceBase> References
+        {
+            get { return _references.AsReadOnly();  }
         }
         
         public void Add(StructDef def)
@@ -48,6 +54,11 @@ namespace Structorian.Engine
             if (_globalEnumConstants.TryGetValue(name, out result))
                 return result;
             return null;
+        }
+        
+        internal void AddReference(ReferenceBase reference)
+        {
+            _references.Add(reference);
         }
     }
 }

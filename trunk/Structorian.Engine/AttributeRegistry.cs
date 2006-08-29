@@ -4,7 +4,7 @@ using Structorian.Engine.Fields;
 
 namespace Structorian.Engine
 {
-    enum AttributeType { Expression, Int, String, Bool };
+    enum AttributeType { Expression, Int, String, Bool, StructRef, EnumRef };
 
     class AttributeRegistry
     {
@@ -21,15 +21,19 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(ChildField), "offset", AttributeType.Expression);
             RegisterAttribute(typeof(ChildField), "count", AttributeType.Expression);
             RegisterAttribute(typeof(ChildField), "group", AttributeType.String);
+            RegisterAttribute(typeof(ChildField), "struct", AttributeType.StructRef);
             RegisterAttribute(typeof(DosDateTimeField), "timefirst", AttributeType.Bool);
+            RegisterAttribute(typeof(EnumField), "enum", AttributeType.EnumRef);
             RegisterAttribute(typeof(GlobalField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(IfField), "expr", AttributeType.Expression);
+            RegisterAttribute(typeof(IncludeField), "struct", AttributeType.StructRef);
             RegisterAttribute(typeof(IncludeField), "replace", AttributeType.Bool);
             RegisterAttribute(typeof(IntBasedField), "frombit", AttributeType.Int);
             RegisterAttribute(typeof(IntBasedField), "tobit", AttributeType.Int);
             RegisterAttribute(typeof(NodenameField), "name", AttributeType.Expression);
             RegisterAttribute(typeof(RepeatField), "count", AttributeType.Expression);
             RegisterAttribute(typeof(SeekField), "offset", AttributeType.Expression);
+            RegisterAttribute(typeof(SetField), "enum", AttributeType.EnumRef);
             RegisterAttribute(typeof(StrField), "len", AttributeType.Expression);
             RegisterAttribute(typeof(SwitchField), "expr", AttributeType.Expression);
         }
@@ -93,6 +97,12 @@ namespace Structorian.Engine
                     break;
                 case AttributeType.Bool:
                     field.SetAttributeValue(key, (Int32.Parse(value) != 0));
+                    break;
+                case AttributeType.StructRef:
+                    field.StructDef.StructFile.AddReference(new StructReference(field, key, value, pos));
+                    break;
+                case AttributeType.EnumRef:
+                    field.StructDef.StructFile.AddReference(new EnumReference(field, key, value, pos));
                     break;
             }
         }
