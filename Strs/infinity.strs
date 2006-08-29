@@ -1,0 +1,646 @@
+// Definitions for Infinity Engine data structures
+// Compiled by Dmitry Jemerov <yole@yole.ru>
+
+enum ResourceType
+{
+  BMP, MVE,
+  WAV=4, WFX, PLT,
+  BAM=0x3E8, WED, CHU, MAP, MOS, ITM, SPL, BCS,
+  IDS, CRE, AREA, DLG, 2DA, GAME, STOR, WMAP,
+  EFF, VVC, PRO,
+  INI=0x802, SRC
+}
+
+struct Auto
+{
+  [hidden] str [len=4] Signature;
+  skip -4;
+  switch (Signature)
+  {
+    case ("BIFF")  { include [replace] BIFF; }
+    case ("BAM ")  { include [replace] BAM; }
+    case ("CHUI")  { include [replace] CHUI; }
+    case ("AREA")  { include [replace] AREA; }
+  }
+}
+
+alias str [len=8] resref;
+alias i32 strref;
+
+// -- BIFF -------------------------------------------------------------------
+
+[filemask="*.bif"]
+struct BIFF
+{
+  str [len=8] Signature;
+  i32 "Element count" [id=ElementCount];
+  i32 "Map count";
+  x32 "Element offset" [id=ElementOffset];
+  child BIFFEntry [offset=ElementOffset, count=ElementCount];
+}
+
+[hidden, preload] struct BIFFEntry
+{
+  i16 "Element index";
+  i16 "BIFF index";
+  x32 "Start offset" [id=Offset];
+  i32 "Resource size" [id=Size];
+  enum32 Type [enum=ResourceType];
+  child Auto [offset=Offset];
+}
+
+// -- BAM --------------------------------------------------------------------
+
+[filemask="*.bam"]
+struct BAM
+{
+  str [len=8] Signature;
+  i16 "Frame count"         [id=FrameCnt];
+  u8  "Animation count"     [id=AnimCnt];
+  x8  "Transparent color";
+  x32 "Frame header offset" [id=FrameHeaderOffset];
+  x32 "Palette offset";
+  x32 "Frame lookup table offset" [id=FrameLookupOffset];
+  local AbsFrameHeaderOffset [value=StructOffset+FrameHeaderOffset];
+  local AbsFrameLookupOffset [value=StructOffset+FrameLookupOffset];
+  child BAMAnim [offset=(StructOffset+FrameHeaderOffset+FrameCnt*SizeOf(BAMFrameHdr)), count=AnimCnt];
+}
+
+[hidden] struct BAMAnim
+{
+  i16 "Frame count" [id=FrameCnt];
+  i16 "Start frame" [id=StartFrame];
+  child BAMLookupTableEntry [offset=(Parent.AbsFrameLookupOffset+StartFrame*2),
+                             count=FrameCnt];
+}
+
+[hidden] struct BAMLookupTableEntry
+{
+  u16 FrameIndex;
+  seek (Parent.Parent.AbsFrameHeaderOffset+FrameIndex*SizeOf(BAMFrameHdr));
+  include BAMFrameHdr;
+}
+
+[hidden] struct BAMFrameHdr
+{
+  i16 Width;
+  i16 Height;
+  i16 "Base point X position";
+  i16 "Base point Y position";
+  bitfield (4)
+  {
+    x32 [frombit=0,  tobit=30] "Graphics offset";
+    x8  [frombit=31, tobit=31] "RLE compressed";
+  }
+}
+
+// -- CHUI -------------------------------------------------------------------
+
+[filemask="*.chu"]
+struct CHUI
+{
+  str [len=8] Signature;
+  u32 "Screen count" [id=ScreenCount];
+  x32 "Control index offset" [id=CIndexOffset];
+  x32 "Screen offset" [id=ScreenOffset];
+  child CHUIScreen [offset=(StructOffset+ScreenOffset), count=ScreenCount];
+}
+
+[hidden, preload] struct CHUIScreen
+{
+  [hidden] x16 xWindowID;
+  skip -2;
+  if (xWindowID > 0x100)    // autodetect broken CHUI
+  {
+    str [len=8] Name;
+  }
+  x16 "Window ID";
+  x16;
+  i16 X;
+  i16 Y;
+  i16 Width;
+  i16 Height;
+  i16 "Has background";
+  i16 "Control count" [id=ControlCount];
+  resref "Background MOS name";
+  i16 "First control" [id=FirstControl];
+  i16;
+  child CHUIControl [count=ControlCount,
+                     offset=(Parent.StructOffset+Parent.CIndexOffset+FirstControl*8)];
+}
+
+enum CHUIControlType
+{
+  "Button"=0, "Slider"=2, "Text edit"=3, "Text area"=5,
+  "Edit/static text"=6, "Scrollbar"=7
+}
+
+[hidden] struct CHUIControl
+{
+  x32 "Control offset" [id=ControlOffset];
+  u32 "Control size";
+  seek (Parent.Parent.StructOffset+ControlOffset);
+  x32 "Control ID";
+  i16   X;
+  i16   Y;
+  i16   Width;
+  i16   Height;
+  enum8 "Control type" [id=ControlType, enum=CHUIControlType];
+  i8;
+  switch (ControlType)
+  {
+    case (0) { include [replace] CHUIButton;     }
+    case (2) { include [replace] CHUISlider;     }
+    case (3) { include [replace] CHUITextEdit;   }
+    case (5) { include [replace] CHUITextArea;   }
+    case (6) { include [replace] CHUIStaticText; }
+    case (7) { include [replace] CHUIScrollbar;  }
+  }
+}
+
+enum CHUIButtonFlags
+{
+  "Left justify text", "Right justify text", 
+  "Top justify text", "Bottom justify text",
+  "Anchor text to 0,0", "Reduce text size"
+}
+
+[hidden] struct CHUIButton
+{
+  resref "BAM name";
+  u8 "BAM cycle";
+  set8 Flags [enum=CHUIButtonFlags];
+  u16 "Up frame";
+  u16 "Down frame";
+  u16 "Selected frame";
+  u16 "Disabled frame";
+}
+
+[hidden] struct CHUISlider
+{
+  resref "MOS background";
+  resref "BAM slider knob";
+  u16 "BAM cycle";
+  u16 "Slider ungrabbed frame";
+  u16 "Slider grabbed frame";
+  u16 "Knob X offset";
+  u16 "Knob Y offset";
+  u16 "Knob jump width";
+  u16 "Knob jump count";
+  repeat (4) { u16; }
+}
+
+[hidden] struct CHUITextEdit
+{
+  repeat (3) { str [len=8] MOS; }
+  str [len=8] "BAM cursor name";
+  repeat (2) { u16; }
+  u16 "X position";
+  u16 "Y position";
+  repeat (2) { u16; }
+  str [len=8] "BAM font name 2";
+  repeat (17) { u16; }
+  u16 "Max input length";
+  repeat (2) { u16; }
+}
+
+[hidden] struct CHUITextArea
+{
+  repeat (2) { str [len=8] "BAM font name"; }
+  repeat (3) { x32 Color; }
+  i16 "ID of attached scrollbar";
+  i16;
+}
+
+enum CHUIStaticTextFlags
+{
+  "Use RGB colors",
+  "Center justify text"=2, "Left justify text", 
+  "Right justify text", "Top justify text", 
+  "Bottom justify text"=7
+}
+
+[hidden] struct CHUIStaticText
+{
+  i32 "Initial value strref";
+  str [len=8] "BAM font name";
+  repeat (2) { x32 Color; }
+  set16 Flags [enum=CHUIStaticTextFlags];
+}
+
+[hidden] struct CHUIScrollbar
+{
+  str [len=8] "BAM name";
+  u16 "BAM cycle";
+  u16 "Up button unpressed frame";
+  u16 "Up button pressed frame";
+  u16 "Down button unpressed frame";
+  u16 "Down button pressed frame";
+  u16 "Background frame";
+  u16 "Thumb frame";
+  u16 "ID of attached text field";
+  u16;
+}
+
+// -- AREA -------------------------------------------------------------------
+
+[filemask="*.are"]
+struct AREA
+{
+  str [len=8] Signature;
+  str [len=8] ID;
+  x32 "Last saved";
+  x32 "Area flags";
+  str [len=8] "Exit N";
+  x32;
+  str [len=8] "Exit W";
+  x32;
+  str [len=8] "Exit S";
+  x32;
+  str [len=8] "Exit E";
+  x32;
+  bits16 Flags;
+  i16 "Rain probability";
+  i16 "Snow probability";
+  i16 "Fog probability";
+  i16 "Lightning probability";
+  i16;
+  if (Signature == "AREAV9.1")
+  {
+    repeat (4) { u32; }
+  }
+  x32 "NPC offset" [id=NPCOffset];
+  i16 "NPC count" [id=NPCCount];
+  i16 "Trigger count" [id=TriggerCount];
+  x32 "Trigger offset" [id=TriggerOffset];
+  x32 "Spawn point offset" [id=SpawnOffset];
+  i32 "Spawn point count" [id=SpawnCount];
+  x32 "Entry point offset" [id=EntryOffset];
+  i32 "Entry point count" [id=EntryCount];
+  x32 "Container offset" [id=ContainerOffset];
+  i16 "Container count" [id=ContainerCount];
+  i16 "Item count" [id=ItemCount];
+  x32 "Item offset" [id=ItemOffset];
+  x32 "Point offset" [id=PointOffset];
+  i16 "Point count" [id=PointCount];
+  i16 "Sound count" [id=SoundCount];
+  x32 "Sound offset" [id=SoundOffset];
+  x32 "Variable offset" [id=VarOffset];
+  i32 "Variable count" [id=VarCount];
+  i32;
+  resref "AI script";
+  i32 "Explored mask size";
+  x32 "Explored mask offset";
+  i32 "Door count" [id=DoorCount];
+  x32 "Door offset" [id=DoorOffset];
+  i32 "Anim count" [id=AnimCount];
+  x32 "Anim offset" [id=AnimOffset];
+  i32 "Tiled object count" [id=TiledObjCount];
+  x32 "Tiled object offset" [id=TiledObjOffset];
+  x32 "Song offset" [id=SongOffset];
+  x32 "Rest spawn creatures offset" [id=RestSpawnOffset];
+  child AreaNPC       [group="NPCs",         offset=StructOffset+NPCOffset,       count=NPCCount];
+  child AreaTrigger   [group="Triggers",     offset=StructOffset+TriggerOffset,   count=TriggerCount];
+  child AreaSpawn     [group="Spawn points", offset=StructOffset+SpawnOffset,     count=SpawnCount];
+  child AreaEntry     [group="Entry points", offset=StructOffset+EntryOffset,     count=EntryCount];
+  child AreaContainer [group="Containers",   offset=StructOffset+ContainerOffset, count=ContainerCount];
+  child AreaSound     [group="Sounds",       offset=StructOffset+SoundOffset,     count=SoundCount];
+  child AreaVar       [group="Variables",    offset=StructOffset+VarOffset,       count=VarCount];
+  child AreaDoor      [group="Doors",        offset=StructOffset+DoorOffset,      count=DoorCount];
+  child AreaAnim      [group="Animations",   offset=StructOffset+AnimOffset,      count=AnimCount];
+  child AreaSong      [offset=StructOffset+SongOffset];
+  child AreaRestSpawn [offset=StructOffset+RestSpawnOffset];
+}
+
+[hidden] struct AreaNPC
+{
+  cstr [len=32] Name;
+  nodename Name;
+  i16 "Current X";
+  i16 "Current Y";
+  i16 "Dest X";
+  i16 "Dest Y";
+  i32 "Is visible?";
+  i32 "Spawned";
+  i32 "Animation";
+  i32 "Actor orientation";
+  repeat (2) { i32; }
+  bits32 "Day/night presence";
+  i32 "Times spoken to";
+  str [len=8] Dialog;
+  str [len=8] "Script override";
+  str [len=8] "Script class";
+  str [len=8] "Script race";
+  str [len=8] "Script general";
+  str [len=8] "Script default";
+  str [len=8] "Script specifics";
+  str [len=8] "CRE file";
+  x32 "CRE offset";
+  x32 "CRE size";
+  repeat (32) { x32; }
+}
+
+[hidden] struct Rect
+{
+  i16 X1;
+  i16 Y1;
+  i16 X2;
+  i16 Y2;
+}
+
+[hidden] struct AreaTrap
+{
+  i16 "Trap detection difficulty";
+  i16 "Trap removal difficulty";
+  i16 Trapped;
+  i16 "Trap detected";
+  i16 "Trap launch X";
+  i16 "Trap launch Y";
+}
+
+enum AreaTriggerType {
+  Proximity,
+  Info,
+  Travel
+}
+
+enum AreaTriggerFlags {
+ "Trap undetectable",
+ "Reset trap",
+ "Party required",
+ "Detectable trap",
+ "Trap set off by NPC"=6,
+ "Trigger deactivated"=8,
+ "Cannot be used by NPC",
+ "Use override box",
+ "Connected to door"
+}
+
+[hidden] struct AreaTrigger
+{
+  cstr [len=32] Name;
+  nodename Name;
+  enum16 Type [enum=AreaTriggerType];
+  include Rect;
+  i16 "Point count";
+  i32 "First point";
+  x32;
+  i32 "Cursor";
+  resref "Dest area";
+  cstr [len=32] "Dest entrance";
+  set32 Flags [enum=AreaTriggerFlags];
+  i32 "TLK index";
+  include AreaTrap;
+  resref "Key type";
+  resref Script;
+  repeat (28) { x16; }
+  resref Dialog;
+}
+
+enum AreaSpawnType
+{
+  Rest=1, Revealed
+}
+
+[hidden] struct AreaSpawn
+{
+  cstr [len=32] Name;
+  i16 X;
+  i16 Y;
+  repeat (10)
+  {
+    resref Creature;
+  }
+  i16 "Creature count";
+  i16 "Spawn frequency?";
+  i16 "Seconds between spawning";
+  enum16 [enum=AreaSpawnType] "Spawn method";
+  i32;
+  repeat (2) { i16; }
+  i16 "Max spawned creature";
+  i16 "Is active";
+  bits32 "Day/night presence?";
+  repeat (2) { i16; }
+  repeat (14) { i32; }
+}
+
+[hidden] struct AreaEntry
+{
+  str [len=32] Name;
+  i16 X;
+  i16 Y;
+  i16 Direction;
+  repeat (33) { i16; }
+}
+
+enum AreaContainerType {
+  Bag=1,
+  Chest,
+  Drawer,
+  Pile,
+  Table,
+  Shelf,
+  Altar,
+  Nonvisible,
+  Spellbook,
+  Body,
+  Barrel,
+  Crate
+}
+
+[hidden] struct AreaContainer
+{
+  cstr [len=32] Name;
+  i16 X;
+  i16 Y;
+  enum16 Type [enum=AreaContainerType];
+  i16 "Lock difficulty";
+  i16 Locked;
+  i16;
+  include AreaTrap;
+  include Rect;
+  i32 "Start item" [id=StartItem];
+  i32 "Item count" [id=ItemCount];
+  str [len=8] "Trap script";
+  i32 "First point";
+  i32 "Point count";
+  cstr [len=32];
+  str [len=8] "Key type";
+  i32;
+  str [len=4] "Lockpick type";
+  repeat (14) { i32; }
+  child AreaItem
+        [offset=(Parent.StructOffset + Parent.ItemOffset + StartItem * SizeOf(AreaItem)),
+         count=ItemCount];
+}
+
+enum AreaSoundFlags {
+  Enabled,
+  "Point sound",
+  "Main ambient",
+  "Area sound"
+}
+
+[hidden] struct AreaSound
+{
+  cstr [len=32] Name;
+  i16 X;
+  i16 Y;
+  i16 Radius;
+  i16 Height;
+  repeat (3) { i16; }
+  i16 "Volume (%)";
+  repeat (10)
+  {
+    resref Sound;
+  }
+  i16 "Sound count";
+  i16;
+  i32 "Time interval";
+  i32 "# sounds to use";
+  bits32 "Day/night presence";
+  set32 Flags [enum=AreaSoundFlags];
+  repeat (16) { i32; }
+}
+
+[hidden] struct AreaVar
+{
+  cstr [len=32] Name;
+  repeat (2) { i32; }
+  i32 Value;
+  repeat (10) { i32; }
+  nodename Name;
+}
+
+enum AreaDoorFlags {
+  "Door open",
+  "Door locked",
+  "Trap must be disarmed",
+  "Detectable trap",
+  "Broken",
+  "Can't close",
+  "Linked",
+  "Door secret",
+  "Door found",
+  "Can be looked through",
+  "Uses key",
+  "Slide door"
+}
+
+[hidden] struct AreaDoor
+{
+  cstr [len=32] Name;
+  str [len=8] ID;
+  set32 Flags [enum=AreaDoorFlags];
+  i32 "Open first point";
+  i16 "Open point count";
+  i16 "Closed point count";
+  i32 "Closed first point";
+  repeat (2)
+  {
+    include Rect;
+  }
+  i32 "Impeded closed first point";
+  i16 "Impeded closed point count";
+  i16 "Impeded open point count";
+  i32 "Impeded open first point";
+  repeat (2) { i16; }
+  resref "Sound: open";
+  resref "Sound: close";
+  i32 "Cursor BAM anim number";
+  include AreaTrap;
+  resref "Key type";
+  resref "Trap script";
+  i32 "Detection difficulty";
+  i32 "Lock difficulty";
+  i16 "Open location X";
+  i16 "Open location Y";
+  i16 "Closed location X";
+  i16 "Closed location Y";
+  i32 "Unlock message";
+  str [len=8] "Travel trigger name";
+  repeat (4) { i32; }
+  i32 "Door name";
+  resref Dialog;
+  repeat (2) { i32; }
+}
+
+[hidden] struct AreaItem
+{
+  str [len=8] ID;
+  i16;
+  i16 Count;
+  i32;
+  i16 Identified;
+  i16;
+}
+
+enum AreaAnimFlags {
+  "Is shown",
+  "No shades",
+  "Night shade",
+  "Partial animation",
+  "Synchronized draw",
+  "",
+  "Wall doesn't hide animation",
+  "Invisible in dark",
+  "Not cover",
+  "Play all frames",
+  "Use palette bitmap",
+  "Mirrored",
+  "Show in combat"
+}
+
+[hidden] struct AreaAnim
+{
+  cstr [len=32] Name;
+  i16 X;
+  i16 Y;
+  bits32 "Day/night presence";
+  cstr [len=8] "BAM ID";
+  i16 "BAM cycle";
+  i16 "BAM frame";
+  set32 Flags [enum=AreaAnimFlags];
+  i16 Height;
+  i16 Transparency;  
+  i16 "Starting frame";
+  u8 "Chance of looping";
+  u8 "Skip cycles";
+  resref Palette;
+  i32;
+}
+
+[hidden] struct AreaSong
+{
+  i32 "Day song reference number";
+  i32 "Night song reference number";
+  i32 "Win song reference number";
+  i32 "Battle song reference number";
+  i32 "Lose song reference number";
+  repeat (5) { i32; }
+  resref "Main day ambient 1";
+  resref "Main day ambient 2";
+  i32 "Main day ambient volume %";
+  resref "Main night ambient 1";
+  resref "Main night ambient 2";
+  i32 "Main night ambient volume %";
+  i32;
+  repeat (15) { i32; }
+}
+
+[hidden] struct AreaRestSpawn
+{
+  cstr [len=32] Name;
+  repeat (10) { i32 "Creature strref"; }
+  repeat (10) { str [len=8] "Creature resref"; }
+  i16 "Creatures in list";
+  i16 "Encounter difficulty";
+  i32;
+  repeat (2) { i16; }
+  i16 "Max spawned creatures";
+  i16;
+  i16 "Chance of encounter";
+  i16;
+  repeat (14) { i32; }
+}
+
