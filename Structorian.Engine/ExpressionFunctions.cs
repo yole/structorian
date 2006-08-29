@@ -9,7 +9,7 @@ namespace Structorian.Engine
         
         private static Dictionary<String, EvaluateDelegate> InitializeFunctions()
         {
-            Dictionary<string, EvaluateDelegate> result = new Dictionary<string, EvaluateDelegate>();
+            Dictionary<string, EvaluateDelegate> result = new Dictionary<string, EvaluateDelegate>(StringComparer.InvariantCultureIgnoreCase);
             result.Add("StructOffset", new EvaluateDelegate(StructOffset));
             result.Add("ParentCount", new EvaluateDelegate(ParentCount));
             result.Add("CurOffset", new EvaluateDelegate(CurOffset));

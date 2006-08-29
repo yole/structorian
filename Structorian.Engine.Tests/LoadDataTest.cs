@@ -642,7 +642,7 @@ namespace Structorian.Engine.Tests
         [Test] public void SizeOfFixedStr()
         {
             StructInstance instance = PrepareInstance(
-                "struct A { str [len=2] x; calc s [value=SizeOf(A)]; }",
+                "struct A { str [len=2] x; calc s [value=sizeof(A)]; }",
                 new byte[] { 0, 0 });
             Assert.AreEqual("2", instance.Cells[1].Value);
         }
