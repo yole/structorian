@@ -31,6 +31,11 @@ namespace Structorian.Engine
             _acceptsChildren = acceptsChildren;
         }
 
+        public StructDef StructDef
+        {
+            get { return _structDef; }
+        }
+
         public string Id
         {
             get
@@ -102,6 +107,16 @@ namespace Structorian.Engine
             object attr = GetAttribute(key);
             if (attr == null) return false;
             return (bool) attr;
+        }
+        
+        public StructDef GetStructAttribute(string key)
+        {
+            return (StructDef) GetAttribute(key);
+        }
+
+        public EnumDef GetEnumAttribute(string key)
+        {
+            return (EnumDef)GetAttribute(key);
         }
 
         public virtual string DefaultAttribute

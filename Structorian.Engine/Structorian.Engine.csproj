@@ -35,6 +35,7 @@
   <ItemGroup>
     <Compile Include="BaseLexer.cs" />
     <Compile Include="EnumDef.cs" />
+    <Compile Include="EnumReference.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="ExpressionFunctions.cs" />
     <Compile Include="ExpressionLexer.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="GroupContainer.cs" />
     <Compile Include="InstanceTree.cs" />
     <Compile Include="InstanceTreeNode.cs" />
+    <Compile Include="ReferenceBase.cs" />
     <Compile Include="LoadDataException.cs" />
     <Compile Include="ParseException.cs" />
     <Compile Include="StructCell.cs" />
@@ -77,6 +79,7 @@
     <Compile Include="StructLexer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructParser.cs" />
+    <Compile Include="StructReference.cs" />
     <Compile Include="TextPosition.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

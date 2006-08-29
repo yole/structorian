@@ -127,5 +127,29 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(2, endPos.Line);
             Assert.AreEqual(6, endPos.Col);
         }
+        
+        [Test] public void IncludeNonExisting()
+        {
+            StructParser parser = new StructParser();
+            parser.LoadStructs("struct A { include B; }");
+            Assert.AreEqual(1, parser.Errors.Count);
+            Assert.AreEqual("Unknown struct B", parser.Errors[0].Message);
+        }
+        
+        [Test] public void EnumNotExisting()
+        {
+            StructParser parser = new StructParser();
+            parser.LoadStructs("struct A { enum8 a [enum=E]; }");
+            Assert.AreEqual(1, parser.Errors.Count);
+            Assert.AreEqual("Unknown enum E", parser.Errors[0].Message);
+        }
+
+        [Test] public void InvalidSiblingStruct()
+        {
+            StructParser parser = new StructParser();
+            parser.LoadStructs("struct A { u8 a; if (a > 0) { sibling NoSuchStruct; } }");
+            Assert.AreEqual(1, parser.Errors.Count);
+            Assert.AreEqual("Unknown struct NoSuchStruct", parser.Errors [0].Message);
+        }
     }
 }

@@ -6,27 +6,15 @@ namespace Structorian.Engine.Fields
 {
     class EnumField: IntBasedField
     {
-        private string _enumName;
-        
         public EnumField(StructDef structDef, int size) : base(structDef, size, false)
         {
         }
         
-        public override void SetAttribute(string key, string value)
-        {
-            if (key == "enum")
-                _enumName = value;
-            else
-                base.SetAttribute(key, value);
-        }
-
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             int offset = (int)reader.BaseStream.Position;
             int value = ReadIntValue(reader).ToInt32(CultureInfo.CurrentCulture);
-            EnumDef enumDef = _structDef.StructFile.GetEnumByName(_enumName);
-            if (enumDef == null)
-                throw new LoadDataException("Enum '" + _enumName + "' not found");
+            EnumDef enumDef = GetEnumAttribute("enum");
             string displayValue = enumDef.ValueToString(value);
             AddCell(instance, new EnumValue(value, displayValue), displayValue, offset);
         }

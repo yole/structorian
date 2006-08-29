@@ -6,7 +6,6 @@ namespace Structorian.Engine.Fields
 {
     public class ChildField: StructField, IChildSeed
     {
-        private string _childStruct;
         private bool _isSibling;
         
         public ChildField(StructDef structDef, bool isSibling)
@@ -18,14 +17,6 @@ namespace Structorian.Engine.Fields
         public override string DefaultAttribute
         {
             get { return "struct"; }
-        }
-
-        public override void SetAttribute(string key, string value)
-        {
-            if (key == "struct")
-                _childStruct = value;
-            else
-                base.SetAttribute(key, value);
         }
 
         public override bool ProvidesChildren()
@@ -66,15 +57,9 @@ namespace Structorian.Engine.Fields
             }
             else
                 count = 1;
-            
-            StructDef childDef;
-            if (_childStruct != null)
-            {
-                childDef = _structDef.StructFile.GetStructByName(_childStruct);
-                if (childDef == null)
-                    throw new LoadDataException("Structure " + _childStruct + " not found");
-            }
-            else
+
+            StructDef childDef = GetStructAttribute("struct");
+            if (childDef == null)
                 childDef = _structDef;
             
             StructInstance childInstance;

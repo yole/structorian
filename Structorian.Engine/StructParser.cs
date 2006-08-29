@@ -70,6 +70,17 @@ namespace Structorian.Engine
                 else
                     throw new Exception("Unexpected top-level item " + token);
             }
+            foreach(ReferenceBase reference in result.References)
+            {
+                try
+                {
+                    reference.Resolve();
+                }
+                catch(ParseException ex)
+                {
+                    _errors.Add(ex);
+                }
+            }
             if (_errors.Count == 0)
                 return result;
             return null;

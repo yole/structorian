@@ -5,18 +5,8 @@ namespace Structorian.Engine.Fields
 {
     class IncludeField: StructField
     {
-        private string _includeStructName;
-        
         public IncludeField(StructDef structDef) : base(structDef, "struct", false)
         {
-        }
-
-        public override void SetAttribute(string key, string value)
-        {
-            if (key == "struct")
-                _includeStructName = value;
-            else
-                base.SetAttribute(key, value);
         }
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
@@ -29,24 +19,17 @@ namespace Structorian.Engine.Fields
 
         private StructDef GetIncludedStruct()
         {
-            StructDef structDef = _structDef.StructFile.GetStructByName(_includeStructName);
-            if (structDef == null)
-                throw new LoadDataException("Unknown struct " + _includeStructName + " in include");
-            return structDef;
+            return GetStructAttribute("struct");
         }
 
         public override bool ProvidesChildren()
         {
-            StructDef structDef = GetIncludedStruct();
-            return structDef.HasChildProvidingFields();
+            return GetIncludedStruct().HasChildProvidingFields();
         }
 
         public override int GetDataSize()
         {
-            StructDef structDef = _structDef.StructFile.GetStructByName(_includeStructName);
-            if (structDef == null)
-                throw new LoadDataException("Unknown struct " + _includeStructName + " in include");
-            return structDef.GetDataSize();
+            return GetIncludedStruct().GetDataSize();
         }
     }
 }
