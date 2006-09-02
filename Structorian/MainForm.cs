@@ -88,7 +88,8 @@ namespace Structorian
             }
             ParseStructures();
             
-            _dataView.ReloadData(_structFile.Structs [0], true);
+            if (_structFile != null)
+                _dataView.ReloadData(_structFile.Structs [0], true);
         }
         
         private void loadDataToolStripMenuItem_Click(object sender, EventArgs e)

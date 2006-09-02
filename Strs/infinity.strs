@@ -20,6 +20,7 @@ struct Auto
     case ("BIFF")  { include [replace] BIFF; }
     case ("BAM ")  { include [replace] BAM; }
     case ("CHUI")  { include [replace] CHUI; }
+    case ("CRE ")  { include [replace] CRE;  }
     case ("AREA")  { include [replace] AREA; }
   }
 }
@@ -240,6 +241,344 @@ enum CHUIStaticTextFlags
   u16 "Thumb frame";
   u16 "ID of attached text field";
   u16;
+}
+
+// -- CRE --------------------------------------------------------------------
+
+enum CREflags {
+  "No corpse"=1,
+  "Keep corpse",
+  "Was fighter",
+  "Was mage",
+  "Was cleric",
+  "Was thief",
+  "Was druid",
+  "Was ranger",
+  "Fallen paladin",
+  "Fallen ranger",
+  "Export allowed",
+  "Been in party"=15
+}
+
+[filemask="*.cre"]
+struct CRE
+{
+  skip 4;
+  str [len=4, hidden] Version;
+  skip -8;
+  str [len=8] Signature;
+  i32 "Name strref";
+  i32 "Tooltip strref";
+  set32 Flags     [enum=CREflags];
+  i32 "XP value";
+  i32 XP;
+  i32 Gold;
+  bits32 Status;
+  i16 "Current HP";
+  i16 "Max HP";
+  u16 "Animation ID";
+  i16;
+  x8 "Metal color";
+  x8 "Minor color";
+  x8 "Major color";
+  x8 "Skin color";
+  x8 "Leather color";
+  x8 "Armor color";
+  x8 "Hair color";
+  i8 "Effect flag";
+  str [len=8] "Small portrait";
+  str [len=8] "Large portrait";
+  i8 Reputation;
+  i8 "Hide in shadows";
+  i16 "Natural AC";
+  if (Version == "V2.3")
+  {
+    repeat (4) { u16; }
+    repeat (9) { u8; }
+  }
+  else
+  {
+    i16 "Effective AC";
+    i16 "Crushing AC modifier";
+    i16 "Missile AC modifier";
+    i16 "Piercing AC modifier";
+    i16 "Slashing AC modifier";
+    i8 THAC0;
+    i8 "# attacks";
+    i8 "Save death";
+    i8 "Save wands";
+    i8 "Save poly";
+    i8 "Save breath";
+    i8 "Save spell";
+  }
+  i8 "Resist fire";
+  i8 "Resist cold";
+  i8 "Resist electricity";
+  i8 "Resist acid";
+  i8 "Resist magic";
+  i8 "Resist magical fire";
+  i8 "Resist magical cold";
+  i8 "Resist slashing";
+  i8 "Resist crushing";
+  i8 "Resist piercing";
+  i8 "Resist missile";
+  i8 "Detect illusions";
+  i8 "Set traps";
+  i8 Lore;
+  i8 "Open locks";
+  i8 "Move silently";
+  i8 "Find/disarm traps";
+  i8 "Pick pockets";
+  i8 Fatigue;
+  i8 Intoxication;
+  i8 Luck;
+  switch (Version)
+  {
+    case ("V1.0")
+    {
+      i8 "Large sword proficiency";
+      i8 "Small sword proficiency";
+      i8 "Bow proficiency";
+      i8 "Spears proficiency";
+      i8 "Blunt proficiency";
+      i8 "Spiked proficiency";
+      i8 "Axe proficiency";
+      i8 "Missile proficiency";
+      repeat (13) { i8; }
+    }
+    case ("V1.2")
+    {
+      u8 "Fist proficiency";
+      u8 "Edged proficiency";
+      u8 "Hammer proficiency";
+      u8 "Axe proficiency";
+      u8 "Club proficiency";
+      u8 "Bow proficiency";
+      repeat(15)
+      {
+        u8 "Unused proficiency slot";
+      }
+    }
+  }
+  if (Version == "V2.2")
+  {
+    repeat (14) { u16; }
+    repeat (6)  { u16; }
+    repeat (11) { u16; }
+    local SoundMapOffset [value=CurOffset];
+    skip 252;
+    i32 Biography;
+    repeat (2) { resref; }
+    u32;
+    repeat (6) { u8; }
+    repeat (80) { u16; }
+    i8 Str;
+    i8 Int;
+    i8 Wis;
+    i8 Dex;
+    i8 Con;
+    i8 Cha;
+    repeat (4)  { u16; }
+    repeat (4)  { resref; }
+    resref;
+    repeat (23) { u16; }
+    resref;
+    repeat (89)  { u16; }
+  }
+  else
+  {
+    i8 Tracking;
+    repeat (8) { i32; }
+    local SoundMapOffset [value=CurOffset];
+    skip 400;   // sound map
+    i8 "Primary level";
+    i8 "Secondary level";
+    i8 "Third level/Dual class";
+    u8 Gender;
+    i8 Str;
+    i8 "Str bonus";
+    i8 Int;
+    i8 Wis;
+    i8 Dex;
+    i8 Con;
+    i8 Cha;
+    i8 Morale;
+    i8 "Morale break";
+    i8 "Racial enemy";
+    i8 "Morale recovery";
+    i8;
+    x32 "Mage type/Kit";
+    str [len=8] "Override script";
+    str [len=8] "Class script";
+    str [len=8] "Race script";
+    str [len=8] "General script";
+    str [len=8] "Default script";
+  }
+  if (Version == "V1.2")
+  {
+    repeat(36) { u8; }
+    x32 "Overlay offset";
+    x32 "Overlay size";
+    u32 "Secondary XP";
+    u32 "Tertiary XP";
+    repeat(12) { u16 internal; }
+    str [len=32] "Monstrous Compendium Entry";
+    u8 "Dialog Activation Range";
+    u8 "Selection Circle Size";
+    u8;
+    u8 "Number of Colours";
+    u8 "Appearance flags";
+    u8 "Attribute flags 2";
+    u16;
+    repeat(7) { u16 "Clown Colour"; }
+    repeat(3) { u8; }
+    repeat(7) { u8 "Colour Placement"; }
+    repeat(21) { u8; }
+    u8 Species;
+    u8 Team;
+    u8 Faction;
+  }
+  u8 "Enemy/Ally";
+  u8 General;
+  u8 Race;
+  u8 Class;
+  u8 Specific;
+  u8 Gender;
+  repeat (5) { u8 Functional; }
+  u8 Alignment;
+  i16 "Global actor enumeration value";
+  i16 "Local actor enumeration value";
+  cstr [len=32] "Death variable";
+  if (Version == "V2.2")
+  {
+    repeat (3)   { u16; }
+    repeat (144) { u32; }
+    x32 SpellDataOffset;
+    u32 SpellDataCount;
+    repeat (4)   { u32; }
+    child CRESpell22 [offset=StructOffset+SpellDataOffset, count=SpellDataCount];
+  }
+  else
+  {
+    x32 "Known spells offset" [id=KnSpOffset];
+    i32 "Known spells count" [id=KnSpCount];
+    x32 "Spell slots offset" [id=SpSlotsOffset];
+    i32 "Spell slots count" [id=SpSlotsCount];
+    x32 "Memorized spells offset" [id=MemSpOffset];
+    i32 "Memorized spells count" [id=MemSpCount];
+    child CREKnownSpell     [group="Known spells", offset=StructOffset+KnSpOffset,    count=KnSpCount];
+    child CRESpellSlot      [group="Spell slots",  offset=StructOffset+SpSlotsOffset, count=SpSlotsCount];
+    child CREMemorizedSpell [group="Memorized",    offset=StructOffset+MemSpOffset,   count=MemSpCount];
+  }
+  x32 "Item slots offset" [id=ItemSlotsOffset];
+  x32 "Items offset"      [id=ItemsOffset];
+  i32 "Items count"       [id=ItemsCount];
+  x32 "Effect offset"     [id=EffectOffset];
+  i32 "Effect count"      [id=EffectCount];
+  resref Dialog;
+  child CREItemSlots      [offset=StructOffset+ItemSlotsOffset];
+  child CREItem           [group="Items",        offset=StructOffset+ItemsOffset,   count=ItemsCount];
+  child CRESoundMap       [offset=SoundMapOffset];
+}
+
+enum CRESpellType {
+  Priest,
+  Wizard,
+  Innate,
+}
+
+[hidden] struct CREKnownSpell
+{
+  str [len=8] Spell;
+  i16 Level;
+  enum16 Type [enum=CRESpellType];
+}
+
+[hidden] struct CRESpellSlot
+{
+  i16 "Spell level";
+  i16 "Spells memorizable";
+  i16 "Spells memorizable (after effects)";
+  enum16 Type [enum=CRESpellType];
+  i32 "Memorized spell index";
+  i32 "Memorized spell count";
+}
+
+enum CREMemorizedFlags {
+  Memorized,
+}
+
+[hidden] struct CREMemorizedSpell
+{
+  str [len=8] Spell;
+  set32 Flags [enum=CREMemorizedFlags];
+}
+
+enum CRESpellType22
+{
+  Innate=1,
+  Wizard,
+  Domain
+}
+
+[hidden] struct CRESpell22
+{
+  i32 SpellIndex;
+  enum32 [enum=CRESpellType22] SpellType;
+  i32 Count;
+  i32;
+}
+
+[hidden] struct CREItemSlots
+{
+  i16 Helmet;
+  i16 Armor;
+  i16 Shield;
+  i16 Gloves;
+  i16 "Left Ring";
+  i16 "Right Ring";
+  i16 Amulet;
+  i16 Belt;
+  i16 Boots;
+  repeat (4) { i16 Weapon; }
+  repeat (3) { i16 Quiver; }
+  i16;
+  i16 Cloak;
+  repeat (3) { i16 "Quick item"; }
+  repeat (16) { i16 Inventory; }
+  i16;
+  u32;
+}
+
+enum CREItemFlags {
+  Identified,
+  Unstealable,
+  Stolen,
+  Undroppable,
+}
+
+[hidden] struct CREItem
+{
+  str [len=8] "ITM file";
+  i16 "Item duration (?)";
+  repeat (3) { i16 "Quantity/Charges"; }
+  set32 Flags [enum=CREItemFlags];
+}
+
+[hidden] struct CRESoundMap
+{
+  local index [value=0];
+  repeat (100)
+  {
+    [hidden] x32 _Sound;
+    if (_Sound != -1)
+    {
+      skip -4;
+      calc "Sound index" [value=index];
+      i32 Sound;
+    }
+    local index [value=index+1];
+  }
 }
 
 // -- AREA -------------------------------------------------------------------
