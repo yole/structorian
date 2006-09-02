@@ -690,5 +690,14 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("", instance.Cells[0].Value);
             Assert.AreEqual("8", instance.Cells[1].Value);
         }
+        
+        [Test] public void CompareX32()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { x32 x; if (x == -1) { u8 q; } }",
+                new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 2});
+            Assert.AreEqual(2, instance.Cells.Count);
+            Assert.AreEqual("2", instance.Cells[1].Value);
+        }
     }
 }

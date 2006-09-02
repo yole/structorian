@@ -42,6 +42,11 @@ namespace Structorian.Engine
             IConvertible result = Evaluate(context);
             if (result.GetTypeCode() == TypeCode.String)
                 return result.ToString(CultureInfo.CurrentCulture);
+            else if (result.GetTypeCode() == TypeCode.UInt32)
+            {
+                uint value = result.ToUInt32(CultureInfo.CurrentCulture);
+                return (int) value;
+            }
             else
                 return result.ToInt32(CultureInfo.CurrentCulture);
         }
