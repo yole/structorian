@@ -50,7 +50,10 @@ namespace Structorian
             StructParser parser = new StructParser();
             try
             {
-                _structFile = parser.LoadStructs(_structFileName, _structEditControl.Text);
+                StructSourceContext context = new StructSourceContext();
+                context.BaseDirectory = Path.GetDirectoryName(_structFileName);
+                context.AddSourceText(_structFileName, _structEditControl.Text);
+                _structFile = parser.LoadStructs(_structFileName, context);
             }
             catch(ParseException ex)
             {

@@ -151,5 +151,18 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(1, parser.Errors.Count);
             Assert.AreEqual("Unknown struct NoSuchStruct", parser.Errors [0].Message);
         }
+        
+        [Test] public void IncludeStructFile()
+        {
+            StructSourceContext context = new StructSourceContext();
+            context.AddSourceText("a.strs", "include b.strs; struct A { enum8 [enum=E] q; }");
+            context.AddSourceText("b.strs", "enum E { z, x, c }");
+            StructParser parser = new StructParser();
+            StructFile file = parser.LoadStructs("a.strs", context);
+            Assert.IsNotNull(file);
+            Assert.AreEqual(0, parser.Errors.Count);
+            EnumDef e = file.GetEnumByName("E");
+            Assert.AreEqual("c", e.ValueToString(2));
+        }
     }
 }

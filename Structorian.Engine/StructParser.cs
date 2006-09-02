@@ -45,31 +45,24 @@ namespace Structorian.Engine
         {
             get { return _errors.AsReadOnly(); }
         }
-
-        public StructFile LoadStructs(string strsText)
-        {
-            return LoadStructs(null, strsText);
-        }
         
         public StructFile LoadStructs(string fileName, string strsText)
         {
+            StructSourceContext context = new StructSourceContext();
+            context.AddSourceText(fileName, strsText);
+            return LoadStructs(fileName, context);
+        }
+
+        public StructFile LoadStructs(string strsText)
+        {
+            return LoadStructs("", strsText);
+        }
+
+        public StructFile LoadStructs(string fileName, StructSourceContext context)
+        {
             StructFile result = new StructFile();
             _curStructFile = result;
-            StructLexer lexer = new StructLexer(fileName, strsText);
-            while(!lexer.EndOfStream())
-            {
-                List<Attribute> attrs = new List<Attribute>();
-                LoadAttributes(lexer, attrs);
-                string token = lexer.GetNextToken(StructTokenType.String);
-                if (token == "struct")
-                    LoadStruct(lexer, attrs);
-                else if (token == "enum")
-                    LoadEnum(lexer, attrs);
-                else if (token == "alias")
-                    LoadAlias(lexer, attrs);
-                else
-                    throw new Exception("Unexpected top-level item " + token);
-            }
+            LoadStructFile(fileName, context);
             foreach(ReferenceBase reference in result.References)
             {
                 try
@@ -84,6 +77,31 @@ namespace Structorian.Engine
             if (_errors.Count == 0)
                 return result;
             return null;
+        }
+
+        private void LoadStructFile(string fileName, StructSourceContext context)
+        {
+            StructLexer lexer = new StructLexer(fileName, context.GetSourceText(fileName));
+            while(!lexer.EndOfStream())
+            {
+                List<Attribute> attrs = new List<Attribute>();
+                LoadAttributes(lexer, attrs);
+                string token = lexer.GetNextToken(StructTokenType.String);
+                if (token == "struct")
+                    LoadStruct(lexer, attrs);
+                else if (token == "enum")
+                    LoadEnum(lexer, attrs);
+                else if (token == "alias")
+                    LoadAlias(lexer, attrs);
+                else if (token == "include")
+                {
+                    string includeName = lexer.GetNextToken(StructTokenType.String);
+                    lexer.GetNextToken(StructTokenType.Semicolon);
+                    LoadStructFile(includeName, context);
+                }
+                else
+                    throw new Exception("Unexpected top-level item " + token);
+            }
         }
 
         private void LoadStruct(StructLexer lexer, List<Attribute> attrs)
