@@ -699,5 +699,25 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(2, instance.Cells.Count);
             Assert.AreEqual("2", instance.Cells[1].Value);
         }
+        
+        [Test] public void Preload()
+        {
+            InstanceTree tree = PrepareInstanceTree(
+                "[preload] struct A { u8 a; child B [offset=a]; } [preload] struct B { nodename (\"Q\"); u8 value; child C [offset=Parent.a]; } struct C { u8 value; nodename(\"W\"); }",
+                new byte[] { 2, 0, 17, 37 });
+            InstanceTreeNode lastAddParent = null;
+            InstanceTreeNode lastAddChild = null;
+            tree.InstanceAdded += delegate(object sender, InstanceAddedEventArgs e)
+                                      {
+                                          lastAddParent = e.Parent;
+                                          lastAddChild = e.Child;
+                                      };
+            tree.Children[0].NeedData();
+            Assert.AreSame(tree.Children[0], lastAddParent);
+            Assert.AreSame(tree.Children[0].Children[0], lastAddChild);
+            Assert.AreEqual("Q", lastAddChild.NodeName);
+            tree.Children[0].Children[0].NeedChildren();
+            Assert.AreEqual("W", tree.Children[0].Children[0].Children[0].NodeName);
+        }
     }
 }

@@ -44,6 +44,11 @@ namespace Structorian.Engine
             get { return _fileMask; }
         }
 
+        public bool Preload
+        {
+            get { return _preload; }
+        }
+
         public void AddField(StructField field)
         {
             _fields.Add(field);
