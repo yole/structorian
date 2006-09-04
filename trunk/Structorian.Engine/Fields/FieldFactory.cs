@@ -67,6 +67,7 @@ namespace Structorian.Engine.Fields
                 case "calc": return new CalcField(structDef, false);
                 case "align": return new AlignField(structDef);
                 case "blob": return new BlobField(structDef);
+                case "float": return new FloatField(structDef);
             }
             
             int size;

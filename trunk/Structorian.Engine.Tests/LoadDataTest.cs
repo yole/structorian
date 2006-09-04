@@ -766,5 +766,13 @@ namespace Structorian.Engine.Tests
                 new byte[] {0xFF, 17});
             Assert.AreEqual(2, instance.Cells.Count);
         }
+        
+        [Test] public void Float()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { float f; }",
+                new byte[] {0, 0, 0x94, 0x44});
+            Assert.AreEqual("1184", instance.Cells[0].Value);
+        }
     }
 }

@@ -53,6 +53,7 @@
     <Compile Include="Fields\EnumField.cs" />
     <Compile Include="Fields\FieldFactory.cs" />
     <Compile Include="Fields\ChildField.cs" />
+    <Compile Include="Fields\FloatField.cs" />
     <Compile Include="Fields\GlobalField.cs" />
     <Compile Include="Fields\IfField.cs" />
     <Compile Include="Fields\IncludeField.cs" />
