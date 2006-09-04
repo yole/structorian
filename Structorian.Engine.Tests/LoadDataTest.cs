@@ -737,5 +737,26 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("FF FF FF FF", instance.Cells[0].Value);
             Assert.AreEqual("4", instance.Cells[1].Value);
         }
+
+        [Test] public void NotifySiblingInGroup()
+        {
+            InstanceTree tree = PrepareInstanceTree(
+                "struct A { u8 a; child B [group=q]; } struct B { u8 c; if (c != 0) { sibling; } }",
+                new byte[] { 17, 37, 2 });
+            InstanceTreeNode lastAddChild = null;
+            tree.InstanceAdded += delegate(object sender, InstanceAddedEventArgs e)
+                                      {
+                                          lastAddChild = e.Child;
+                                      };
+            InstanceTreeNode a = tree.Children[0];
+            a.NeedChildren();
+            InstanceTreeNode q = a.Children[0];
+            q.NeedChildren();
+            Assert.AreEqual(1, q.Children.Count);
+            InstanceTreeNode b = q.Children[0];
+            b.NeedChildren();
+            Assert.AreEqual(2, q.Children.Count);
+            Assert.AreSame(q.Children[1], lastAddChild);
+        }
     }
 }

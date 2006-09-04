@@ -9,6 +9,7 @@ namespace Structorian.Engine
         private string _groupName;
         private readonly InstanceTreeNode _parent;
         private List<InstanceTreeNode> _children = new List<InstanceTreeNode>();
+        private bool _notifyChildren = false;
 
         public GroupContainer(InstanceTreeNode parent, string groupName)
         {
@@ -42,6 +43,7 @@ namespace Structorian.Engine
             {
                 tree.NotifyInstanceAdded(this, child);
             }
+            _notifyChildren = true;
         }
 
         public override ReadOnlyCollection<StructCell> Cells
@@ -57,6 +59,10 @@ namespace Structorian.Engine
         public override void AddChild(InstanceTreeNode instance)
         {
             _children.Add(instance);
+            if (_notifyChildren)
+            {
+                GetInstanceTree().NotifyInstanceAdded(this, instance);
+            }
         }
     }
 }
