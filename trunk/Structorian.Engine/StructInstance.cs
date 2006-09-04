@@ -302,7 +302,7 @@ namespace Structorian.Engine
         internal int? GetCellSize(StructCell cell)
         {
             int result;
-            if (_cellSizes.TryGetValue(cell, out result))
+            if (_cellSizes != null && _cellSizes.TryGetValue(cell, out result))
                 return result;
             return null;
         }

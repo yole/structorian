@@ -205,6 +205,9 @@ namespace Structorian.Engine
         
         public virtual int GetInstanceDataSize(StructCell cell, StructInstance instance)
         {
+            int? cellSize = instance.GetCellSize(cell);
+            if (cellSize.HasValue)
+                return cellSize.Value;
             return GetDataSize();
         }
     }
