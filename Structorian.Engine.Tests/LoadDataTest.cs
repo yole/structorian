@@ -758,5 +758,13 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(2, q.Children.Count);
             Assert.AreSame(q.Children[1], lastAddChild);
         }
+        
+        [Test] public void Enum8IsUnsigned()
+        {
+            StructInstance instance = PrepareInstance(
+                "[global] enum e { Q=255 } struct S { enum8 a [enum=e]; if (a == Q) { u8 x; } }",
+                new byte[] {0xFF, 17});
+            Assert.AreEqual(2, instance.Cells.Count);
+        }
     }
 }
