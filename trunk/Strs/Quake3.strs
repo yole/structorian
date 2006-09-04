@@ -1,0 +1,223 @@
+// Definitions of Quake 3 map structures
+// Compiled by Dmitry Jemerov <yole@yole.ru>
+// Based on the Unofficial Quake 3 Map Specs:
+// http://graphics.stanford.edu/~kekoa/q3/
+
+[filemask="*.bsp"]
+struct Q3BSPHeader
+{
+  calc Q3PlaneSize [value=(sizeof (Q3Plane))];
+  str [len=4] Signature;
+  i32 Version;
+  i32 EntitiesOffset;
+  i32 EntitiesLength;
+  i32 TexturesOffset;
+  i32 TexturesLength;
+  i32 PlanesOffset;
+  i32 PlanesLength;
+  i32 NodesOffset;
+  i32 NodesLength;
+  i32 LeafsOffset;
+  i32 LeafsLength;
+  i32 LeafFacesOffset;
+  i32 LeafFacesLength;
+  i32 LeafBrushesOffset;
+  i32 LeafBrushesLength;
+  i32 ModelsOffset;
+  i32 ModelsLength;
+  i32 BrushesOffset;
+  i32 BrushesLength;
+  i32 BrushSidesOffset;
+  i32 BrushSidesLength;
+  i32 VertexesOffset;
+  i32 VertexesLength;
+  i32 MeshVertsOffset;
+  i32 MeshVertsLength;
+  i32 EffectsOffset;
+  i32 EffectsLength;
+  i32 FacesOffset;
+  i32 FacesLength;
+  i32 LightmapsOffset;
+  i32 LightmapsLength;
+  i32 LightvolsOffset;
+  i32 LightvolsLength;
+  i32 VisdataOffset;
+  i32 VisdataLength;
+  child Q3Entities [offset=EntitiesOffset];
+  child Q3Texture [group=Textures, offset=TexturesOffset,
+                   count=(TexturesLength/sizeof (Q3Texture))];
+  child Q3Plane [group=Planes, offset=PlanesOffset,
+                 count=(PlanesLength/sizeof (Q3Plane))];
+  child Q3Node [group=Nodes, offset=NodesOffset,
+                count=(NodesLength/sizeof (Q3Node))];
+  child Q3Leaf [group=Leafs, offset=LeafsOffset,
+                count=(LeafsLength/sizeof (Q3Leaf))];
+  child Q3LeafFaces [offset=LeafFacesOffset];
+  child Q3LeafBrushes [offset=LeafBrushesOffset];
+  child Q3Model [group=Models, offset=ModelsOffset,
+                 count=(ModelsLength / sizeof (Q3Model))];
+  child Q3Brush [group=Brushes, offset=BrushesOffset,
+                 count=(BrushesLength / sizeof (Q3Brush))];
+  child Q3BrushSide [group=BrushSides, offset=BrushSidesOffset,
+                     count=(BrushSidesLength / sizeof (Q3BrushSide))];
+  child Q3Vertex [group=Vertexes, offset=VertexesOffset,
+                  count=(VertexesLength / sizeof (Q3Vertex))];
+  child Q3MeshVerts [offset=MeshVertsOffset];
+  child Q3Effect [group=Effects, offset=EffectsOffset,
+                  count=(EffectsLength / sizeof (Q3Effect))];
+  child Q3Face [group=Faces, offset=FacesOffset,
+                count=(FacesLength / sizeof (Q3Face))];
+  child Q3Lightmaps [offset=LightmapsOffset];
+  child Q3Lightvol [group=Lightvos, offset=LightvolsOffset,
+                    count=(LightvolsLength / sizeof (Q3Lightvol))];
+  child Q3Visdata [offset=VisdataOffset];
+}
+
+struct Q3Entities
+{
+  str [len=Parent.EntitiesLength] Entities;
+}
+
+struct Q3Texture
+{
+  str [len=64] name;
+  bits32 flags;
+  bits32 contents;
+}
+
+struct Q3Plane
+{
+  repeat (3) { float normal; }
+  float dist;
+}
+
+struct Q3Node
+{
+  i32 planeIndex;
+  i32 childIndex1;
+  i32 childIndex2;
+  repeat (3) { i32 boundingBoxMin; }
+  repeat (3) { i32 boundingBoxMax; }
+}
+
+struct Q3Leaf
+{
+  i32 cluster;
+  i32 areaPortalArea;
+  repeat (3) { i32 boundingBoxMin; }
+  repeat (3) { i32 boundingBoxMax; }
+  i32 leafFaceFirst;
+  i32 leafFaceCount;
+  i32 leafBrushFirst;
+  i32 leafBrushCount;
+}
+
+struct Q3LeafFaces
+{
+  repeat (Parent.LeafFacesLength / 4)
+  {
+    i32 face;
+  }
+}
+
+struct Q3LeafBrushes
+{
+  repeat (Parent.LeafBrushesLength / 4)
+  {
+    i32 brush;
+  }
+}
+
+struct Q3Model
+{
+  repeat (3) { float boundingBoxMin; }
+  repeat (3) { float boundingBoxMax; }
+  i32 faceFirst;
+  i32 faceCount;
+  i32 brushFirst;
+  i32 brushCount;
+}
+
+struct Q3Brush
+{
+  i32 brushSideFirst;
+  i32 brushSideCount;
+  i32 texture;
+}
+
+struct Q3BrushSide
+{
+  i32 planeIndex;
+  i32 texture;
+}
+
+struct Q3Vertex
+{
+  repeat (3) { float position; }
+  repeat (2) { float surfaceTexCoord; }
+  repeat (2) { float lightmapTexCoord; }
+  repeat (3) { float normal; }
+  repeat (4) { u8 color; }
+}
+
+struct Q3MeshVerts
+{
+  repeat (Parent.MeshVertsLength / 4)
+  {
+    i32 offset;
+  }
+}
+
+struct Q3Effect
+{
+  str [len=64] shaderName;
+  i32 brush;
+  i32;
+}
+
+enum Q3FaceType { Polygon=1, Patch, Mesh, Billboard }
+
+struct Q3Face
+{
+  i32 texture;
+  i32 effect;
+  enum32 type [enum=Q3FaceType];
+  i32 vertexFirst;
+  i32 vertexCount;
+  i32 meshVertFirst;
+  i32 meshVertCount;
+  i32 lm_index;
+  repeat (2) { i32 lm_start; }
+  repeat (2) { i32 lm_size; }
+  repeat (3) { float lm_origin; }
+  repeat (3) { float lm_vecs_s; }
+  repeat (3) { float lm_vecs_t; }
+  repeat (3) { float normal; }
+  repeat (2) { i32 patchSize; }
+}
+
+struct Q3Lightmaps
+{
+  local LightmapSize [value=128*128*3];
+  repeat (Parent.LightmapsLength / LightmapSize)
+  {
+    blob Lightmap [len=LightmapSize];
+  }
+}
+
+struct Q3Lightvol
+{
+  repeat (3) { u8 ambient; }
+  repeat (3) { u8 directional; }
+  repeat (2) { u8 dir; }
+}
+
+struct Q3Visdata
+{
+  i32 n_vecs;
+  i32 sz_vecs;
+  repeat (n_vecs)
+  {
+    blob Visdata [len=sz_vecs];
+  }
+}
