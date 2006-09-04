@@ -1,0 +1,151 @@
+struct DBHeader
+{
+  str [len=16] signature;
+  x32 version;
+  x32 ofsFileEnd;
+  u32 slackSpace;
+  u32 contactCount;
+  x32 ofsFirstContact;
+  x32 ofsUser;
+  x32 ofsFirstModuleName;
+  if (ofsFirstContact != 0)
+  {
+    child DBContact [group="Contacts", offset=ofsFirstContact];
+  }
+  if (ofsUser != 0)
+  {
+    child DBContact [group="User", offset=ofsUser];
+  }
+  if (ofsFirstModuleName != 0)
+  {
+    child DBModuleName [group="Modules", offset=ofsFirstModuleName];
+  }
+}
+
+struct DBContact
+{
+  x32 signature;
+  assert (signature == 0x43DECADE);
+  x32 ofsNext;
+  x32 ofsFirstSettings;
+  u32 eventCount;
+  x32 ofsFirstEvent;
+  x32 ofsLastEvent;
+  x32 ofsFirstUnreadEvent;
+  unixtime timestampFirstUnread;
+  if (ofsFirstSettings != 0)
+  {
+    child DBContactSettings [group="Settings", offset=ofsFirstSettings];
+  }
+  if (ofsFirstEvent != 0)
+  {
+    child DBEvent [group="Events", offset=ofsFirstEvent];
+  }
+  if (ofsNext != 0)
+  {
+    sibling DBContact [offset=ofsNext];
+  }
+}
+
+struct DBContactSettings
+{
+  x32 signature;
+  assert (signature == 0x53DECADE);
+  x32 ofsNext;
+  x32 ofsModuleName;
+  
+  seek (ofsModuleName + 8);
+  [hidden] u8 cbModuleName;
+  str [len=cbModuleName] szModuleName;
+  rewind;
+
+  x32 cbBlob;
+  if (ofsNext != 0)
+  {
+    sibling DBContactSettings [offset=ofsNext];
+  }
+  child DBSetting;
+}
+
+[global] enum DataValueType
+{
+  DBVT_DELETED = 0, DBVT_BYTE = 1, DBVT_WORD = 2,
+  DBVT_DWORD = 4, DBVT_ASCIIZ = 255, DBVT_BLOB = 254
+}
+
+struct DBSetting
+{
+  u8 cbName;
+  if (cbName > 0)
+  {
+    str [len=cbName] szName;
+    enum8 dataType [enum=DataValueType];
+    switch (dataType)
+    {
+      case (DBVT_BYTE)
+      {
+        u8 bVal;
+      }
+      case (DBVT_WORD)
+      {
+        u16 wVal;
+      }
+      case (DBVT_DWORD)
+      {
+        u32 dVal;
+      }
+      case (DBVT_ASCIIZ)
+      {
+        u16 cbString;
+        str [len=cbString] szVal;
+      }
+    }
+    sibling DBSetting;
+  }
+}
+
+enum DBEventFlags
+{
+  DBEF_FIRST, DBEF_SENT, DBEF_READ
+}
+
+enum DBEventType
+{
+  EVENTTYPE_MESSAGE
+}
+
+struct DBEvent
+{
+  x32 signature;
+  assert (signature == 0x45DECADE);
+  x32 ofsPrev;
+  x32 ofsNext;
+  x32 ofsModuleName;
+
+  seek (ofsModuleName + 8);
+  [hidden] u8 cbModuleName;
+  str [len=cbModuleName] szModuleName;
+  rewind;
+  
+  unixtime timestamp;
+  set32 flags [enum=DBEventFlags];
+  enum16 eventType [enum=DBEventType];
+  u32 cbBlob;
+  if (ofsNext != 0)
+  {
+    sibling DBEvent [offset=ofsNext];
+  }
+}
+
+struct DBModuleName
+{
+  x32 signature;
+  assert (signature == 0x4DDECADE);
+  x32 ofsNext;
+  u8 cbName;
+  str [len=cbName] name;
+  if (ofsNext != 0)
+  {
+    sibling DBModuleName [offset=ofsNext];
+  }
+}

@@ -6,7 +6,7 @@ namespace Structorian.Engine.Fields
 {
     class EnumField: IntBasedField
     {
-        public EnumField(StructDef structDef, int size) : base(structDef, size, false)
+        public EnumField(StructDef structDef, int size) : base(structDef, size, true)
         {
         }
         
