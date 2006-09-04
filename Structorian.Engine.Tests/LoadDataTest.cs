@@ -11,7 +11,16 @@ namespace Structorian.Engine.Tests
     {
         private static InstanceTree PrepareInstanceTree(string structDefs, byte[] data)
         {
-            StructFile structFile = new StructParser().LoadStructs(structDefs);
+            StructParser parser = new StructParser();
+            StructFile structFile = parser.LoadStructs(structDefs);
+            if (structFile == null && parser.Errors.Count > 0)
+            {
+                Assert.IsTrue(false, parser.Errors[0].Message);
+            }
+            else
+            {
+                Assert.IsNotNull(structFile);
+            }
             MemoryStream dataStream = new MemoryStream(data);
             return structFile.Structs[0].LoadData(dataStream);
         }
@@ -718,6 +727,15 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("Q", lastAddChild.NodeName);
             tree.Children[0].Children[0].NeedChildren();
             Assert.AreEqual("W", tree.Children[0].Children[0].Children[0].NodeName);
+        }
+        
+        [Test] public void Blob()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { blob q [len=4]; calc x [value=CurOffset]; }",
+                new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
+            Assert.AreEqual("FF FF FF FF", instance.Cells[0].Value);
+            Assert.AreEqual("4", instance.Cells[1].Value);
         }
     }
 }
