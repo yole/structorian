@@ -24,6 +24,7 @@ namespace Structorian.Engine
         private List<InstanceTreeNode> _children = null;
         private List<IChildSeed> _childSeeds = null;
         private Dictionary<StructCell, int> _cellSizes = null;
+        private bool _preloading = false;
 
         private StructInstance _followInstance = null;
 
@@ -118,6 +119,12 @@ namespace Structorian.Engine
             GetInstanceTree().NotifyNodeNameChanged(this);
         }
 
+        internal bool Preloading
+        {
+            get { return _preloading; }
+            set { _preloading = value; }
+        }
+
         public override ReadOnlyCollection<InstanceTreeNode> Children
         {
             get
@@ -162,6 +169,10 @@ namespace Structorian.Engine
                         childSeed.LoadChildren(this, _stream);
                     }
                 }
+                if (_def.Preload && !_preloading)
+                {
+                    PreloadChildren();
+                }
             }
         }
 
@@ -191,6 +202,31 @@ namespace Structorian.Engine
                 _stream.Position = Offset;
                 _def.LoadInstanceData(this, _stream);
                 _endOffset = _stream.Position;
+                if (_def.Preload && !_preloading)
+                {
+                    NeedChildren();
+                }
+            }
+        }
+
+        private void PreloadChildren()
+        {
+            int i = 0;
+            while (i<_children.Count)
+            {
+                if (_children [i] is StructInstance)
+                {
+                    (_children[i] as StructInstance).Preloading = true;
+                    try
+                    {
+                        _children[i].NeedData();
+                    }
+                    finally
+                    {
+                        (_children[i] as StructInstance).Preloading = false;
+                    }
+                }
+                i++;
             }
         }
 
