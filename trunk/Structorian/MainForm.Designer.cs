@@ -103,6 +103,7 @@ namespace Structorian
             this._structEditControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this._structEditControl.Location = new System.Drawing.Point(0, 25);
             this._structEditControl.Name = "_structEditControl";
+            this._structEditControl.ShowEOLMarkers = true;
             this._structEditControl.ShowInvalidLines = false;
             this._structEditControl.ShowLineNumbers = false;
             this._structEditControl.ShowSpaces = true;
@@ -151,9 +152,12 @@ namespace Structorian
             this.ClientSize = new System.Drawing.Size(438, 424);
             this.Controls.Add(this.splitContainer2);
             this.Controls.Add(this.menuStrip1);
+            this.Location = new System.Drawing.Point(30, 30);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Structorian";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.splitContainer2.Panel1.ResumeLayout(false);
