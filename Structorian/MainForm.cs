@@ -6,6 +6,7 @@ using System.IO;
 using System.Windows.Forms;
 using ICSharpCode.TextEditor.Document;
 using Structorian.Engine;
+using Structorian.Properties;
 
 namespace Structorian
 {
@@ -15,6 +16,7 @@ namespace Structorian
         private StructFile _structFile;
         private DataView _dataView;
         private TextMarker _currentCellMarker;
+        private Settings _settings = new Settings();
         
         public MainForm()
         {
@@ -25,24 +27,62 @@ namespace Structorian
             splitContainer2.Panel2.Controls.Add(_dataView);
             
             Application.AddMessageFilter(new WheelMessageFilter());
+            string lastStrsFile = _settings.LastStrsFile;
+            if (lastStrsFile != null && lastStrsFile.Length > 0)
+                LoadStructsFile(lastStrsFile);
+
+            RestoreFormPosition();
         }
 
+        private void RestoreFormPosition()
+        {
+            if (_settings.MainFormMaximized)
+                WindowState = FormWindowState.Maximized;
+            else
+            {
+                if (_settings.PropertyValues ["MainFormLocation"].PropertyValue != null)
+                    Location = _settings.MainFormLocation;
+                if (_settings.PropertyValues["MainFormSize"].PropertyValue != null)
+                    Size = _settings.MainFormSize;
+            }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (WindowState == FormWindowState.Maximized)
+                _settings.MainFormMaximized = true;
+            else
+            {
+                _settings.MainFormMaximized = false;
+                _settings.MainFormLocation = Location;
+                _settings.MainFormSize = Size;
+            }
+            _settings.Save();
+        }
+        
         private void loadStructuresToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_openStructsDialog.ShowDialog(this) == DialogResult.OK)
             {
-                _structFileName = Path.GetFullPath(_openStructsDialog.FileName);
-                using(Stream stream = _openStructsDialog.OpenFile())
-                {
-                    string strs = new StreamReader(stream).ReadToEnd();
-                    _structEditControl.Text = strs;
-                    _structEditControl.ShowEOLMarkers = false;
-                    _structEditControl.ShowInvalidLines = false;
-                    _structEditControl.ShowSpaces = false;
-                    ParseStructures();
-                }
-                _btnSaveStructures.Enabled = true;
+                LoadStructsFile(_openStructsDialog.FileName);
+                _settings.LastStrsFile = _openStructsDialog.FileName;
+                _settings.Save();
             }
+        }
+
+        private void LoadStructsFile(string name)
+        {
+            _structFileName = Path.GetFullPath(name);
+            using(Stream stream = new FileStream(name, FileMode.Open))
+            {
+                string strs = new StreamReader(stream).ReadToEnd();
+                _structEditControl.Text = strs;
+                _structEditControl.ShowEOLMarkers = false;
+                _structEditControl.ShowInvalidLines = false;
+                _structEditControl.ShowSpaces = false;
+                ParseStructures();
+            }
+            _btnSaveStructures.Enabled = true;
         }
 
         private void ParseStructures()
