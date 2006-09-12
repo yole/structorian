@@ -31,10 +31,7 @@ namespace Structorian
             string lastStrsFile = _settings.LastStrsFile;
             if (lastStrsFile != null && lastStrsFile.Length > 0)
                 LoadStructsFile(lastStrsFile);
-            _structEditControl.Document.DocumentChanged += delegate(object sender, DocumentEventArgs e)
-                                                               {
-                                                                   _structuresModified = true;
-                                                               };
+            _structEditControl.Document.DocumentChanged += delegate { _structuresModified = true; };
 
             RestoreFormPosition();
         }

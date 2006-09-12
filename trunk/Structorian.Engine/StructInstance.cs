@@ -160,8 +160,8 @@ namespace Structorian.Engine
         {
             if (_children == null)
             {
-                NeedData();
                 _children = new List<InstanceTreeNode>();
+                NeedData();
                 if (_childSeeds != null)
                 {
                     foreach(IChildSeed childSeed in _childSeeds)

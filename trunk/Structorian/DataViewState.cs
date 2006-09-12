@@ -30,7 +30,18 @@ namespace Structorian
         {
             if (_selectedIndices.Count > 0)
             {
-                view.StructTreeView.SelectedNode = LoadNode(view.StructTreeView.Nodes, _selectedIndices[0]);
+                TreeNodeCollection nodeCollection = view.StructTreeView.Nodes;
+                TreeNode node;
+                TreeNode nodeToSelect = null;
+                foreach(int index in _selectedIndices)
+                {
+                    node = LoadNode(nodeCollection, index);
+                    if (node == null) break;
+                    nodeToSelect = node;
+                    node.Expand();
+                    nodeCollection = node.Nodes;
+                }
+                view.StructTreeView.SelectedNode = nodeToSelect;
             }
         }
 
