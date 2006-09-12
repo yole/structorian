@@ -17,6 +17,7 @@ namespace Structorian
         private DataView _dataView;
         private TextMarker _currentCellMarker;
         private Settings _settings = new Settings();
+        private bool _structuresModified = false;
         
         public MainForm()
         {
@@ -30,6 +31,10 @@ namespace Structorian
             string lastStrsFile = _settings.LastStrsFile;
             if (lastStrsFile != null && lastStrsFile.Length > 0)
                 LoadStructsFile(lastStrsFile);
+            _structEditControl.Document.DocumentChanged += delegate(object sender, DocumentEventArgs e)
+                                                               {
+                                                                   _structuresModified = true;
+                                                               };
 
             RestoreFormPosition();
         }
@@ -49,6 +54,12 @@ namespace Structorian
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (!CheckSaveStructures())
+            {
+                e.Cancel = true;
+                return;
+            }
+            
             if (WindowState == FormWindowState.Maximized)
                 _settings.MainFormMaximized = true;
             else
@@ -72,6 +83,7 @@ namespace Structorian
 
         private void LoadStructsFile(string name)
         {
+            if (!CheckSaveStructures()) return;
             _structFileName = Path.GetFullPath(name);
             using(Stream stream = new FileStream(name, FileMode.Open))
             {
@@ -80,9 +92,29 @@ namespace Structorian
                 _structEditControl.ShowEOLMarkers = false;
                 _structEditControl.ShowInvalidLines = false;
                 _structEditControl.ShowSpaces = false;
+                _structuresModified = false;
                 ParseStructures();
             }
             _btnSaveStructures.Enabled = true;
+        }
+
+        private bool CheckSaveStructures()
+        {
+            if (!_structuresModified) 
+                return true;
+            if (_structFileName == null) 
+                return true;
+            
+            DialogResult dr = MessageBox.Show(
+                "The file " + _structFileName + " has been modified. Would you like to save the changes?",
+                "Structorian",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Warning);
+            if (dr == DialogResult.Cancel) 
+                return false;
+            if (dr == DialogResult.Yes)
+                SaveStructuresToDisk();
+            return true;
         }
 
         private void ParseStructures()
@@ -117,6 +149,15 @@ namespace Structorian
 
         private void _btnSaveStructures_Click(object sender, EventArgs e)
         {
+            SaveStructuresToDisk();
+            ParseStructures();
+            
+            if (_structFile != null)
+                _dataView.ReloadData(_structFile.Structs [0], true);
+        }
+
+        private void SaveStructuresToDisk()
+        {
             StreamWriter writer = new StreamWriter(_structFileName);
             try
             {
@@ -126,12 +167,8 @@ namespace Structorian
             {
                 writer.Close();
             }
-            ParseStructures();
-            
-            if (_structFile != null)
-                _dataView.ReloadData(_structFile.Structs [0], true);
         }
-        
+
         private void loadDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_structFile == null || _structFile.Structs.Count == 0) return;
