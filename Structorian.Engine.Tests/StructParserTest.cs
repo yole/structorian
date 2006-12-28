@@ -139,9 +139,10 @@ namespace Structorian.Engine.Tests
         [Test] public void EnumNotExisting()
         {
             StructParser parser = new StructParser();
-            parser.LoadStructs("struct A { enum8 a [enum=E]; }");
+            parser.LoadStructs("struct A { enum8 a [enum=EEEEE]; }");
             Assert.AreEqual(1, parser.Errors.Count);
-            Assert.AreEqual("Unknown enum E", parser.Errors[0].Message);
+            Assert.AreEqual("Unknown enum EEEEE", parser.Errors[0].Message);
+            Assert.AreEqual(5, parser.Errors [0].Length);
         }
 
         [Test] public void InvalidSiblingStruct()
