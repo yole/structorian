@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Structorian.Engine
 {
@@ -15,7 +13,7 @@ namespace Structorian.Engine
         {
             EnumDef target = _baseField.StructDef.StructFile.GetEnumByName(_targetName);
             if (target == null)
-                throw new ParseException("Unknown enum " + _targetName, _position);
+                throw new ParseException("Unknown enum " + _targetName, _position, _targetName.Length);
             _baseField.SetAttributeValue(_attrName, target);
         }
     }
