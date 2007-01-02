@@ -479,6 +479,15 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("B", instance.Cells[1].Value);
             Assert.AreEqual(2, instance.Cells.Count);
         }
+
+        [Test] public void ElIf()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 a; if (a == 1) { x8 c; } elif (a == 2) { str [len=1] b; } else { u8 c; } }",
+                new byte[] { 2, (byte)'B' });
+            Assert.AreEqual("B", instance.Cells[1].Value);
+            Assert.AreEqual(2, instance.Cells.Count);
+        }
         
         [Test] public void ParentCount()
         {

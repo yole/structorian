@@ -52,6 +52,7 @@ namespace Structorian.Engine.Fields
                 case "rewind": return new RewindField(structDef);
                 case "repeat": return new RepeatField(structDef);
                 case "if": return new IfField(structDef);
+                case "elif": return new ElseIfField(structDef);
                 case "else": return new ElseField(structDef);
                 case "include": return new IncludeField(structDef);
                 case "assert": return new AssertField(structDef);

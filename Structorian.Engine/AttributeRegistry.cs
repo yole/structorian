@@ -27,6 +27,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(EnumField), "enum", AttributeType.EnumRef);
             RegisterAttribute(typeof(GlobalField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(IfField), "expr", AttributeType.Expression);
+            RegisterAttribute(typeof(ElseIfField), "expr", AttributeType.Expression);
             RegisterAttribute(typeof(IncludeField), "struct", AttributeType.StructRef);
             RegisterAttribute(typeof(IncludeField), "replace", AttributeType.Bool);
             RegisterAttribute(typeof(IntBasedField), "frombit", AttributeType.Int);
