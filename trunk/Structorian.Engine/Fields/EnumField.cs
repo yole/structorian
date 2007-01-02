@@ -13,7 +13,7 @@ namespace Structorian.Engine.Fields
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             int offset = (int)reader.BaseStream.Position;
-            uint value = ReadIntValue(reader).ToUInt32(CultureInfo.CurrentCulture);
+            uint value = ReadIntValue(reader, instance).ToUInt32(CultureInfo.CurrentCulture);
             EnumDef enumDef = GetEnumAttribute("enum");
             string displayValue = enumDef.ValueToString(value);
             AddCell(instance, new EnumValue(value, displayValue), displayValue, offset);
