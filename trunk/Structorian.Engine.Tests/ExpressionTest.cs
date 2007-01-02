@@ -153,5 +153,11 @@ namespace Structorian.Engine.Tests
         {
             Assert.IsTrue(ExpressionParser.Parse("255 & 0x80 != 0").EvaluateBool(null));
         }
+
+        [Test] public void EvaluateShift()
+        {
+            Assert.AreEqual(4, ExpressionParser.Parse("1 << 2").EvaluateInt(null));
+            Assert.AreEqual(4, ExpressionParser.Parse("16 >> 2").EvaluateInt(null));
+        }
     }
 }

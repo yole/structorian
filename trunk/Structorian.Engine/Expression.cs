@@ -139,6 +139,8 @@ namespace Structorian.Engine
                 case ExprTokenType.Mod: return lhs % rhs;
                 case ExprTokenType.BitAND: return lhs & rhs;
                 case ExprTokenType.BitOR: return lhs | rhs;
+                case ExprTokenType.SHL: return lhs << rhs;
+                case ExprTokenType.SHR: return lhs >> rhs;
             }
             throw new Exception("Unknown binary operation");
         }
