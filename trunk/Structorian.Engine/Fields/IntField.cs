@@ -35,7 +35,7 @@ namespace Structorian.Engine.Fields
                     break;
 
                 case 0:
-                    displayValue = _unsigned ? ((UInt32)value).ToString(format) : ((Int32)value).ToString(format);
+                    displayValue = ((int)value).ToString(format);
                     break;
 
                 default:

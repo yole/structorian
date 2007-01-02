@@ -808,7 +808,15 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("8", instance.Cells [0].Value);
         }
 
-        [Test] public void StrCalcField()
+        [Test] public void UnsignedCalcField()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u X [value=8]; }", new byte[0]);
+            Assert.AreEqual("8", instance.Cells[0].Value);
+        }
+
+        [Test]
+        public void StrCalcField()
         {
             StructInstance instance = PrepareInstance(
                 "struct A { str X [value=\"\"A\"\"]; }", new byte[0]);
