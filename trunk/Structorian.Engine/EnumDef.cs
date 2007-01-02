@@ -7,7 +7,7 @@ namespace Structorian.Engine
     {
         private StructFile _structFile;
         private string _name;
-        private Dictionary<int, string> _values = new Dictionary<int, string>();
+        private Dictionary<uint, string> _values = new Dictionary<uint, string>();
         private string _inherit;
         private bool _global;
         private bool _globalMask;
@@ -24,16 +24,16 @@ namespace Structorian.Engine
             get { return _name; }
         }
 
-        public void AddValue(string name, int value)
+        public void AddValue(string name, uint value)
         {
             _values.Add(value, name);
             if (_global)
                 _structFile.RegisterGlobalEnumConstant(name, value);
             if (_globalMask)
-                _structFile.RegisterGlobalEnumConstant(name, 1 << value);
+                _structFile.RegisterGlobalEnumConstant(name, (uint) (1 << (int) value));
         }
 
-        public string ValueToString(int value)
+        public string ValueToString(uint value)
         {
             if (_values.ContainsKey(value))
                 return _values[value];

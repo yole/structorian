@@ -25,10 +25,10 @@ namespace Structorian.Engine.Fields
                 {
                     if (result.Length > 0)
                         result.Append(", ");
-                    result.Append(enumDef.ValueToString(i));
+                    result.Append(enumDef.ValueToString((uint) i));
                 }
             }
-            AddCell(instance, new EnumValue((int) value, result.ToString()), offset);
+            AddCell(instance, new EnumValue(value, result.ToString()), offset);
         }
     }
 }

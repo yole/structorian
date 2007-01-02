@@ -244,7 +244,7 @@ namespace Structorian.Engine
             if (global.HasValue)
                 return global.Value;
 
-            int? enumValue = _def.StructFile.EvaluateGlobalEnumConstant(symbol);
+            uint? enumValue = _def.StructFile.EvaluateGlobalEnumConstant(symbol);
             if (enumValue.HasValue)
                 return enumValue.Value;
 

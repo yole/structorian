@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using NUnit.Framework;
@@ -765,6 +766,14 @@ namespace Structorian.Engine.Tests
                 "[global] enum e { Q=255 } struct S { enum8 a [enum=e]; if (a == Q) { u8 x; } }",
                 new byte[] {0xFF, 17});
             Assert.AreEqual(2, instance.Cells.Count);
+        }
+
+        [Test] public void Enum32Overflow()
+        {
+            StructInstance instance = PrepareInstance(
+                "enum e { Q = 0xFFFFFFFF } struct S { enum32 a [enum=e]; } ",
+                new byte[] {0xFF, 0xFF, 0xFF, 0xFF});
+            Assert.AreEqual("Q", instance.Cells [0].Value);
         }
         
         [Test] public void Float()

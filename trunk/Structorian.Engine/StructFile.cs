@@ -10,7 +10,7 @@ namespace Structorian.Engine
     {
         private List<StructDef> _structDefs = new List<StructDef>();
         private List<EnumDef> _enumDefs = new List<EnumDef>();
-        private Dictionary<string, int> _globalEnumConstants = new Dictionary<string, int>();
+        private Dictionary<string, uint> _globalEnumConstants = new Dictionary<string, uint>();
         private List<ReferenceBase> _references = new List<ReferenceBase>();
         
         public ReadOnlyCollection<StructDef> Structs
@@ -43,14 +43,14 @@ namespace Structorian.Engine
             return _enumDefs.Find(delegate(EnumDef def) { return def.Name == name; });
         }
         
-        internal void RegisterGlobalEnumConstant(string name, int value)
+        internal void RegisterGlobalEnumConstant(string name, uint value)
         {
             _globalEnumConstants.Add(name, value);
         }
 
-        public int? EvaluateGlobalEnumConstant(string name)
+        public uint? EvaluateGlobalEnumConstant(string name)
         {
-            int result;
+            uint result;
             if (_globalEnumConstants.TryGetValue(name, out result))
                 return result;
             return null;
