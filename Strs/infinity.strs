@@ -25,6 +25,7 @@ struct Auto
     case ("DLG ")  { include [replace] DLG;  }
     case ("GAME")  { include [replace] GAME; }
     case ("EFF ")  { include [replace] EFF;  }
+    case ("PRO ")  { include [replace] PRO;  }
   }
 }
 
@@ -1447,4 +1448,97 @@ enum EffectDispel {
 
 enum EffectSaveType {
   Spells, Breath, "Death/poison", Wands, Petrification
+}
+
+// -- PRO --------------------------------------------------------------------
+
+enum PROSparksType
+{
+  Sparks, "Flying projectile", "Looping sound", "Ignore centre"=4
+}
+
+enum PROSparksColor
+{
+  "Black"=1, "Blue", "Purple and amber", "Amber",
+  "Pale green", "Purple", "Pink", "Grey", "Aqua",
+  "White", "Pale pink", "Gold"
+}
+
+enum PROSmokeType
+{
+  "Fireball ring", "Little bubbles", "Flesh pieces",
+  "Smoke", "Skull trap", "Cloudkill ring", "Cloudkill ring (2)",
+  "Grease", "Web", "Cloudkill ring (3)", "Abi-Dalzim",
+  "Color spray", "Storm of vengence"
+}
+
+enum PROExplProj
+{
+  "Fireball", "Stinking cloud", "Cloudkill", "Ice storm",
+  "Grease", "Web", "Meteor", "Abi-Dalzim's Horrid Wilting",
+  "Teleport field", "Entangle", "Color spray",
+  "Cone of cold", "Holy smite", "Unholy blight",
+  "Prismatic spray", "Big flame", "Storm of vengence",
+  "Purple fireball", "Green dragon blast"
+}
+
+enum PROFlags
+{
+  "Enable BAM colouring", "Enable smoke", "Darken projectile"=3,
+  "Enable shadow"=5, "Enable light spot", "Coloured shadow"
+}
+
+[filemask="*.pro"]
+struct PRO
+{
+  str [len=8] Signature;
+  x16 "Projectile type" [id=ProjType];
+  u16 "Projectile speed";
+  set16 "Show sparks" [enum=PROSparksType];
+  u16;
+  repeat (3) { resref Sound; }
+  enum32 "Sparks color" [enum=PROSparksColor];
+  skip 212;
+  set32 "Flags" [enum=PROFlags];
+  resref "Projectile BAM";
+  resref "Shadow BAM";
+  u8 "Projectile animation";
+  u8 "Shadow animation";
+  u16 "Light spot intensity";
+  u8 "Light spot X size";
+  u8 "Projectile invisible";
+  u16 "Light spot Y size";
+  resref;
+  u8 "Projectile color";
+  repeat (6) { u8 "Projectile color gradient"; }
+  u8 "Smoke puff delay";
+  u8 "Smoke color";
+  repeat (6) { u8 "Smoke color gradient"; }
+  u8 "Aim to target";
+  enum16 "Smoke type" [enum=PROSmokeType];
+  repeat(3) { resref "Trailing BAM"; }
+  repeat(3) { u16 "Trailing distance?"; }
+  skip 172;
+  if (CurOffset-StructOffset != 512) { error "Broken structure: offset must be 512"; }
+  if (ProjType == 3)
+  {
+    u8 "Area of effect targets";
+    u8 "Area of effect type";
+    u16;
+    u16 "Trigger radius";
+    u16 "Area of effect";
+    resref "Exploding sound?";
+    u16 "Explosion delay";
+    u16 "Fragment animation";
+    u16 "Secondary projectile";
+    u8 "Duration/Trigger count";
+    enum8 "Set off animation" [enum=PROExplProj];
+    u8 "Color of explosion";
+    u8;
+    u16 "Explosion effect";
+    resref "VVC file";
+    u16 "Cone width";
+    skip 218;
+    if (CurOffset-StructOffset != 768) { error "Broken structure: offset must be 768"; }
+  }
 }

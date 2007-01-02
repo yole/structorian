@@ -74,6 +74,8 @@ namespace Structorian.Engine.Fields
                 case "u": return new IntField(structDef, 0, true, false);
                 case "x": return new IntField(structDef, 0, true, true);
                 case "enum": return new EnumField(structDef, 0);
+                case "message": return new MessageField(structDef, false);
+                case "error": return new MessageField(structDef, true);
             }
             
             int size;
