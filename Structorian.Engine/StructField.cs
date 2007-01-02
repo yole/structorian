@@ -10,7 +10,7 @@ namespace Structorian.Engine
         private List<StructField> _childFields = null;
         private StructField _linkedToField = null;
         protected List<StructField> _linkedFields = null;
-        private string _tag;
+        protected string _tag;
         private string _id;
         private string _defaultAttribute = "tag";
         private TextPosition _position;

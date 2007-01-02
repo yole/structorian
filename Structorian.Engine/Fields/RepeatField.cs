@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Structorian.Engine.Fields
 {
@@ -16,7 +14,14 @@ namespace Structorian.Engine.Fields
             int count = GetExpressionAttribute("count").EvaluateInt(instance);
             for(int i=0; i<count; i++)
             {
-                LoadChildFields(reader, instance);
+                try
+                {
+                    LoadChildFields(reader, instance);
+                }
+                catch(BreakRepeatException)
+                {
+                    break;
+                }
             }
         }
 

@@ -792,5 +792,13 @@ namespace Structorian.Engine.Tests
                 new byte[] {0, 0, 0x94, 0x44});
             Assert.AreEqual("1184", instance.Cells[0].Value);
         }
+
+        [Test] public void Break()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { repeat(8) { u8 x; if (x == 2) { break; } } }",
+                new byte[] {0, 1, 2, 3, 4});
+            Assert.AreEqual(3, instance.Cells.Count);
+        }
     }
 }

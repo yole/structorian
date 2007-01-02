@@ -214,16 +214,17 @@ namespace Structorian.Engine
             int i = 0;
             while (i<_children.Count)
             {
-                if (_children [i] is StructInstance)
+                InstanceTreeNode child = _children [i];
+                if (child is StructInstance)
                 {
-                    (_children[i] as StructInstance).Preloading = true;
+                    (child as StructInstance).Preloading = true;
                     try
                     {
-                        _children[i].NeedData();
+                        child.NeedData();
                     }
                     finally
                     {
-                        (_children[i] as StructInstance).Preloading = false;
+                        (child as StructInstance).Preloading = false;
                     }
                 }
                 i++;
@@ -252,7 +253,7 @@ namespace Structorian.Engine
             if (funcValue != null)
                 return funcValue;
             
-            throw new Exception("Unknown symbol " + symbol);
+            throw new LoadDataException("Unknown symbol " + symbol);
         }
 
         public IConvertible EvaluateFunction(string symbol, string param)
@@ -263,7 +264,7 @@ namespace Structorian.Engine
             if (funcValue != null)
                 return funcValue;
 
-            throw new Exception("Unknown symbol " + symbol);
+            throw new LoadDataException("Unknown symbol " + symbol);
         }
 
         public IEvaluateContext EvaluateContext(string symbol)
@@ -274,7 +275,7 @@ namespace Structorian.Engine
                 if (parent == null) throw new Exception("Expression does not have a parent");
                 return parent;
             }
-            throw new Exception("Unknown context " + symbol);
+            throw new LoadDataException("Unknown context " + symbol);
         }
 
         private StructInstance EvaluateParent()
