@@ -216,7 +216,7 @@ namespace Structorian
 
             int selectionStartInLine = (_selectionStart < offset) ? 0 : _selectionStart - offset;
             int selectionEndInLine = (_selectionEnd >= offset + 16) ? 16 : _selectionEnd - offset;
-            if (selectionStartInLine < 16 && selectionEndInLine > 0)
+            if (selectionStartInLine < 16 && selectionEndInLine > 0 && selectionStartInLine != selectionEndInLine)
             {
                 Size defSize = new Size(100, 100);
                 int x = 0;
