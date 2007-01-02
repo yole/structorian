@@ -1,0 +1,79 @@
+// Structures of Python binary files
+// Compiled by Dmitry Jemerov <yole@yole.ru>
+// Valid for Python 2.5
+
+[filemask="*.pyc"]
+struct PYC
+{
+  u32 Magic;
+  unixtime ModificationTime;
+  child MarshalObject;
+}
+
+[global] enum MarshalObjectType
+{
+  TYPE_TUPLE=0x28, TYPE_NONE=0x4E, 
+  TYPE_STRINGREF=0x52,
+  TYPE_CODE=0x63, TYPE_INT=0x69,
+  TYPE_LONG=0x6C, TYPE_STRING=0x73, TYPE_INTERNED=0x74
+}
+
+// Note that not all types of marshalled objects are supported -
+// only those that I found in the .pyc files I tried
+struct MarshalObject
+{
+  enum8 Type [enum=MarshalObjectType];
+  switch (Type)
+  {
+    case TYPE_INT
+    {
+      i32 value;
+    }
+    case TYPE_LONG
+    {
+      i32 size;
+      repeat (size) { i16 digit; }
+    }
+    case TYPE_STRING
+    {
+      i32 length;
+      str [len=length] data;
+    }
+    case TYPE_INTERNED
+    {
+      i32 length;
+      str [len=length] data;
+    }
+    case TYPE_STRINGREF
+    {
+      i32 id;
+    }
+    case TYPE_TUPLE
+    {
+      i32 count;
+      child MarshalObject [count=count, followchildren];
+    }
+    case TYPE_CODE
+    {
+      i32 argcount;
+      i32 nlocals;
+      i32 stacksize;
+      i32 flags;
+      child MarshalObject [group=code];
+      child MarshalObject [group=consts, followchildren];
+      child MarshalObject [group=names, followchildren];
+      child MarshalObject [group=varnames, followchildren];
+      child MarshalObject [group=freevars, followchildren];
+      child MarshalObject [group=cellvars, followchildren];
+      child MarshalObject [group=filename, followchildren];
+      child MarshalObject [group=name, followchildren];
+      child LineNumbers   [followchildren];
+    }
+  }
+}
+
+struct LineNumbers
+{
+  i32 firstlineno;
+  child MarshalObject [group=lnotab];
+}
