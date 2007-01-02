@@ -5,7 +5,7 @@ namespace Structorian.Engine
 {
     enum ExprTokenType { Symbol, Number, String, Plus,  Minus, Mult, Div, Mod, Dot, 
         Open, Close, EQ, NE, GT, GE, LT, LE, 
-        AND, OR, NOT, BitAND, BitOR, EOF };
+        AND, OR, NOT, BitAND, BitOR, SHL, SHR, EOF };
     
     class ExpressionLexer: BaseLexer<ExprTokenType, object>
     {
@@ -30,15 +30,15 @@ namespace Structorian.Engine
         {
             char c = _text[_position];
             if (c == '>')
-                return FetchTwoCharToken('=', ExprTokenType.GT, ExprTokenType.GE);
+                return FetchTwoCharToken('=', ExprTokenType.GE, '>', ExprTokenType.SHR, ExprTokenType.GT);
             if (c == '<')
-                return FetchTwoCharToken('=', ExprTokenType.LT, ExprTokenType.LE);
+                return FetchTwoCharToken('=', ExprTokenType.LE, '<', ExprTokenType.SHL, ExprTokenType.LT);
             if (c == '!')
-                return FetchTwoCharToken('=', ExprTokenType.NOT, ExprTokenType.NE);
+                return FetchTwoCharToken('=', ExprTokenType.NE, ExprTokenType.NOT);
             if (c == '&')
-                return FetchTwoCharToken('&', ExprTokenType.BitAND, ExprTokenType.AND);
+                return FetchTwoCharToken('&', ExprTokenType.AND, ExprTokenType.BitAND);
             if (c == '|')
-                return FetchTwoCharToken('|', ExprTokenType.BitOR, ExprTokenType.OR);
+                return FetchTwoCharToken('|', ExprTokenType.OR, ExprTokenType.BitOR);
             if (c == '=')
             {
                 _position++;
@@ -63,9 +63,29 @@ namespace Structorian.Engine
             if (_position < _text.Length && _text [_position] == c)
             {
                 _position++;
-                return new Token(token2);
+                return new Token(token1);
             }
-            return new Token(token1);
+            return new Token(token2);
+        }
+
+        private Token FetchTwoCharToken(char c, ExprTokenType token1, char c2, ExprTokenType token2, ExprTokenType token3)
+        {
+            _position++;
+            if (_position < _text.Length)
+            {
+                if (_text[_position] == c)
+                {
+                    _position++;
+                    return new Token(token1);
+                }
+                if (_text[_position] == c2)
+                {
+                    _position++;
+                    return new Token(token2);
+                }
+            }
+
+            return new Token(token3);
         }
 
         private int ReadNumber()

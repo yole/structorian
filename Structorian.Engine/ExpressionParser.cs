@@ -15,7 +15,8 @@ namespace Structorian.Engine
             };
         private static ExprTokenType[] _exprTokens = new ExprTokenType[]
             {
-                ExprTokenType.Plus, ExprTokenType.Minus, ExprTokenType.BitAND, ExprTokenType.BitOR
+                ExprTokenType.Plus, ExprTokenType.Minus, ExprTokenType.BitAND, ExprTokenType.BitOR,
+                ExprTokenType.SHL, ExprTokenType.SHR
             };
         private static ExprTokenType[] _termTokens = new ExprTokenType[]
             {
