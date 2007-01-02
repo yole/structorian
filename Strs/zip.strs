@@ -1,0 +1,110 @@
+// ZIP archive structures
+// Compiled by Dmitry Jemerov <yole@yole.ru>
+// Based on .ZIP File Format Specification Version 4.5
+
+enum ZipCompressionMethod
+{
+  "Stored", "Shrunk", "Reduced1", "Reduced2", "Reduced3", "Reduced4",
+  "Imploded", "Tokenized", "Deflated", "Deflate64'ed",
+  "PKWARE Data Compression Library Imploded"
+}
+
+[globalmask] enum ZipFlags
+{
+  Encrypted,
+  DataDescriptorPresent=3
+}
+
+[filemask="*.zip"]
+struct LocalFileHeader
+{
+  x32         Signature;
+  assert (Signature == 0x04034b50);
+  u16         VersionToExtract;
+  set16       Flags [enum=ZipFlags];
+  enum16      CompressionMethod [enum=ZipCompressionMethod];
+  dosdatetime LastModification [timefirst];
+  if ((Flags & DataDescriptorPresent) != 0)
+  {
+    skip 12;
+  }
+  else {
+    x32         CRC32;
+    u32         CompressedSize;
+    u32         UncompressedSize;
+  }
+  u16         FileNameLength;
+  u16         ExtraFieldLength;
+  str         FileName [len=FileNameLength];
+  nodename    FileName;
+  if (ExtraFieldLength > 0)
+  {
+    blob      ExtraField [len=ExtraFieldLength];
+  }
+
+  if ((Flags & DataDescriptorPresent) != 0)
+  {
+    include DataDescriptorDetector;
+  }
+  else
+  {
+    skip CompressedSize;
+  }
+  
+  [hidden] u32 _nextSignature;
+  skip -4;
+  if (_nextSignature == 0x04034b50)
+  {
+    sibling LocalFileHeader;
+  }
+  elif (_nextSignature == 0x02014b50)
+  {
+    sibling CentralFileHeader;
+  }
+}
+
+struct DataDescriptorDetector
+{
+  repeat(FileSize-CurOffset)
+  {
+    [hidden] i32 _signature;
+    skip -4;
+    if (_signature == 0x08074B50)
+    {
+      include DataDescriptor;
+      break;
+    }
+    else
+    {
+      skip 1;
+    }
+  }
+}
+
+struct DataDescriptor
+{
+  x32 Signature;
+  assert (Signature == 0x08074B50);
+  x32         CRC32;
+  u32         CompressedSize;
+  u32         UncompressedSize;
+}
+
+struct CentralFileHeader
+{
+  x32         Signature;
+  assert      (Signature == 0x02014b50);
+  u16         VersionMadeBy;
+  u16         VersionToExtract;
+  bits16      Flags;
+  enum16      CompressionMethod [enum=ZipCompressionMethod];
+  dosdatetime LastModification [timefirst];
+  x32         CRC32;
+  u32         CompressedSize;
+  u32         UncompressedSize;
+  u16         FileNameLength;
+  u16         ExtraFieldLength;
+  u16         FileCommentLength;
+  u16         DiskNumberStart;
+
+}
