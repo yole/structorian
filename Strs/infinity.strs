@@ -22,6 +22,9 @@ struct Auto
     case ("CHUI")  { include [replace] CHUI; }
     case ("CRE ")  { include [replace] CRE;  }
     case ("AREA")  { include [replace] AREA; }
+    case ("DLG ")  { include [replace] DLG;  }
+    case ("GAME")  { include [replace] GAME; }
+    case ("EFF ")  { include [replace] EFF;  }
   }
 }
 
@@ -983,3 +986,465 @@ enum AreaAnimFlags {
   repeat (14) { i32; }
 }
 
+// -- DLG --------------------------------------------------------------------
+
+[filemask="*.dlg"]
+struct DLG
+{
+  str [len=8] Signature;
+  i32 "Phrase count" [id=PhraseCount];
+  x32 "Phrase offset" [id=PhraseOffset];
+  i32 "Response count" [id=ResponseCount];
+  x32 "Response offset" [id=ResponseOffset];
+  x32 "Condition offset" [id=CondOffset];
+  i32 "Condition count" [id=CondCount];
+  x32 "Response condition offset" [id=RespCondOffset];
+  i32 "Response condition count" [id=RespCondCount];
+  x32 "Action offset" [id=ActionOffset];
+  i32 "Action count" [id=ActionCount];
+  child DLGphrase [offset=StructOffset+PhraseOffset, count=PhraseCount];
+}
+
+[hidden] struct DLGphrase
+{
+  strref "TLK index";
+  i32 "First response" [id=FirstResponse];
+  i32 "Response count" [id=ResponseCount];
+  i32 "Condition index" [id=Cond];
+  if (Cond != -1)
+  {
+    seek (Parent.StructOffset + Parent.CondOffset + Cond*8);
+    [hidden] x32 CondOffset;
+    [hidden] x32 CondLength;
+    seek (Parent.StructOffset + CondOffset);
+    cstr Condition [len=CondLength];
+  }
+  child DLGresponse [offset=(Parent.StructOffset + Parent.ResponseOffset + FirstResponse*SizeOf(DLGresponse)),
+                     count=ResponseCount];
+}
+
+enum DLGresponseFlags {
+  Text,
+  Trigger,
+  Action,
+  "End dialog",
+  Journal,
+  "Add quest"=6,
+  "Remove quest",
+  "Add done quest"
+}
+
+[hidden] struct DLGresponse
+{
+  set32 Flags [enum=DLGresponseFlags];
+  i32 "TLK index";
+  i32 "Journal index";
+  i32 "Condition index" [id=Cond];
+  i32 "Action index" [id=Action];
+  str [len=8] "Response dialog";
+  i32 "Response phrase";
+  if (Cond != -1)
+  {
+    seek (Parent.Parent.StructOffset+Parent.Parent.RespCondOffset+Cond*8);
+    [hidden] x32 CondOffset;
+    [hidden] x32 CondLength;
+    seek (Parent.Parent.StructOffset+CondOffset);
+    cstr Condition [len=CondLength];
+  }
+  if (Action != -1)
+  {
+    seek (Parent.Parent.StructOffset + Parent.Parent.ActionOffset+Action*8);
+    [hidden] x32 ActionOffset;
+    [hidden] x32 ActionLength;
+    seek (Parent.Parent.StructOffset + ActionOffset);
+    cstr Action [len=ActionLength];
+  }
+}
+
+// -- GAME -------------------------------------------------------------------
+
+enum GAMEFormation
+{
+  "Formation 1", "Formation 2", "Formation 3", "Formation 4", "Formation 5"
+}
+
+enum GAMEUIFlags
+{
+  "Party AI Disabled", "Text window size (1)", "Text window size (2)",
+  "Hide GUI"=4, "Hide options panel", "Hide portraits panel"
+}
+
+[filemask="*.gam", preload]
+struct GAME
+{
+  str [len=8] Version;
+  x32 "Game time";
+  enum16 Formation [enum=GAMEFormation];
+  repeat (5)
+  {
+    u16 "Formation button";
+  }
+  u32 "Party gold";
+  u32;
+  x32 "Party members offset"   [id=PartyOffset];
+  u32 "Party members count"    [id=PartyCount];
+  repeat (2) { u32; }
+  x32 "NPC offset"             [id=NPCOffset];
+  u32 "NPC count"              [id=NPCCount];
+  x32 "Global var offset"      [id=GlobalOffset];
+  u32 "Global var count"       [id=GlobalCount];
+  resref "Main area";
+  i32;
+  u32 "Journal entries count"  [id=JournCount];
+  x32 "Journal entries offset" [id=JournOffset];
+  u32 "Party reputation";
+  resref "Current area?";
+  set32 "Game UI Flags" [enum=GAMEUIFlags];
+  repeat (20) { u32; }
+  child GAMEChar    [group="Party",       offset=StructOffset+PartyOffset,  count=PartyCount];
+  child GAMEChar    [group="NPCs",        offset=StructOffset+NPCOffset,    count=NPCCount];
+  child AreaVar     [group="Global vars", offset=StructOffset+GlobalOffset, count=GlobalCount];
+  child GAMEJournal [group="Journal",     offset=StructOffset+JournOffset,  count=JournCount];
+}
+
+[hidden] struct GAMEChar
+{
+  u16 Selected;
+  u16 "Party order";
+  x32 "CRE offset" [id=CREOffset];
+  u32 "CRE size";
+  resref "CRE name";
+  u32 "Character orientation";
+  resref "Current area";
+  u16 X;
+  u16 Y;
+  u16 "View rect X";
+  u16 "View rect Y";
+  u16 "Modal action";
+  u16 Happiness;
+  repeat (24) { u32; }
+  repeat(4) { i32 "Quick weapon"; }
+  repeat(3) { resref "Quick spell"; }
+  repeat(3) { u32 "Quick item"; }
+  if (Parent.Version == "GAMEV2.2")
+  {
+    repeat (63) { u32; }
+    u16;
+  }
+  str [len=32] Name;
+  nodename Name;
+  u32 "Talkcount";
+  include GAMECharStats;
+  if (Parent.Version == "GAMEV2.2")
+  {
+    resref;
+    str [len=32] SoundSet;
+    repeat (48) { u32; }
+    u16;
+  }
+  else
+  {
+    repeat (2) { u32; }
+  }
+  if (CREOffset > 0)
+  {	
+    child CRE [offset=Parent.StructOffset+CREOffset];
+  }
+}
+
+[hidden] struct GAMECharStats
+{
+  strref "Most powerful foe vanquished";
+  u32 "XP for most powerful foe";
+  u32 "Time absent from party";
+  u32 "Time joined";
+  u32;
+  u32 "Kill XP (chapter)";
+  u32 "Kill count (chapter)";
+  u32 "Kill XP (game)";
+  u32 "Kill count (game)";
+  repeat (4) { resref "Favourite spell"; }
+  repeat (4) { i16 "Favourite spell count"; }
+  repeat (4) { resref "Favourite weapon"; }
+  repeat (4) { i16 "Favourite weapon count"; }
+}
+
+[hidden] struct GAMEJournal
+{
+  strref "Journal text";
+  u32 "Time in seconds";
+  u32 "Current chapter";
+}
+
+// -- EFF --------------------------------------------------------------------
+
+[filemask="*.eff"]
+struct EFF
+{
+  str [len=8] Signature;
+  str [len=8] "Signature 2";
+  enum32 "Effect type"     [enum=EffectType];
+  enum32 "Target type"     [enum=EffectTargetType];
+  u32 "Power";
+  i32 "Param 1";
+  i32 "Param 2";
+  enum8 Duration          [enum=EffectDuration];
+  u8;
+  u16;
+  i32 Time;
+  i16 "Probability 1";
+  i16 "Probability 2";
+  resref Resource;
+  u32 "Dice Thrown";
+  u32 "Dice Sides";
+  set32 "Save type"        [enum=EffectSaveType];
+  i32 "Save bonus";
+  u32 "Variable (?)";
+  u32 "Primary Type (School)";
+  u32;
+  u32 "Lowest affected level (transferred from source)";
+  u32 "Highest affected level (transferred from source)";
+  u32 "Resistance type";
+  u8 "Param 3";
+  u8 "Param 4";
+  u16;
+  repeat(3) { u32; }
+  resref Animation;
+  resref "Resource 2";
+  i32 "Caster X position";
+  i32 "Caster Y position";
+  i32 "Target X position";
+  i32 "Target Y position";
+  u32;
+  resref "Effect source";
+  repeat(3) { i32; }
+  repeat(32) { u8; }
+  u16 "Caster level?";
+  repeat(3) { u16; }
+  u32 "Secondary type";
+  repeat(15) { u32; }
+}
+
+enum EffectType {
+  "Bonus to AC",
+  "Attacks per 2 round bonus",
+  Awaken,
+  Berserk,
+  Calm,
+  "Charm creature",
+  "Charisma bonus",
+  "Set item color",
+  "Set colorglow solid",
+  "Set colorglow pulse",
+  "Constitution bonus",
+  "Cure poison",
+  Damage,
+  Death,
+  Defrost,
+  "Dexterity bonus",
+  Haste,
+  "Current HP bonus",
+  "Max HP bonus",
+  "Intelligence bonus",
+  Invisibility,
+  "Lore bonus",
+  "Luck bonus",
+  "Remove fear",
+  Panic,
+  Poison,
+  "Remove curse",
+  "Acid resistance bonus",
+  "Cold resistance bonus",
+  "Electricity resistance bonus",
+  "Fire resistance bonus",
+  "Magic damage resistance bonus",
+  "Raise dead",
+  "Save vs death bonus",
+  "Save vs wands bonus",
+  "Save vs polymorph bonus",
+  "Save vs breath bonus",
+  "Save vs spell bonus",
+  Silence,
+  Sleep,
+  Slow,
+  Sparkle,
+  "Bonus wizard spells",
+  "Stone to flesh",
+  "Strength bonus",
+  Stun,
+  Unstun,
+  Visible,
+  Vocalize,
+  "Wisdom bonus",
+  "Character color 1",
+  "Character color 2",
+  "Character color 3",
+  "Animation change",
+  "THAC0 bonus",
+  Slay,
+  "Reverse alignment",
+  "Change alignment",
+  "Dispel effects",
+  "Stealth bonus",
+  "Casting failure",
+  "Unknown (3D)",
+  "Bonus priest spells",
+  Infravision,
+  "Remove infravision",
+  Blur,
+  Translucent,
+  "Summon creature",
+  "Unsummon creature",
+  "Non-detection",
+  "Remove non-detection",
+  "Change sex",
+  "Set reaction",
+  "Attack damage bonus",
+  Blindness,
+  "Cure blindness",
+  Feeblemindedness,
+  "Cure feeblemindedness",
+  Disease,
+  "Cure disease",
+  Deafness,
+  "Cure deafness",
+  "Set AI script",
+  "Immunity to projectile",
+  "Magical fire resistance bonus",
+  "Magical cold resistance bonus",
+  "Slashing resistance bonus",
+  "Crushing resistance bonus",
+  "Piercing resistance bonus",
+  "Missile resistance bonus",
+  "Lockpicking bonus",
+  "Find traps bonus",
+  "Pick pockets bonus",
+  "Fatigue bonus",
+  "Intoxification bonus",
+  "Tracking bonus",
+  "Change level",
+  "Exceptional strength bonus",
+  Regeneration,
+  "Modify duration",
+  "Protection from creature type",
+  "Immunity to effect",
+  "Immunity to spell level",
+  "Change name",
+  "XP bonus",
+  "Gold bonus",
+  "Break morale",
+  "Change portrait",
+  Reputation,
+  "Hold creature",
+  "Retreat from",
+  "Create item",
+  "Remove item",
+  "Equip weapon",
+  "Disallow spellcasting",
+  "Detect alignment",
+  "Detect invisible",
+  Clairvoyance,
+  "Show creatures",
+  "Mirror image",
+  "Immunity to weapons",
+  "Visual animation effect",
+  "Create inventory item",
+  "Remove inventory item",
+  Teleport,
+  Unlock,
+  "Movementrate bonus",
+  "Summon monsters",
+  Confusion,
+  "Aid (non-cumulative)",
+  "Bless (non-cumulative)",
+  "Chant (non-cumulative)",
+  "Draw upon holy might (non-cumulative)",
+  "Luck (non-cumulative)",
+  Petrification,
+  Polymorph,
+  "Force visible",
+  "Bad chant (non-cumulative)",
+  "Character animation change",
+  "Display string",
+  "Casting glow",
+  "Lighting effects",
+  "Display portrait icon",
+  "Create item in slot",
+  "Disable button",
+  "Disable spellcasting",
+  "Cast spell",
+  "Learn spell",
+  "Cast spell (scroll)",
+  Identify,
+  "Find traps",
+  "Summon hostile creature",
+  "Play movie",
+  Sanctuary,
+  "Entangle overlay",
+  "Minor globe overlay",
+  "Protection from normal missiles overlay",
+  "Web effect overlay",
+  "Grease effect overlay",
+  "Mirror image effect",
+  "Unknown (A0)",
+  "Remove fear 2",
+  "Remove paralysis",
+  "Free action",
+  "Slow poison",
+  "Burning hands overlay",
+  "Magic resistance bonus",
+  "Missile THAC0 bonus",
+  "Remove creature",
+  "Remove portrait icon",
+  "Play damage animation",
+  "Give innate ability",
+  "Remove spell",
+  "Reduced damage from poison",
+  "Play sound",
+  "Hold creature type",
+  "Unknown (B0)",
+  "Use EFF file",
+  "THAC0 vs. type bonus",
+  "Damage vs. type bonus",
+  "Disallow item",
+  "Unknown (B5)",
+  "Unknown (B6)",
+  "Unknown (B7)",
+  "Unknown (B8)",
+  "Hold creature 2",
+  "Increase critical hits",
+  "Set local variable",
+  "Increase spells cast pr. round",
+  "Increase casting speed factor",
+  "Increase attack speed factor"
+}
+
+enum EffectTargetType {
+  Self=1,
+  "Preset target",
+  Party,
+  "Global including party",
+  "Global excluding party"
+}
+
+enum EffectDuration {
+  "Duration",
+  "Permanent",
+  "While Equipped",
+  "Delayed Duration",
+  "Delayed",
+  "Delayed (transforms to 8)",
+  "Duration?",
+  "Permanent?",
+  "Permanent (unsaved)",
+  "Permanent (after Death)",
+  "Trigger"
+}
+
+enum EffectDispel {
+  Dispel, "Bypass resistance"
+}
+
+enum EffectSaveType {
+  Spells, Breath, "Death/poison", Wands, Petrification
+}
