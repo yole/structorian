@@ -1,4 +1,4 @@
-[filemask="*.exe;*.dll"]
+[filemask="*.exe;*.dll", preload]
 struct MZHeader
 {
   str [len=2] Signature;
@@ -24,6 +24,8 @@ struct MZHeader
     child PEHeader [offset=NewHdrOffset];
   }
 }
+
+// -- PE EXE -----------------------------------------------------------------
 
 enum PEMachine
 {
@@ -59,6 +61,7 @@ enum PELoaderFlags
   BREAK_ON_LOAD, DEBUG_ON_LOAD
 }
 
+[preload]
 struct PEHeader
 {
   str [len=4] Signature;
@@ -142,6 +145,7 @@ enum PESectionCharacteristics
   MEM_SHARED, MEM_EXECUTE, MEM_READ, MEM_WRITE
 }
 
+[preload]
 struct PESection
 {
   str [len=8] Name;
@@ -219,6 +223,7 @@ struct PEExportedFunction
   calc Ordinal [value=_Ordinal+Parent.Base];
 }
 
+[preload]
 struct IMAGE_IMPORT_DESCRIPTOR
 {
   x32 Characteristics;
@@ -242,6 +247,7 @@ struct IMAGE_IMPORT_DESCRIPTOR
   }
 }
 
+[preload]
 struct IMAGE_IMPORT_BY_NAME
 {
   x32 StructPtr;
@@ -267,10 +273,457 @@ struct IMAGE_TLS_DIRECTORY32
 
 // -- Resource directory -----------------------------------------------------
 
+[preload]
 struct IMAGE_RESOURCE_DIRECTORY
 {
   include PEDirHeader;
   u16 NumberOfNamedEntries;
   u16 NumberOfIdEntries;
   child PEResDirEntry [count=(NumberOfNamedEntries+NumberOfIdEntries)];
+}
+
+[global]
+enum PEResourceType
+{
+  RT_CURSOR=1, RT_BITMAP, RT_ICON, RT_MENU, RT_DIALOG, RT_STRING,
+  RT_FONTDIR, RT_FONT, RT_ACCELERATOR, RT_RCDATA, RT_MESSAGETABLE,
+  RT_GROUPCURSOR=12, RT_GROUPICON=14, RT_VERSION=16,
+  RT_DLGINCLUDE=17, RT_PLUGPLAY=19, RT_VXD, RT_ANICURSOR, RT_ANIICON,
+  RT_HTML, RT_MANIFEST
+}
+
+[preload]
+struct PEResDirEntry
+{
+  bitfield (4)
+  {
+    [hidden] u32 NameOffset   [frombit=0, tobit=30];
+    [hidden] u8  NameIsString [frombit=31, tobit=31];
+  }
+  skip (-4);
+  if (NameIsString == 0)
+  {
+    if (ParentCount == 4)
+    {
+      enum16 ResType [enum=PEResourceType];
+    }
+    else
+    {
+      x16 ID;
+    }
+    skip 2;
+  }
+  else
+  {
+    bitfield (4)
+    {
+      x32 Name [frombit=0, tobit=30];
+    }
+    seek (ResourceDirStart+NameOffset);
+    u16 Length;
+    wstr [len=Length] NameString;
+    rewind;
+    if (ParentCount == 4)
+    {
+      local ResType [value=-1];
+    }
+  }
+  if (ParentCount >= 6)
+  {
+    local ResType [value=Parent.Parent.ResType];
+  }
+  bitfield (4)
+  {
+    i32 OffsetToData [frombit=0, tobit=30];
+    [hidden] u8 DataIsDirectory [frombit=31, tobit=31];
+  }
+  if (DataIsDirectory == 0)
+  {
+    child PEResDataEntry [offset=(ResourceDirStart+OffsetToData)];
+  }
+  else
+  {
+    child IMAGE_RESOURCE_DIRECTORY [offset=(ResourceDirStart+OffsetToData)];
+  }
+}
+
+[preload]
+struct PEResDataEntry
+{
+  x32 OffsetToData;
+  u32 Size;
+  u32 CodePage;
+  u32 Reserved;
+  local ResOffset [value=ResourceBase+OffsetToData];
+  switch (Parent.ResType)
+  {
+    case (RT_BITMAP)       { child BITMAPINFOHEADER [offset=ResOffset]; }
+    case (RT_MENU)         { child MENUHEADER       [offset=ResOffset]; }
+    case (RT_DIALOG)       { child DLGTEMPLATE_Base [offset=ResOffset]; }
+    case (RT_STRING)       { child PEStringBlock    [offset=ResOffset]; }
+    case (RT_ACCELERATOR)  { child ACCELTABLEENTRY  [offset=ResOffset, count=(Size/8)]; }
+    case (RT_MESSAGETABLE) { child MESSAGE_RESOURCE_DATA [offset=ResOffset]; }
+    case (RT_GROUPICON)    { child PEIconHeader     [offset=ResOffset]; }
+    case (RT_GROUPCURSOR)  { child PEIconHeader     [offset=ResOffset]; }
+    case (RT_VERSION)      { child VS_VERSIONINFO   [offset=ResOffset]; }
+  }
+}
+
+include "bmp.strs";
+
+// -- RT_MENU ----------------------------------------------------------------
+
+[preload]
+struct MENUHEADER
+{
+  u16 wVersion;
+  u16 cbHeaderSize;
+  child MENUITEMTEMPLATE;
+}
+
+[globalmask]
+enum MenuFlags
+{
+  MF_GRAYED, MF_DISABLED, MF_BITMAP, MF_CHECKED,
+  MF_POPUP, MF_MENUBARBREAK, MF_MENUBREAK, MF_END
+}
+
+struct MENUITEMTEMPLATE
+{
+  set16 mtOption [enum=MenuFlags];
+  if (!(mtOption & MF_POPUP))
+  {
+    u16 mtID;
+  }
+  wstr mtString;
+  if (CurOffset - Parent.StructOffset < Parent.Parent.Size)
+  {
+    sibling MENUITEMTEMPLATE;
+  }
+}
+
+// -- RT_DIALOG --------------------------------------------------------------
+
+enum WindowStyle
+{
+  WS_TABSTOP=16, WS_GROUP, WS_THICKFRAME, WS_SYSMENU,
+  WS_HSCROLL, WS_VSCROLL, WS_DLGFRAME, WS_BORDER,
+  WS_MAXIMIZE, WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_DISABLED,
+  WS_VISIBLE, WS_MINIMIZE, WS_CHILD, WS_POPUP
+}
+
+[globalmask,inherit=WindowStyle]
+enum DialogStyle
+{
+  DS_ABSALIGN, DS_SYSMODAL, DS_3DLOOK, DS_FIXEDSYS,
+  DS_NOFAILCREATE, DS_LOCALEDIT, DS_SETFONT, DS_MODALFRAME,
+  DS_NOIDLEMSG, DS_SETFOREGROUND, DS_CONTROL, DS_CENTER,
+  DS_CENTERMOUSE, DS_CONTEXTHELP
+}
+
+struct DLGTEMPLATE_Base
+{
+  skip 2;
+  [hidden] x16 signature;
+  skip -4;
+  if (signature == 0xFFFF)
+  {
+    include [replace] DLGTEMPLATEEX;
+  }
+  else
+  {
+    include [replace] DLGTEMPLATE;
+  }
+}
+
+[hidden]
+struct DLGTEMPLATE_Common
+{
+  i16 x;
+  i16 y;
+  i16 cx;
+  i16 cy;
+  [hidden] x16 menuArray;
+  switch (menuArray)
+  {
+    case 0      { skip (-2); i16 MenuID; }
+    case 0xFFFF { i16 MenuID; }
+    default     { skip (-2); wstr MenuName; }
+  }
+  [hidden] x16 classArray;
+  switch (classArray)
+  {
+    case 0         { skip (-2); i16 ClassID; }
+    case 0xFFFF    { i16 ClassID; }
+    case [default] { skip (-2); wstr ClassName; }
+  }
+  wstr DialogTitle;
+}
+
+struct DLGTEMPLATE
+{
+  set32 dwStyle [enum=DialogStyle];
+  x32 dwExtendedStyle;
+  u16 cdit;
+  include DLGTEMPLATE_Common;
+  if (dwStyle & DS_SETFONT)
+  {
+    i16 pointsize;
+    wstr typeface;
+  }
+  child DLGITEMTEMPLATE [count=cdit];
+}
+
+enum DlgItemClass
+{
+  BUTTON=0x80, EDIT, STATIC, LISTBOX, SCROLLBAR, COMBOBOX
+}
+
+[hidden]
+struct DLGITEMTEMPLATE_Common
+{
+  [hidden] x16 classArray;
+  if (classArray == 0xFFFF)
+  {
+    enum16 [enum=DlgItemClass] Class;
+  }
+  else
+  {
+    skip (-2);
+    wstr Class;
+  }
+  [hidden] x16 titleArray;
+  if (titleArray == 0xFFFF)
+  {
+    u16 TitleID;
+  }
+  else
+  {
+    skip (-2);
+    wstr Title;
+  }
+}
+
+struct DLGITEMTEMPLATE
+{
+  align 4;
+  x32 dwStyle;
+  x32 dwExtendedStyle;
+  i16 x;
+  i16 y;
+  i16 cx;
+  i16 cy;
+  u16 id;
+  include DLGITEMTEMPLATE_Common;
+  align 2;
+  u16 creationDataSize;
+  skip creationDataSize;
+}
+
+struct DLGTEMPLATEEX
+{
+  u16 dlgVer;
+  x16 signature;
+  x32 helpID;
+  x32 exStyle;
+  set32 dwStyle [enum=DialogStyle];
+  u16 cDlgItems;
+  include DLGTEMPLATE_Common;
+  if (dwStyle & DS_SETFONT)
+  {
+    u16  pointsize;
+    u16  weight;
+    u8   italic;
+    u8   charset;
+    wstr typeface;
+  }
+  child DLGITEMTEMPLATEEX [count=cDlgItems];
+}
+
+struct DLGITEMTEMPLATEEX
+{
+  align 4;
+  x32 helpID;
+  x32 dwExtendedStyle;
+  x32 dwStyle;
+  i16 x;
+  i16 y;
+  i16 cx;
+  i16 cy;
+  i32 id;
+  include DLGITEMTEMPLATE_Common;
+  u16 extraCount;
+  if (extraCount > 0)
+  {
+    align 2;
+    skip extraCount;
+  }
+}
+
+// -- RT_STRING --------------------------------------------------------------
+
+struct PEStringBlock
+{
+  local index [value=0];
+  repeat (16)
+  {
+    [hidden] u16 length;
+    if (length > 0)
+    {
+      calc ID [value=((Parent.Parent.Parent.Parent.ID-1)*16+index)];
+      wstr String [len=length];
+    }
+    local index [value=index+1];
+  }
+}
+
+// -- RT_ACCELERATOR ---------------------------------------------------------
+
+enum AccelFlags
+{
+  FVIRTKEY, FNOINVERT, FSHIFT, FCONTROL, FALT, F_LASTENTRY=7
+}
+
+struct ACCELTABLEENTRY
+{
+  set16 fFlags [enum=AccelFlags];
+  u16 wAnsi;
+  u16 wId;
+  skip 2;
+}
+
+// -- RT_MESSAGETABLE --------------------------------------------------------
+
+struct MESSAGE_RESOURCE_DATA
+{
+  u32 NumberOfBlocks;
+  child MESSAGE_RESOURCE_BLOCK [count=NumberOfBlocks];
+}
+
+struct MESSAGE_RESOURCE_BLOCK
+{
+  u32 LowId;
+  u32 HighId;
+  x32 OffsetToEntries;
+  child MESSAGE_RESOURCE_ENTRY [offset=(Parent.StructOffset+OffsetToEntries),
+                                count=(HighId-LowId+1)];
+}
+
+struct MESSAGE_RESOURCE_ENTRY
+{
+  u16 Length;
+  u16 Flags;
+  if (Flags == 1)
+  {
+    wstr Text [len=((Length-4)/2)];
+  }
+  else
+  {
+    str Text [len=(Length-4)];
+  }
+}
+
+// -- RT_GROUPICON, RT_GROUPCURSOR -------------------------------------------
+
+struct PEIconHeader
+{
+  u16 wReserved;
+  u16 wType;
+  u16 wCount;
+  switch (Parent.Parent.ResType)
+  {
+    case (RT_GROUPICON)   { child PEIconResInfo   [count=wCount]; }
+    case (RT_GROUPCURSOR) { child PECursorResInfo [count=wCount]; }
+  }
+}
+
+struct PEIconResInfo
+{
+  u8  bWidth;
+  u8  bHeight;
+  u8  bColorCount;
+  u8  bReserved;
+  u16 wPlanes;
+  u16 wBitCount;
+  u32 lBytesInRes;
+  u16 wNameOrdinal;
+}
+
+struct PECursorResInfo
+{
+  u16 wWidth;
+  u16 wHeight;
+  u16 wPlanes;
+  u16 wBitCount;
+  u32 lBytesInRes;
+  u16 wNameOrdinal;
+}
+
+// -- RT_VERSION -------------------------------------------------------------
+
+[preload]
+struct VS_VERSIONINFO
+{
+  u16 wLength;
+  u16 wValueLength;
+  u16 wType;
+  wstr szKey;
+  align 4;
+  if (wValueLength > 0)
+  {
+    if (szKey == "VS_VERSION_INFO")
+    {
+      include VS_FIXEDFILEINFO;
+    }
+    else
+    {
+      wstr Value [len=wValueLength];
+    }
+  }
+  align 4;
+  if (CurOffset - StructOffset < wLength)
+  {
+    child VS_VERSIONINFO;
+  }
+  if (Parent.StructName == "VS_VERSIONINFO")
+  {
+    if (CurOffset - Parent.StructOffset < Parent.wLength)
+    {
+      sibling VS_VERSIONINFO;
+    }
+  }
+}
+
+enum VS_FF_Flags
+{
+  DEBUG, PRERELEASE, PATCHED, PRIVATEBUILD, INFOINFERRED, SPECIALBUILD
+}
+
+enum "VS_FIXEDFILEINFO OS"
+{
+  "DOS"=1, "OS/2 16-bit", "OS/2 32-bit", "Win32"
+}
+
+enum "VS_FIXEDFILEINFO VFT"
+{
+  "Unknown", "Application", "DLL", "Device driver",
+  "Font", "VXD", "Static library"=7
+}
+
+struct VS_FIXEDFILEINFO
+{
+  x32 dwSignature;
+  x32 dwStrucVersion;
+  x32 dwFileVersionMS;
+  x32 dwFileVersionLS;
+  x32 dwProductVersionMS;
+  x32 dwProductVersionLS;
+  set32 dwFileFlagsMask    [enum=VS_FF_Flags];
+  set32 dwFileFlags        [enum=VS_FF_Flags];
+  enum16 "dwFileOS/Target" [enum="VS_FIXEDFILEINFO OS"];
+  enum16 "dwFileOS/Base"   [enum="VS_FIXEDFILEINFO OS"];
+  enum32 dwFileType        [enum="VS_FIXEDFILEINFO VFT"];
+  u32 dwFileSubtype;
+  x32 dwFileDateMS;
+  x32 dwFileDateLS;
 }
