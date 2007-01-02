@@ -28,6 +28,6 @@ namespace Structorian.Engine
         public int Length
         {
             get { return _length; }
-        } 
+        }
     }
 }

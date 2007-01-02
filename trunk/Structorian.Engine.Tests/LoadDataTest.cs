@@ -814,5 +814,16 @@ namespace Structorian.Engine.Tests
                 "struct A { str X [value=\"\"A\"\"]; }", new byte[0]);
             Assert.AreEqual("A", instance.Cells[0].Value);
         }
+
+        [Test] public void FieldLike()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { include B [tag=T]; i q [value=a]; i p [value=b]; } [fieldlike] struct B { [hidden] u8 a; u8 b; }",
+                new byte[] {17, 37});
+            Assert.AreEqual("37", instance.Cells [0].Value);
+            Assert.AreEqual("T", instance.Cells [0].Tag);
+            Assert.AreEqual("17", instance.Cells [1].Value);
+            Assert.AreEqual("37", instance.Cells [2].Value);
+        }
     }
 }
