@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using NUnit.Framework;
 
 namespace Structorian.Engine.Tests
@@ -13,7 +11,7 @@ namespace Structorian.Engine.Tests
             Expression expr = ExpressionParser.Parse("2");
             Assert.AreEqual(2, expr.Evaluate(null));
         }
-        
+
         [Test] public void EvaluateSymbol()
         {
             Expression expr = ExpressionParser.Parse("len");
@@ -149,6 +147,11 @@ namespace Structorian.Engine.Tests
         {
             Assert.AreEqual("B2", ExpressionParser.Parse("\"B\" + 2").EvaluateString(null));
             Assert.AreEqual("2B", ExpressionParser.Parse("2 + \"B\"").EvaluateString(null));
+        }
+
+        [Test] public void EvaluateHexNumber()
+        {
+            Assert.IsTrue(ExpressionParser.Parse("255 & 0x80 != 0").EvaluateBool(null));
         }
     }
 }

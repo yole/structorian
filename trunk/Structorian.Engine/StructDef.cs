@@ -15,6 +15,7 @@ namespace Structorian.Engine
         private string _fileMask;
         private ByteOrder _byteOrder = ByteOrder.Default;
         private bool _hidden;
+        private bool _fieldLike;
         private bool _preload;
 
         public StructDef(StructFile structFile, string name)
@@ -100,6 +101,8 @@ namespace Structorian.Engine
                 _hidden = true;
             else if (name == "preload")
                 _preload = true;
+            else if (name == "fieldlike")
+                _fieldLike = (Int32.Parse(value) > 0);
             else
                 throw new ParseException("Unknown attribute " + name, position);
         }
