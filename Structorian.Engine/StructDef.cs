@@ -50,6 +50,11 @@ namespace Structorian.Engine
             get { return _preload; }
         }
 
+        public bool FieldLike
+        {
+            get { return _fieldLike; }
+        }
+
         public void AddField(StructField field)
         {
             _fields.Add(field);

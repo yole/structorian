@@ -9,7 +9,9 @@ namespace Structorian.Engine
     {
         void LoadChildren(StructInstance instance, Stream stream);
     }
-    
+
+    internal delegate void CellHandler(StructCell cell);
+
     public class StructInstance: InstanceTreeNode, IEvaluateContext
     {
         private StructDef _def;
@@ -25,6 +27,7 @@ namespace Structorian.Engine
         private List<IChildSeed> _childSeeds = null;
         private Dictionary<StructCell, int> _cellSizes = null;
         private bool _preloading = false;
+        private Stack<CellHandler> _addedCellHandlers = new Stack<CellHandler>();
 
         private StructInstance _followInstance = null;
 
@@ -186,6 +189,11 @@ namespace Structorian.Engine
             }
             else
                 _cells.Add(cell);
+
+            foreach(CellHandler handler in _addedCellHandlers)
+            {
+                handler(cell);
+            }
         }
 
         public override void AddChild(InstanceTreeNode instance)
@@ -306,6 +314,16 @@ namespace Structorian.Engine
             if (_cellSizes != null && _cellSizes.TryGetValue(cell, out result))
                 return result;
             return null;
+        }
+
+        internal void PushAddedCellHandler(CellHandler handler)
+        {
+            _addedCellHandlers.Push(handler);
+        }
+
+        internal void PopAddedCellHandler()
+        {
+            _addedCellHandlers.Pop();
         }
     }
 }

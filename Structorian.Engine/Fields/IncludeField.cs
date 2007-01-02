@@ -12,7 +12,20 @@ namespace Structorian.Engine.Fields
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             StructDef structDef = GetIncludedStruct();
-            structDef.LoadInstanceData(instance, reader.BaseStream);
+
+            if (structDef.FieldLike)
+                instance.PushAddedCellHandler(delegate(StructCell cell) { cell.Tag = Tag; });
+            
+            try
+            {
+                structDef.LoadInstanceData(instance, reader.BaseStream);
+            }
+            finally
+            {
+                if (structDef.FieldLike)
+                    instance.PopAddedCellHandler();
+            }
+
             if (GetBoolAttribute("replace"))
                 instance.SetNodeName(structDef.Name);
         }

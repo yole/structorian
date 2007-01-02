@@ -9,6 +9,7 @@ namespace Structorian.Engine
         private static ReadOnlyCollection<StructCell> _emptyCollection = new List<StructCell>().AsReadOnly();
         
         private StructField _def;
+        private string _tag;
         private IConvertible _value;
         private string _displayValue;
         private int _offset;
@@ -48,7 +49,14 @@ namespace Structorian.Engine
 
         public string Tag
         {
-            get { return _def.Tag; }
+            get
+            {
+                if (_tag != null)
+                    return _tag;
+
+                return _def.Tag;
+            }
+            set { _tag = value; }
         }
         
         public string Value
