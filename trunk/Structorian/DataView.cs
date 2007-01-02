@@ -80,8 +80,11 @@ namespace Structorian
                 AddInstanceNode(null, e.Child);
             else
             {
-                TreeNode parent = _nodeMap[e.Parent];
-                AddInstanceNode(parent, e.Child);
+                TreeNode parent;
+                if (_nodeMap.TryGetValue(e.Parent, out parent))
+                {
+                    AddInstanceNode(parent, e.Child);
+                }
             }
         }
 

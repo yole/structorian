@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 
 namespace Structorian.Engine
 {
     public abstract class InstanceTreeNode
     {
+        private StructInstance lastChild;
         public abstract InstanceTreeNode Parent { get; }
         public abstract void AddChild(InstanceTreeNode instance);
         public abstract string NodeName { get; }
@@ -15,6 +14,9 @@ namespace Structorian.Engine
         public abstract void NeedChildren();
         public abstract ReadOnlyCollection<InstanceTreeNode> Children { get; }
         public abstract ReadOnlyCollection<StructCell> Cells { get; }
+
+        public abstract StructInstance LastChild { get; }
+        public abstract long EndChildrenOffset { get; }
 
         protected InstanceTree GetInstanceTree()
         {
