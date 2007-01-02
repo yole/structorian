@@ -20,16 +20,16 @@ The following attributes are common to all string types:
     is not specified, the string continues until the following null
     character or until the end of file.
 
-    Actually, both **str** and **cstr** fields will read as many bytes as
+    Actually, both *str* and *cstr* fields will read as many bytes as
     specified by the `[len]` attribute, and will stop at the first null
     character encountered. The only difference between them is their
-    behavior when editing. For a **str** field of length N, it is allowed
-    to enter exactly N characters. On the other hand, for a **cstr** field
+    behavior when editing. For a *str* field of length N, it is allowed
+    to enter exactly N characters. On the other hand, for a *cstr* field
     of length N, only N-1 characters can be entered, and the Nth character
-    will always be the terminating null byte. **wstr** fields behave like
-    **str** fields, and do not enforce the terminating null character.
+    will always be the terminating null byte. *wstr* fields behave like *str* fields, 
+    and do not enforce the terminating null character.
 
-**value** = *expression*
+*value* = _expression_
 
     Specifies the expression that is evaluated to obtain the value
     of the field. If the `value` attribute is specified, the field
