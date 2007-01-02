@@ -22,7 +22,16 @@ namespace Structorian.Engine.Fields
             {
                 foreach(StructField field in _linkedFields)
                 {
-                    if (field is ElseField)
+                    if (field is ElseIfField)
+                    {
+                        Expression expr = field.GetExpressionAttribute("expr");
+                        if (expr.EvaluateBool(instance))
+                        {
+                            field.LoadData(reader, instance);
+                            break;
+                        }
+                    }
+                    else if (field is ElseField)
                     {
                         field.LoadData(reader, instance);
                         break;
@@ -33,7 +42,7 @@ namespace Structorian.Engine.Fields
 
         protected internal override bool CanLinkField(StructField nextField)
         {
-            return nextField is ElseField;
+            return nextField is ElseField || nextField is ElseIfField;
         }
     }
 }
