@@ -1,0 +1,159 @@
+[filemask="*.mid", byteorder=bigendian]
+struct MIDIChunk
+{
+  str [len=4] signature;
+  nodename signature;
+  u32 chunk_length;
+  switch (signature)
+  {
+    case ("MThd")  { include MThd; }
+    case ("MTrk")  { include MTrk; }
+  }
+  if (StructOffset+chunk_length+8 < FileSize)
+  {
+    sibling MIDIChunk [offset=StructOffset+chunk_length+8];
+  }
+}
+
+[hidden,fieldlike]
+struct VarInt
+{
+  [hidden] u8 b0;
+  local result [value=b0];
+  if (b0 & 0x80 != 0)
+  {
+    [hidden] u8 b1;
+    local result [value=(((b0 & 0x7F) << 7) | b1)];
+  }
+  i VarInt [value=result];
+}
+
+enum MidiFormat
+{
+  "Single Track", "Multi Track Sync", "Multi Track Async"
+}
+
+struct MThd
+{
+  enum16 format [enum=MidiFormat];
+  u16    tracks;
+  u16    division;
+}
+
+struct MTrk
+{
+  child MidiCommand;
+}
+
+[global] enum MidiCommandType
+{
+  NOTE_OFF=8, NOTE_ON=9, CONTROL_CHANGE=11, PATCH_CHANGE=12, PITCH_WHEEL=14
+}
+
+struct MidiCommand
+{
+  include VarInt [tag=time];
+  [hidden] u8 _event;
+  skip -1;
+  if ((_event & 0x80) == 0x80)
+  {
+    global last_event [value=_event];
+  }
+  if (_event == 0xFF)
+  {
+    u8 event;
+    include MetaEvent;
+  }
+  else
+  {
+    if ((_event & 0x80) == 0x80)
+    {
+      bitfield(1)
+      {
+        enum8 command [enum=MidiCommandType, frombit=4, tobit=7];
+        u8 channel [frombit=0, tobit=3];
+      }
+    }
+    else
+    {
+      enum command [enum=MidiCommandType, value=(last_event >> 4)];
+      u channel [value=(last_event & 0xF)];
+    }
+    nodename command;
+    switch (command)
+    {
+      case NOTE_OFF { include MidiNote; }
+      case NOTE_ON  { include MidiNote; }
+      case CONTROL_CHANGE
+      {
+        u8 controller;
+        u8 new_value;
+      }
+      case PATCH_CHANGE
+      {
+        u8 new_patch;
+      }
+      case PITCH_WHEEL
+      {
+        [hidden] u8 _lsb;
+        [hidden] u8 _msb;
+        x wheel_value [value=(_lsb + (_msb << 7))];
+      }
+    }
+  }
+  if (CurOffset - Parent.StructOffset < Parent.chunk_length+8)
+  {
+    sibling;
+  }
+}
+
+enum Note
+{
+  C, "C#", D, "D#", E, F, "F#", G, "G#", A, "A#", B
+}
+
+[hidden] struct MidiNote
+{
+  [hidden] u8 _note;
+  u octave   [value=(_note / 12)];
+  enum note  [value=(_note % 12), enum=Note];
+  u8 velocity;
+}
+
+[global] enum MetaEventType
+{
+  TEXT_EVENT=1, COPYRIGHT_NOTICE=2, TRACK_NAME=3, END_OF_TRACK=0x2F,
+  TEMPO_SETTING=0x51, SMPTE_OFFSET=0x54, TIME_SIGNATURE=0x58,
+  KEY_SIGNATURE=0x59
+}
+
+enum major_minor
+{
+  major=0, minor=1
+}
+
+struct MetaEvent
+{
+  enum8 meta_type [enum=MetaEventType];
+  include VarInt [tag=size];
+  switch (meta_type)
+  {
+    case TEXT_EVENT       { str [len=result] text; }
+    case COPYRIGHT_NOTICE { str [len=result] copyright_notice; }
+    case TRACK_NAME       { str [len=result] track_name; }
+    case TIME_SIGNATURE
+    {
+      [hidden] u8 _numerator;
+      [hidden] u8 _denominator;
+      str time_signature [value=(_numerator + "/" + (1 << _denominator))];
+      u8 ticks_per_metronome_click;
+      u8 32_notes_per_quarter;
+    }
+    case KEY_SIGNATURE
+    {
+      i8 sharps_or_flats;
+      enum8 is_major [enum=major_minor];
+    }
+    default         { blob meta_data [len=result]; }
+  }
+}
