@@ -23,6 +23,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(ChildField), "count", AttributeType.Expression);
             RegisterAttribute(typeof(ChildField), "group", AttributeType.String);
             RegisterAttribute(typeof(ChildField), "struct", AttributeType.StructRef);
+            RegisterAttribute(typeof(ChildField), "followchildren", AttributeType.Bool);
             RegisterAttribute(typeof(DosDateTimeField), "timefirst", AttributeType.Bool);
             RegisterAttribute(typeof(EnumField), "enum", AttributeType.EnumRef);
             RegisterAttribute(typeof(EnumField), "value", AttributeType.Expression);

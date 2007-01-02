@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Structorian.Engine.Fields
@@ -40,6 +39,7 @@ namespace Structorian.Engine.Fields
 
         private void DoLoadChildren(StructInstance instance, InstanceTreeNode parent, Stream stream)
         {
+            StructInstance lastChild = instance.LastChild;
             string groupName = GetStringAttribute("group");
             if (groupName != null)
             {
@@ -64,18 +64,22 @@ namespace Structorian.Engine.Fields
             
             StructInstance childInstance;
             Expression offsetExpr = GetExpressionAttribute("offset");
+            bool followChildren = GetBoolAttribute("followchildren");
             if (offsetExpr != null)
             {
                 long childOffset = offsetExpr.EvaluateLong(instance);
                 childInstance = new StructInstance(childDef, parent, stream, childOffset);
             }
             else
-                childInstance = new StructInstance(childDef, parent, stream, instance);
+            {
+                bool firstFollowChildren = followChildren && lastChild != parent;
+                childInstance = new StructInstance(childDef, parent, stream, lastChild, firstFollowChildren);
+            }
             parent.AddChild(childInstance);
             
             for(int i=1; i<count; i++)
             {
-                StructInstance nextInstance = new StructInstance(childDef, parent, stream, childInstance);
+                StructInstance nextInstance = new StructInstance(childDef, parent, stream, childInstance, followChildren);
                 parent.AddChild(nextInstance);
                 childInstance = nextInstance;
             }

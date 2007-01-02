@@ -247,8 +247,7 @@ namespace Structorian.Engine.Tests
             InstanceTreeNode groupInstance = instance.Children[0];
             Assert.AreEqual("X", groupInstance.NodeName);
             Assert.AreEqual(1, groupInstance.Children.Count);
-            Assert.AreEqual("17", groupInstance.Children[0].Cells[0].Value);
-        }
+            Assert.AreEqual("17", groupInstance.Children[0].Cells[0].Value);}
 
         [Test] public void ChildGroupCount()
         {
@@ -839,6 +838,23 @@ namespace Structorian.Engine.Tests
             StructInstance instance = PrepareInstance(
                 "struct A { global q [value=0]; global q [value=1]; i a [value=q]; }", new byte[0]);
             Assert.AreEqual("1", instance.Cells [0].Value);
+        }
+
+        [Test] public void FollowChildren()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { child B; child C [followchildren]; } struct B { u8 x; child C; } struct C { u8 q; }",
+                new byte[] {2, 17, 37});
+            Assert.AreEqual("37", instance.Children[1].Cells[0].Value);
+        }
+
+        [Test] public void FollowSelfChildren()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 q; child C [count=2, followchildren]; } struct C { u8 q; }",
+                new byte[] { 2, 17, 37 });
+            Assert.AreEqual("17", instance.Children[0].Cells[0].Value);
+            Assert.AreEqual("37", instance.Children[1].Cells[0].Value);
         }
     }
 }

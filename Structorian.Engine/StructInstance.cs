@@ -30,6 +30,7 @@ namespace Structorian.Engine
         private Stack<CellHandler> _addedCellHandlers = new Stack<CellHandler>();
 
         private StructInstance _followInstance = null;
+        private bool _followChildren;
 
         public StructInstance(StructDef def, InstanceTreeNode parent, Stream stream, long offset)
         {
@@ -39,12 +40,14 @@ namespace Structorian.Engine
             _offset = offset;
         }
 
-        public StructInstance(StructDef def, InstanceTreeNode parent, Stream stream, StructInstance followInstance)
+        public StructInstance(StructDef def, InstanceTreeNode parent, Stream stream, 
+            StructInstance followInstance, bool followChildren)
         {
             _def = def;
             _parent = parent;
             _stream = stream;
             _followInstance = followInstance;
+            _followChildren = followChildren;
         }
 
         public StructDef Def
@@ -81,7 +84,7 @@ namespace Structorian.Engine
             get
             {
                 if (_followInstance != null)
-                    return _followInstance.EndOffset;
+                    return _followChildren ? _followInstance.EndChildrenOffset : _followInstance.EndOffset;
                 return _offset;
             }
         }
@@ -92,6 +95,20 @@ namespace Structorian.Engine
             {
                 NeedData();
                 return _endOffset;
+            }
+        }
+
+        public override long EndChildrenOffset
+        {
+            get
+            {
+                if (HasChildren)
+                {
+                    NeedChildren();
+                    if (_children.Count > 0)
+                        return _children[_children.Count - 1].EndChildrenOffset;
+                }
+                return EndOffset;
             }
         }
 
@@ -149,6 +166,22 @@ namespace Structorian.Engine
                     p = p.EvaluateParent();
                 }
                 return count;
+            }
+        }
+
+        public override StructInstance LastChild
+        {
+            get
+            {
+                if (_children != null)
+                {
+                    for (int i = _children.Count - 1; i >= 0; i--)
+                    {
+                        if (_children [i].Children.Count > 0)
+                            return _children[i].LastChild;
+                    }
+                }
+                return this;
             }
         }
 

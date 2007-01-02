@@ -51,6 +51,17 @@ namespace Structorian.Engine
             get { return StructCell.EmptyCollection(); }
         }
 
+        public override long EndChildrenOffset
+        {
+            get { return _children[_children.Count - 1].EndChildrenOffset; }
+        }
+
+
+        public override StructInstance LastChild
+        {
+            get { return _children[_children.Count - 1].LastChild; }
+        }
+
         public override ReadOnlyCollection<InstanceTreeNode> Children
         {
             get { return _children.AsReadOnly(); }

@@ -48,6 +48,16 @@ namespace Structorian.Engine
             get { return StructCell.EmptyCollection(); }
         }
 
+        public override StructInstance LastChild
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override long EndChildrenOffset
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         internal void RegisterGlobal(string id, int result)
         {
             _globals [id] = result;
