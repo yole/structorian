@@ -237,14 +237,14 @@ namespace Structorian.Engine
                 enumDef.SetAttribute(attr.Key, attr.Value);
             
             lexer.GetNextToken(StructTokenType.OpenCurly);
-            int lastValue = -1;
+            uint lastValue = UInt32.MaxValue;
             while(!lexer.CheckNextToken(StructTokenType.CloseCurly))
             {
                 string constName = lexer.GetNextToken(StructTokenType.String);
                 if (lexer.CheckNextToken(StructTokenType.Equals))
                 {
                     string constValue = lexer.GetNextToken(StructTokenType.String);
-                    lastValue = ExpressionParser.Parse(constValue).EvaluateInt(null);
+                    lastValue = (uint) ExpressionParser.Parse(constValue).EvaluateInt(null);
                 }
                 else
                     lastValue++;
