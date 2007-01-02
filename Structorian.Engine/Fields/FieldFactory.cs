@@ -70,6 +70,10 @@ namespace Structorian.Engine.Fields
                 case "blob": return new BlobField(structDef);
                 case "float": return new FloatField(structDef);
                 case "break": return new BreakField(structDef);
+                case "i": return new IntField(structDef, 0, false, false);
+                case "u": return new IntField(structDef, 0, true, false);
+                case "x": return new IntField(structDef, 0, true, true);
+                case "enum": return new EnumField(structDef, 0);
             }
             
             int size;

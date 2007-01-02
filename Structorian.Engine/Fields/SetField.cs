@@ -14,7 +14,7 @@ namespace Structorian.Engine.Fields
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             int offset = (int)reader.BaseStream.Position;
-            IConvertible iValue = ReadIntValue(reader);
+            IConvertible iValue = ReadIntValue(reader, instance);
             uint value = iValue.ToUInt32(CultureInfo.CurrentCulture);
             EnumDef enumDef = GetEnumAttribute("enum");
 

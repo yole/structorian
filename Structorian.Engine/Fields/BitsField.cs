@@ -14,7 +14,7 @@ namespace Structorian.Engine.Fields
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             int offset = (int) reader.BaseStream.Position;
-            IConvertible value = ReadIntValue(reader);
+            IConvertible value = ReadIntValue(reader, instance);
             uint u = value.ToUInt32(CultureInfo.CurrentCulture);
             StringBuilder displayValue = new StringBuilder(_size * 8);
             for(int i=_size * 8 - 1; i >= 0; i--)

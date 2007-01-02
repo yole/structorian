@@ -14,8 +14,14 @@ namespace Structorian.Engine.Fields
             _unsigned = unsigned;
         }
 
-        protected IConvertible ReadIntValue(BinaryReader reader)
+        protected IConvertible ReadIntValue(BinaryReader reader, StructInstance instance)
         {
+            Expression expr = GetExpressionAttribute("value");
+            if (expr != null)
+            {
+                return expr.EvaluateInt(instance);
+            }
+            
             if (_structDef.IsReverseByteOrder())
                 reader = new ReverseByteOrderReader(reader.BaseStream);
                     

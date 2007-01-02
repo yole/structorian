@@ -25,8 +25,10 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(ChildField), "struct", AttributeType.StructRef);
             RegisterAttribute(typeof(DosDateTimeField), "timefirst", AttributeType.Bool);
             RegisterAttribute(typeof(EnumField), "enum", AttributeType.EnumRef);
+            RegisterAttribute(typeof(EnumField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(GlobalField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(IfField), "expr", AttributeType.Expression);
+            RegisterAttribute(typeof(IntField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(ElseIfField), "expr", AttributeType.Expression);
             RegisterAttribute(typeof(IncludeField), "struct", AttributeType.StructRef);
             RegisterAttribute(typeof(IncludeField), "replace", AttributeType.Bool);
@@ -37,6 +39,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(SeekField), "offset", AttributeType.Expression);
             RegisterAttribute(typeof(SetField), "enum", AttributeType.EnumRef);
             RegisterAttribute(typeof(StrField), "len", AttributeType.Expression);
+            RegisterAttribute(typeof(StrField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(SwitchField), "expr", AttributeType.Expression);
         }
 
@@ -73,7 +76,14 @@ namespace Structorian.Engine
                 fieldType = fieldType.BaseType;
             }
             
-            field.SetAttribute(key, value);
+            try
+            {
+                field.SetAttribute(key, value);
+            }
+            catch(Exception)
+            {
+                throw new ParseException("Unknown attribute " + key, pos);
+            }
         }
 
         private void SetFieldAttributeValue(StructField field, string key, AttributeType type, string value,

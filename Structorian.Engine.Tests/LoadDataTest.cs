@@ -800,5 +800,19 @@ namespace Structorian.Engine.Tests
                 new byte[] {0, 1, 2, 3, 4});
             Assert.AreEqual(3, instance.Cells.Count);
         }
+
+        [Test] public void NewStyleCalcField()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { i X [value=8]; }", new byte[0]);
+            Assert.AreEqual("8", instance.Cells [0].Value);
+        }
+
+        [Test] public void StrCalcField()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { str X [value=\"\"A\"\"]; }", new byte[0]);
+            Assert.AreEqual("A", instance.Cells[0].Value);
+        }
     }
 }

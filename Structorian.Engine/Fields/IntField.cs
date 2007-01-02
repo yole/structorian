@@ -19,7 +19,7 @@ namespace Structorian.Engine.Fields
             string format = _hex ? "x" + (_size*2).ToString() : "d";
             string displayValue;
             IConvertible value;
-            value = ReadIntValue(reader);
+            value = ReadIntValue(reader, instance);
             switch(_size)
             {
                 case 1:
@@ -31,6 +31,10 @@ namespace Structorian.Engine.Fields
                     break;
                     
                 case 4:
+                    displayValue = _unsigned ? ((UInt32)value).ToString(format) : ((Int32)value).ToString(format);
+                    break;
+
+                case 0:
                     displayValue = _unsigned ? ((UInt32)value).ToString(format) : ((Int32)value).ToString(format);
                     break;
 
