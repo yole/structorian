@@ -1,0 +1,77 @@
+[filemask="*.md2"]
+struct dmdl_t
+{
+  i32 ident;
+  i32 version;
+  
+  i32 skinwidth;
+  i32 skinheight;
+  i32 framesize;
+
+  i32 num_skins;
+  i32 num_xyz;
+  i32 num_st;
+  i32 num_tris;
+  i32 num_glcmds;
+  i32 num_frames;
+
+  i32 ofs_skins;
+  i32 ofs_st;
+  i32 ofs_tris;
+  i32 ofs_frames;
+  i32 ofs_glcmds;
+  i32 ofs_end;
+
+  child dstvert_t [offset=ofs_st, count=num_st, group=stverts];
+  child dtriangle_t [offset=ofs_tris, count=num_tris, group=triangles];
+  child daliasframe_t [offset=ofs_frames, count=num_frames, group=frames];
+  child glcommand_t [offset=ofs_glcmds, group=glcmds];
+}
+
+struct dtriangle_t
+{
+  repeat (3) { u16 index_xyz; }
+  repeat (3) { u16 index_st; }
+}
+
+struct dstvert_t
+{
+  u16 s;
+  u16 t;
+}
+
+struct daliasframe_t
+{
+  repeat (3) { float scale; }
+  repeat (3) { float translate; }
+  str [len=16] name;
+  skip (4*Parent.num_xyz);
+}
+
+[global] enum glcommand_type { GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP }
+
+struct glcommand_t
+{
+  [hidden] i32 _count;
+  if (_count < 0)
+  {
+    i count [value=-_count];
+    enum type [enum=glcommand_type, value=GL_TRIANGLE_FAN];
+  }
+  else
+  {
+    skip -4;
+    i32 count;
+    enum type [enum=glcommand_type, value=GL_TRIANGLE_STRIP];
+  }
+  repeat(count)
+  {
+    float s;
+    float t;
+    i32 index_xyz; 
+  }
+  if (count != 0)
+  {
+    sibling glcommand_t;
+  }
+}
