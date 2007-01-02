@@ -1,0 +1,113 @@
+[filemask="*.t3"]
+struct TADS3Header
+{
+  str [len=11] Signature;
+  u16 Version;
+  blob [len=32] Reserved;
+  str [len=24] Timestamp;
+  child TADSBlock;
+}
+
+enum TADSBlockFlags
+{
+  MANDATORY
+}
+
+struct TADSBlock
+{
+  str [len=4] Type;
+  u32 Size;
+  set16 [enum=TADSBlockFlags] Flags;
+  switch (Type)
+  {
+    case ("ENTP") { include ENTP; }
+    case ("SYMD") { include SYMD; }
+    case ("FNSD") { include FNSD; }
+    case ("CPDF") { include CPDF; }
+    case ("CPPG") { include CPPG; }
+  }
+  if (Type != "EOF ")
+  {
+    sibling TADSBlock [offset=StructOffset+10+Size];
+  }
+}
+
+struct ENTP
+{
+  u32 EntryPoint;
+  u16 "Method header size of all methods in image file";
+  u16 "Exception table entry size for all exception tables";
+  u16 "Debugger line table entry size for all line tables";
+  u16 "Debug table header size for all debug tables";
+  u16 "Debug table local symbol record header size for all debug tables";
+  u16 "Debug records version number";
+}
+
+struct SYMD
+{
+  u16 EntryCount;
+  child SYMDEntry [count=EntryCount];
+}
+
+struct SYMDEntry
+{
+  include DATA_HOLDER [tag=Value];
+  include Str255 [tag=Name];
+}
+
+struct FNSD
+{
+  u16 EntryCount;
+  child FNSDEntry [count=EntryCount];
+}
+
+struct FNSDEntry
+{
+  include Str255 [tag=Name];
+}
+
+struct CPDF
+{
+  enum16 "Pool identifier" [enum=PoolType];
+  u32 "Number of pages in the pool";
+  u32 "Size in bytes of each page in the pool";
+}
+
+struct CPPG
+{
+  enum16 "Pool identifier" [enum=PoolType];
+  u32 "Page index";
+  x8 "Xor mask";  
+}
+
+enum PoolType
+{
+  "Byte-code pool" = 1, "Constant data pool"
+}
+
+[fieldlike] struct Str255
+{
+  [hidden] u8 NameLength;
+  str [len=NameLength] name;
+}
+
+[global] enum VMTypeID
+{
+  VM_NIL=1, VM_TRUE, VM_STACK, VM_CODEPTR, VM_OBJ, VM_PROP, VM_INT,
+  VM_SSTRING, VM_DSTRING, VM_LIST, VM_CODEOFS, VM_FUNCPTR, VM_EMPTY,
+  VM_NATIVE_CODE, VM_ENUM
+}
+
+struct DATA_HOLDER
+{ 
+  enum8 [enum=VMTypeID] type;
+  if (type == VM_PROP)
+  {
+    u16 value;
+    skip 2;
+  }
+  else
+  {
+    blob [len=4] value;
+  }
+}
