@@ -50,7 +50,7 @@ namespace Structorian.Engine
 
         internal void RegisterGlobal(string id, int result)
         {
-            _globals.Add(id, result);
+            _globals [id] = result;
         }
         
         internal int? GetGlobal(string id)

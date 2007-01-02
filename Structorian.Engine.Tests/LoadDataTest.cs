@@ -825,5 +825,12 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("17", instance.Cells [1].Value);
             Assert.AreEqual("37", instance.Cells [2].Value);
         }
+
+        [Test] public void DuplicateGlobal()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { global q [value=0]; global q [value=1]; i a [value=q]; }", new byte[0]);
+            Assert.AreEqual("1", instance.Cells [0].Value);
+        }
     }
 }
