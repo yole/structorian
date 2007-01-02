@@ -35,6 +35,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(IncludeField), "replace", AttributeType.Bool);
             RegisterAttribute(typeof(IntBasedField), "frombit", AttributeType.Int);
             RegisterAttribute(typeof(IntBasedField), "tobit", AttributeType.Int);
+            RegisterAttribute(typeof(MessageField), "text", AttributeType.String);
             RegisterAttribute(typeof(NodenameField), "name", AttributeType.Expression);
             RegisterAttribute(typeof(RepeatField), "count", AttributeType.Expression);
             RegisterAttribute(typeof(SeekField), "offset", AttributeType.Expression);

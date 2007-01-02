@@ -61,6 +61,7 @@
     <Compile Include="Fields\IfField.cs" />
     <Compile Include="Fields\IncludeField.cs" />
     <Compile Include="Fields\IntBasedField.cs" />
+    <Compile Include="Fields\MessageField.cs" />
     <Compile Include="Fields\NodenameField.cs" />
     <Compile Include="Fields\RepeatField.cs" />
     <Compile Include="Fields\RewindField.cs" />
