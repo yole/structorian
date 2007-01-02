@@ -87,13 +87,22 @@ namespace Structorian.Engine
                 while (_position < _text.Length && Char.IsDigit(_text, _position))
                     _position++;
             }
-                
-            return Int32.Parse(_text.Substring(startPos, _position - startPos), ns);
+
+            string valueString = _text.Substring(startPos, _position - startPos);
+            try
+            {
+                return Int32.Parse(valueString, ns);
+            }
+            catch(FormatException)
+            {
+                throw new ParseException("Invalid number format in string " + valueString,
+                                         BuildTextPosition(startPos), _position - startPos);
+            }
         }
 
         private static bool IsHexChar(char c)
         {
-            return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' || c <= 'f');
+            return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
         }
 
         private string ReadSymbol()
