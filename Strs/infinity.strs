@@ -24,7 +24,10 @@ struct Auto
     case ("AREA")  { include [replace] AREA; }
     case ("DLG ")  { include [replace] DLG;  }
     case ("GAME")  { include [replace] GAME; }
+    case ("STOR")  { include [replace] STOR; }
+    case ("WMAP")  { include [replace] WMAP; }
     case ("EFF ")  { include [replace] EFF;  }
+    case ("VVC ")  { include [replace] VVC;  }
     case ("PRO ")  { include [replace] PRO;  }
   }
 }
@@ -247,6 +250,49 @@ enum CHUIStaticTextFlags
   u16;
 }
 
+// -- ITM --------------------------------------------------------------------
+
+enum ITMtype {
+  "Books/misc",
+  "Amulet/Necklace",
+  Armor,
+  "Belt and girdles",
+  Boots,
+  Arrows,
+  "Bracers and gauntles",
+  Headgear,
+  Keys,
+  Potions,
+  Rings,
+  Scrolls,
+  Shields,
+  Food,
+  Bullets,
+  Bows,
+  Daggers,
+  Maces,
+  Slings,
+  "Short swords",
+  "Long swords",
+  Hammers,
+  "Morning stars",
+  Flails,
+  Darts,
+  Axes,
+  Quarterstaff,
+  Crossbow,
+  "Hand-to-hand weapons",
+  Spears,
+  Halberds,
+  Bolts,
+  "Cloaks and robes",
+  "Gold pieces",
+  Gems,
+  Wands,
+  Container,
+  Book,
+  "Broken Swords"
+}
 // -- CRE --------------------------------------------------------------------
 
 enum CREflags {
@@ -1177,6 +1223,193 @@ struct GAME
   u32 "Current chapter";
 }
 
+// -- STOR -------------------------------------------------------------------
+
+enum StoreType {
+  Store,
+  Tavern,
+  Inn,
+  Temple,
+  Container=5
+}
+
+enum StoreFlags {
+  "Can buy",
+  "Can sell",
+  "Can identify",
+  "Can steal",
+  "Can buy cures",
+  "Can donate",
+  "Can buy drinks",
+  "Quality 1"=9,
+  "Quality 2",
+  "Buy fenced goods"=12
+}
+
+enum StoreRoomFlags {
+  Peasant,
+  Merchant,
+  Noble,
+  Royal
+}
+
+struct STOR
+{
+  str [len=8] Signature;
+  enum32 "Store type" [enum=StoreType];
+  i32 "Name strref";
+  set32 Flags [enum=StoreFlags];
+  i32 "Sell price";
+  i32 "Buy price";
+  i32 "Buy price reduction";
+  i16 "Stealing difficulty";
+  i16 "Storage capacity";
+  str [len=8];
+  x32 "Items purchased offset" [id=PurOffset];
+  i32 "Items purchased count" [id=PurCount];
+  x32 "Items sold offset" [id=SoldOffset];
+  i32 "Items sold count" [id=SoldCount];
+  i32 "Identify lore";
+  i32 "Cost to identify";
+  str [len=8] "Rumor dialog";
+  x32 "Drinks offset" [id=DrinkOffset];
+  i32 "Drinks count" [id=DrinkCount];
+  str [len=8] "Donate rumor dialog";
+  set32 "Available rooms" [enum=StoreRoomFlags];
+  i32 "Peasant room price";
+  i32 "Merchant room price";
+  i32 "Noble room price";
+  i32 "Royal room price";
+  x32 "Cures offset" [id=CureOffset];
+  i32 "Cures count" [id=CureCount];
+  repeat (9) { i32; }
+  child STORSold [group="Sold", offset=StructOffset+SoldOffset, count=SoldCount];
+  if (PurCount > 0)
+  {
+    child STORPurchased [offset=StructOffset+PurOffset];
+  }
+  child STORDrink [group="Drinks", offset=StructOffset+DrinkOffset, count=DrinkCount];
+  child STORCure  [group="Cures",  offset=StructOffset+CureOffset,  count=CureCount];
+}
+
+enum StoreItemFlags {
+  Identified,
+  Unstealable,
+  Stolen,
+  Undroppable
+}
+
+[hidden] struct STORSold
+{
+  resref Item;
+  i16;
+  i16 "Usage 1";
+  i16 "Usage 2";
+  i16 "Usage 3";
+  set32 Flags [enum=StoreItemFlags];
+  i32 "Count in stock";
+  i32 "Infinite supply";
+}
+
+[hidden] struct STORPurchased
+{
+  repeat (Parent.PurCount)
+  {
+    enum32 Category [enum=ITMtype];
+  }
+}
+
+[hidden] struct STORDrink
+{
+  resref SpecialRumor;
+  i32 "Drink name strref";
+  i32 Price;
+  i32 IntoxicationAmount;
+}
+
+[hidden] struct STORCure
+{
+  resref Spell;
+  i32 Price;
+}
+
+// -- WMAP -------------------------------------------------------------------
+
+[filemask="*.wmp"]
+struct WMAP
+{
+  str [len=8] Signature;
+  i32 "Worldmap count" [id=WMapCount];
+  x32 "Worldmap offset" [id=WMapOffset];
+  child WorldMap [offset=StructOffset+WMapOffset, count=WMapCount];
+}
+
+[hidden] struct WorldMap
+{
+  str [len=8] "Map resource name";
+  i32 "X size";
+  i32 "Y size";
+  i32 "Map number";
+  i32 "Name strref";
+  repeat (2) { i32; }
+  i32 "Area count" [id=AreaCount];
+  x32 "Area offset" [id=AreaOffset];
+  x32 "Link offset" [id=LinkOffset];
+  i32 "Link count" [id=LinkCount];
+  str [len=8] "Map icon res name";
+  repeat (32) { i32; }
+  child WorldMapArea [offset=Parent.StructOffset+AreaOffset, count=AreaCount];
+}
+
+enum WorldMapAreaFlags {
+  Visible,
+  "Visible from adjacent",
+  "Can be visited",
+  Visited
+}
+
+[hidden] struct WorldMapArea
+{
+  str [len=8] "Short name";
+  str [len=8] "Area content";
+  cstr [len=32] "Long name";
+  set32 Flags [enum=WorldMapAreaFlags];
+  i32 "BAM frame";
+  i32 X;
+  i32 Y;
+  i32 "Name strref";
+  i32 "Tooltip strref";
+  str [len=8] "Loading screen";
+  i32 "First link north" [id=NLinkFirst];
+  i32 "Link north count" [id=NLinkCount];
+  i32 "First link west" [id=WLinkFirst];
+  i32 "Link west count" [id=WLinkCount];
+  i32 "First link south" [id=SLinkFirst];
+  i32 "Link south count" [id=SLinkCount];
+  i32 "First link east" [id=ELinkFirst];
+  i32 "Link east count" [id=ELinkCount];
+  repeat (32) { i32; }
+  child WorldMapLink [offset=(Parent.Parent.StructOffset+Parent.LinkOffset+NLinkFirst*SizeOf (WorldMapLink)),
+                      count=NLinkCount, group="North"];
+  child WorldMapLink [offset=(Parent.Parent.StructOffset+Parent.LinkOffset+WLinkFirst*SizeOf (WorldMapLink)),
+                      count=WLinkCount, group="West"];
+  child WorldMapLink [offset=(Parent.Parent.StructOffset+Parent.LinkOffset+SLinkFirst*SizeOf (WorldMapLink)),
+                      count=SLinkCount, group="South"];
+  child WorldMapLink [offset=(Parent.Parent.StructOffset+Parent.LinkOffset+ELinkFirst*SizeOf (WorldMapLink)),
+                      count=ELinkCount, group="East"];
+}
+
+[hidden] struct WorldMapLink
+{
+  i32 "Target area index";
+  cstr [len=32] "Entry point name";
+  i32 "Travel hours";
+  i32 "Default entry location";
+  repeat (5) { str [len=8] "Random encounter area"; }
+  i32 "Random encounter probability";
+  repeat (32) { i32; }
+}
+
 // -- EFF --------------------------------------------------------------------
 
 [filemask="*.eff"]
@@ -1448,6 +1681,43 @@ enum EffectDispel {
 
 enum EffectSaveType {
   Spells, Breath, "Death/poison", Wands, Petrification
+}
+
+// -- VVC --------------------------------------------------------------------
+
+enum VVCFlags
+{
+  Translucent=1, Transparent=3, "Mirror X Axis", "Mirror Y Axis",
+  Blend=9
+}
+
+[filemask="*.vvc"]
+struct VVC
+{
+  str [len=8] Signature;
+  resref "BAM Animation";
+  repeat (2) { u32; }
+  set16 Transparency [enum=VVCFlags];
+  u16 Tint;
+  u32;
+  u32 "Play method?";
+  u32;
+  u32 "X position";
+  u32 "Y position";
+  u32;
+  u32 Framerate;
+  u32 "Face Target";
+  u32;
+  u32 Position;
+  repeat (2) { u32; }
+  u32 "Z position";
+  repeat (6) { u32; }
+  u32 "Starting BAM animation";
+  u32 "Duration BAM animation";
+  repeat (2) { u32; }
+  resref "Starting sound";
+  resref "Duration sound";
+  repeat (89) { u32; }
 }
 
 // -- PRO --------------------------------------------------------------------
