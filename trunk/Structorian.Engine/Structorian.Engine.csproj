@@ -71,6 +71,7 @@
     <Compile Include="Fields\StrField.cs" />
     <Compile Include="Fields\SwitchField.cs" />
     <Compile Include="Fields\UnixTimeField.cs" />
+    <Compile Include="FunctionRegistry.cs" />
     <Compile Include="GroupContainer.cs" />
     <Compile Include="InstanceTree.cs" />
     <Compile Include="InstanceTreeNode.cs" />
