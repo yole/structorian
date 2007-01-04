@@ -1,11 +1,358 @@
 // Structures for Westwood games (for example, Legend of Kyrandia)
 // Based on scummvm source code
 
-struct EMCScript
+[filemask="*.pak"]
+struct Pak
 {
-  str [len=4] signature;
+  u32 count;
+  child PakEntry;
 }
 
+struct PakEntry
+{
+  str fileName;
+  u32 offset;
+  if (offset > 0)
+  {
+    sibling;
+  }
+  if (EndsWith(fileName, ".WSA"))
+  {
+    child WSAMovie [offset=offset];
+  }
+  elif (EndsWith(fileName, ".DAT"))
+  {
+    child DAT [offset=offset];
+  }
+}
+
+// -- .EMC --------------------------------------------------
+
+[byteorder=bigendian, filemask="*.emc"]
+struct Chunk
+{
+  str [len=4] signature;
+  u32 size;
+  str [len=4];
+  if (signature == "FORM")
+  {
+    child SubChunk;
+  }
+}
+
+[byteorder=bigendian]
+struct SubChunk
+{
+  str [len=4] signature;
+  u32 size;
+  if (signature == "DATA")
+  {
+    child OpcodeStruct;
+  }
+  elif (signature == "TEXT")
+  {
+    local baseOffset [value=CurOffset];
+    // we have to guess where offsets end and text strings begin
+    repeat(size/2)
+    {
+      [hidden] u16 _maybeOffset;
+      if (_maybeOffset >= size)
+      {
+        break;
+      }
+      seek baseOffset+_maybeOffset;
+      str Text;
+      rewind;
+    }
+    skip baseOffset+size-CurOffset;
+  }
+  elif (signature == "ORDR")
+  {
+    repeat(size/2)
+    {
+      u16 offset;
+    }
+  }
+  else
+  {
+    blob data [len=size];
+  }
+  if (CurOffset < Parent.StructOffset + Parent.size)
+  {
+    sibling SubChunk;
+  }
+}
+
+[global] enum Opcodes
+{
+  jmpTo,
+  setRetValue,
+  pushRetOrPos,
+  push,
+  push5,
+  pushVar,
+  pushBPNeg,
+  pushBPAdd,
+  popRetOrPos,
+  popVar,
+  popBPNeg,
+  popBPAdd,
+  addSP,
+  subSP,
+  execOpcode,
+  ifNotJmp,
+  negate,
+  eval,
+  setRetAndJmp
+}
+
+enum EvalOpcodes
+{
+  "&&", "||", "==", "!=", ">", ">=", "<", "<=", "+", "-", "*", "/", ">>", "<<",
+  "&", "|", "%", "^"
+}
+
+enum VMOpcodes
+{
+  magicInMouseItem,
+  characterSays,
+  pauseTicks,
+  drawSceneAnimShape,
+  queryGameFlag,
+  setGameFlag,
+  resetGameFlag,
+  runNPCScript,
+  setSpecialExitList,
+  blockInWalkableRegion,
+  blockOutWalkableRegion,
+  walkPlayerToPoint,
+  dropItemInScene,
+  drawAnimShapeIntoScene,
+  createMouseItem,
+  savePageToDisk,
+  sceneAnimOn,
+  sceneAnimOff,
+  getElapsedSeconds,
+  mouseIsPointer,
+  destroyMouseItem,
+  runSceneAnimUntilDone,
+  fadeSpecialPalette,
+  playAdlibSound,
+  playAdlibScore,
+  phaseInSameScene,
+  setScenePhasingFlag,
+  resetScenePhasingFlag,
+  queryScenePhasingFlag,        
+  sceneToDirection,             
+  setBirthstoneGem,             
+  placeItemInGenericMapScene,   
+                                    
+  setBrandonStatusBit,          
+  pauseSeconds,                 
+  getCharactersLocation,        
+  runNPCSubscript,              
+                                    
+  magicOutMouseItem,            
+  internalAnimOn,               
+  forceBrandonToNormal,         
+  poisonDeathNow,               
+                                    
+  setScaleMode,                 
+  openWSAFile,                  
+  closeWSAFile,                 
+  runWSAFromBeginningToEnd,     
+                                    
+  displayWSAFrame,              
+  enterNewScene,                
+  setSpecialEnterXAndY,         
+  runWSAFrames,                 
+                                    
+  popBrandonIntoScene,          
+  restoreAllObjectBackgrounds,  
+  setCustomPaletteRange,        
+  loadPageFromDisk,             
+                                    
+  customPrintTalkString,        
+  restoreCustomPrintBackground, 
+  hideMouse,                    
+  showMouse,                    
+                                    
+  getCharacterX,                
+  getCharacterY,                
+  changeCharactersFacing,       
+  copyWSARegion,                
+                                    
+  printText,                    
+  random,                       
+  loadSoundFile,                
+  displayWSAFrameOnHidPage,     
+                                    
+  displayWSASequentialFrames,   
+  drawCharacterStanding,        
+  internalAnimOff,              
+  changeCharactersXAndY,        
+                                    
+  clearSceneAnimatorBeacon,     
+  querySceneAnimatorBeacon,     
+  refreshSceneAnimator,         
+  placeItemInOffScene,          
+                                    
+  wipeDownMouseItem,            
+  placeCharacterInOtherScene,   
+  getKey,                       
+  specificItemInInventory,      
+                                    
+  popMobileNPCIntoScene,        
+  mobileCharacterInScene,       
+  hideMobileCharacter,          
+  unhideMobileCharacter,        
+                                    
+  setCharactersLocation,        
+  walkCharacterToPoint,         
+  specialEventDisplayBrynnsNote,
+  specialEventRemoveBrynnsNote, 
+                                    
+  setLogicPage,                 
+  fatPrint,                     
+  preserveAllObjectBackgrounds, 
+  updateSceneAnimations,        
+                                    
+  sceneAnimationActive,         
+  setCharactersMovementDelay,   
+  getCharactersFacing,          
+  bkgdScrollSceneAndMasksRight, 
+                                    
+  dispelMagicAnimation,         
+  findBrightestFireberry,       
+  setFireberryGlowPalette,      
+  setDeathHandlerFlag,          
+                                    
+  drinkPotionAnimation,         
+  makeAmuletAppear,             
+  drawItemShapeIntoScene,       
+  setCharactersCurrentFrame,    
+                                    
+  waitForConfirmationMouseClick,
+  pageFlip,                     
+  setSceneFile,                 
+  getItemInMarbleVase,          
+                                    
+  setItemInMarbleVase,          
+  addItemToInventory,           
+  intPrint,                     
+  shakeScreen,                  
+                                    
+  createAmuletJewel,            
+  setSceneAnimCurrXY,           
+  poisonBrandonAndRemaps,       
+  fillFlaskWithWater,           
+                                    
+  getCharactersMovementDelay,   
+  getBirthstoneGem,             
+  queryBrandonStatusBit,        
+  playFluteAnimation,           
+                                    
+  playWinterScrollSequence,     
+  getIdolGem,                   
+  setIdolGem,                   
+  totalItemsInScene,            
+                                    
+  restoreBrandonsMovementDelay, 
+  setMousePos,                  
+  getMouseState,                
+  setEntranceMouseCursorTrack,  
+                                    
+  itemAppearsOnGround,          
+  setNoDrawShapesFlag,          
+  fadeEntirePalette,            
+  itemOnGroundHere,             
+                                    
+  queryCauldronState,           
+  setCauldronState,             
+  queryCrystalState,            
+  setCrystalState,              
+                                    
+  setPaletteRange,              
+  shrinkBrandonDown,            
+  growBrandonUp,                
+  setBrandonScaleXAndY,         
+                                    
+  resetScaleMode,               
+  getScaleDepthTableValue,      
+  setScaleDepthTableValue,      
+  message,                      
+                                    
+  checkClickOnNPC,              
+  getFoyerItem,                 
+  setFoyerItem,                 
+  setNoItemDropRegion,          
+                                    
+  walkMalcolmOn,                
+  passiveProtection,            
+  setPlayingLoop,               
+  brandonToStoneSequence,       
+                                    
+  brandonHealingSequence,       
+  protectCommandLine,           
+  pauseMusicSeconds,            
+  resetMaskRegion,              
+                                    
+  setPaletteChangeFlag,         
+  fillRect,                     
+  vocUnload,                    
+  vocLoad,                      
+  dummy                         
+}
+
+[byteorder=bigendian]
+struct OpcodeStruct
+{
+  [hidden] x16 _code;
+  if (_code & 0x8000)
+  {
+    enum opcode [value=0, enum=Opcodes];
+    [hidden] i _parameter [value=_code & 0x7FFF];    
+  }
+  elif (_code & 0x4000)
+  {
+    enum opcode [value=(_code >> 8) & 0x1F, enum=Opcodes];
+    [hidden] i _parameter [value = _code & 0xFF];
+  }
+  elif (_code & 0x2000)
+  {
+    enum opcode [value=(_code >> 8) & 0x1F, enum=Opcodes];
+    [hidden] i16 _parameter;
+  }
+  else
+  {
+    enum opcode [value=(_code >> 8) & 0x1F, enum=Opcodes];
+    [hidden] i _parameter [value=0];
+  }
+  if (opcode == eval) 
+  {
+    enum parameter [value=_parameter, enum=EvalOpcodes];
+  }
+  elif (opcode == ifNotJmp)
+  {
+    i parameter [value=_parameter & 0x7FFF];
+  }
+  elif (opcode == execOpcode)
+  {
+    enum parameter [value=_parameter, enum=VMOpcodes];
+  }
+  else
+  {
+    i parameter [value=_parameter];
+  }
+  if (CurOffset < Parent.StructOffset + Parent.size)
+  {
+    sibling OpcodeStruct;
+  }
+}
+
+// -- .WSA --------------------------------------------------
+
+[filemask="*.wsa"]
 struct WSAMovie
 {
   u16 numFrames;
@@ -15,3 +362,68 @@ struct WSAMovie
   x32 frameDataOffs;
 }
 
+// -- .DAT --------------------------------------------------
+
+[global]
+enum DATCodes
+{
+  Unknown=0xFF82, 
+  SpriteStart=0xFF84,
+  SpriteEnd=0xFF85,
+  AnimStart, 
+  AnimEnd,
+  SetSpriteImage=0xFF88,
+  SetTimeToWait=0xFF8A,
+  JumpToScriptStart=0xFF8B,
+  WaitUntilWaitTime=0xFF8C,
+}
+
+[filemask="*.dat"]
+struct DAT
+{
+  str [len=0x0D] maskFileName;
+  repeat(8)
+  {
+    u8 drawLayerTable;
+  }
+  u16 northExitHeight;
+  repeat(20)
+  {
+    u8 r;
+    u8 g;
+    u8 b;
+  }
+  skip 24;
+  u16 length;
+  local startOffset [value=CurOffset];
+  repeat(length/2)
+  {
+    if (CurOffset == startOffset+length)
+    {
+      break;
+    }
+    enum16 code [enum=DATCodes];
+    if (code == SpriteStart)
+    {
+      repeat(length/2)
+      {
+        [hidden] u16 _code;
+        skip -2;
+        if (_code == SpriteEnd)
+        {
+          enum16 code [enum=DATCodes];
+          break;
+        }
+        u16 spriteNum;
+        u16 x;
+        u16 y;
+        u16 width;
+        u16 height;
+      }
+    }
+    elif (code == SetTimeToWait)
+    {
+      u16 TimeToWait;
+    }
+  }
+}
