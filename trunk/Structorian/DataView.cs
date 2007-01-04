@@ -154,7 +154,12 @@ namespace Structorian
                 StructCell cell = (StructCell)_structGridView.SelectedRows[0].DataBoundItem;
                 int offset = cell.Offset;
                 if (offset >= 0)
-                    _hexDump.SelectBytes(offset, cell.GetDataSize((StructInstance) _activeInstance));
+                {
+                    int dataSize = cell.GetDataSize((StructInstance) _activeInstance);
+                    if (dataSize <= 0)
+                        dataSize = 1;
+                    _hexDump.SelectBytes(offset, dataSize);
+                }
                 if (CellSelected != null)
                     CellSelected(this, new CellSelectedEventArgs(cell));
             }
