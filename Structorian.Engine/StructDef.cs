@@ -84,6 +84,11 @@ namespace Structorian.Engine
                     instance.AddCell(StructCell.CreateErrorCell(field, ex.Message), false);
                     break;
                 }
+                catch(IOException ex)
+                {
+                    instance.AddCell(StructCell.CreateErrorCell(field, ex.Message), false);
+                    break;
+                }
             }
             if (instance.RewindOffset != -1)
                 stream.Position = instance.RewindOffset;
