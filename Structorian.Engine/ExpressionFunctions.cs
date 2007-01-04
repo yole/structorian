@@ -1,78 +1,57 @@
 using System;
-using System.Collections.Generic;
 
 namespace Structorian.Engine
 {
-    class ExpressionFunctions
+    class ExpressionFunctions: FunctionRegistry<StructInstance>
     {
-        private static Dictionary<String, EvaluateDelegate> _functionRegistry = InitializeFunctions();
-        
-        private static Dictionary<String, EvaluateDelegate> InitializeFunctions()
-        {
-            Dictionary<string, EvaluateDelegate> result = new Dictionary<string, EvaluateDelegate>(StringComparer.InvariantCultureIgnoreCase);
-            result.Add("StructOffset", new EvaluateDelegate(StructOffset));
-            result.Add("ParentCount", new EvaluateDelegate(ParentCount));
-            result.Add("CurOffset", new EvaluateDelegate(CurOffset));
-            result.Add("StructName", new EvaluateDelegate(StructName));
-            result.Add("FileSize", new EvaluateDelegate(FileSize));
-            result.Add("SizeOf", new EvaluateDelegate(SizeOf));
-            return result;
-        }
-        
-        public static IConvertible Evaluate(string function, Expression[] parameters, IEvaluateContext context)
-        {
-            EvaluateDelegate evalDelegate;
-            if (!_functionRegistry.TryGetValue(function, out evalDelegate))
-                return null;
-            return evalDelegate(context, parameters);
-        }
+        private static ExpressionFunctions _instance;
 
-        private static IConvertible StructOffset(IEvaluateContext context, Expression[] parameters)
+        public static ExpressionFunctions Instance
         {
-            if (context is StructInstance)
+            get
             {
-                return ((StructInstance) context).Offset;
+                if (_instance == null)
+                    _instance = new ExpressionFunctions();
+                return _instance;
             }
-            throw new LoadDataException("Invalid StructOffset context");
         }
 
-        private static IConvertible CurOffset(IEvaluateContext context, Expression[] parameters)
+        private ExpressionFunctions()
         {
-            if (context is StructInstance)
-            {
-                return ((StructInstance)context).CurOffset;
-            }
-            throw new LoadDataException("Invalid CurOffset context");
+            Register("StructOffset", new FunctionDelegate(StructOffset));
+            Register("ParentCount", new FunctionDelegate(ParentCount));
+            Register("CurOffset", new FunctionDelegate(CurOffset));
+            Register("StructName", new FunctionDelegate(StructName));
+            Register("FileSize", new FunctionDelegate(FileSize));
+            Register("SizeOf", new FunctionDelegate(SizeOf));
         }
 
-        private static IConvertible ParentCount(IEvaluateContext context, Expression[] parameters)
+        private static IConvertible StructOffset(StructInstance context, Expression[] parameters)
         {
-            if (context is StructInstance)
-            {
-                return ((StructInstance)context).ParentCount;
-            }
-            throw new LoadDataException("Invalid ParentCount context");
+            return context.Offset;
         }
 
-        private static IConvertible StructName(IEvaluateContext context, Expression[] parameters)
+        private static IConvertible CurOffset(StructInstance context, Expression[] parameters)
         {
-            if (context is StructInstance)
-            {
-                return ((StructInstance)context).Def.Name;
-            }
-            throw new LoadDataException("Invalid StructName context");
+            return context.CurOffset;
         }
 
-        private static IConvertible FileSize(IEvaluateContext context, Expression[] parameters)
+        private static IConvertible ParentCount(StructInstance context, Expression[] parameters)
         {
-            if (context is StructInstance)
-            {
-                return ((StructInstance) context).Stream.Length;
-            }
-            throw new LoadDataException("Invalid FileSize context");
+            return context.ParentCount;
         }
 
-        private static IConvertible SizeOf(IEvaluateContext context, Expression[] parameters)
+        private static IConvertible StructName(StructInstance context, Expression[] parameters)
+        {
+            return context.Def.Name;
+        }
+
+        private static IConvertible FileSize(StructInstance context, Expression[] parameters)
+        {
+            return context.Stream.Length;
+        }
+
+        private static IConvertible SizeOf(StructInstance context, Expression[] parameters)
         {
             if (parameters.Length != 1) 
                 throw new LoadDataException("SizeOf function requires an argument");
@@ -80,14 +59,10 @@ namespace Structorian.Engine
                 throw new LoadDataException("SizeOf argument must be a symbol");
             string symbol = ((SymbolExpression) parameters[0]).Symbol;
 
-            if (context is StructInstance)
-            {
-                StructFile structFile = ((StructInstance) context).Def.StructFile;
-                StructDef def = structFile.GetStructByName(symbol);
-                if (def == null) throw new LoadDataException("Structure '" + symbol + "' not found");
-                return def.GetDataSize();
-            }
-            throw new LoadDataException("Invalid SizeOf context");
+            StructFile structFile = context.Def.StructFile;
+            StructDef def = structFile.GetStructByName(symbol);
+            if (def == null) throw new LoadDataException("Structure '" + symbol + "' not found");
+            return def.GetDataSize();
         }
     }
 }

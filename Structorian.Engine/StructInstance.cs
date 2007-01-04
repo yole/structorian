@@ -290,7 +290,7 @@ namespace Structorian.Engine
             if (enumValue.HasValue)
                 return enumValue.Value;
 
-            IConvertible funcValue = ExpressionFunctions.Evaluate(symbol, null, this);
+            IConvertible funcValue = ExpressionFunctions.Instance.Evaluate(symbol, null, this);
             if (funcValue != null)
                 return funcValue;
             
@@ -301,7 +301,7 @@ namespace Structorian.Engine
         {
             NeedData();
 
-            IConvertible funcValue = ExpressionFunctions.Evaluate(symbol, parameters, this);
+            IConvertible funcValue = ExpressionFunctions.Instance.Evaluate(symbol, parameters, this);
             if (funcValue != null)
                 return funcValue;
 
