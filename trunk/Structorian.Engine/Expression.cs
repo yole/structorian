@@ -6,11 +6,11 @@ namespace Structorian.Engine
     public interface IEvaluateContext
     {
         IConvertible EvaluateSymbol(string symbol);
-        IConvertible EvaluateFunction(string symbol, string param);
+        IConvertible EvaluateFunction(string symbol, Expression[] parameters);
         IEvaluateContext EvaluateContext(string symbol);
     }
     
-    public delegate IConvertible EvaluateDelegate(IEvaluateContext context, string param);
+    public delegate IConvertible EvaluateDelegate(IEvaluateContext context, Expression[] parameters);
     
     public abstract class Expression
     {
@@ -101,6 +101,11 @@ namespace Structorian.Engine
         public override IConvertible Evaluate(IEvaluateContext context)
         {
             return context.EvaluateSymbol(_symbol);
+        }
+
+        public string Symbol
+        {
+            get { return _symbol; }
         }
     }
     
@@ -236,17 +241,17 @@ namespace Structorian.Engine
     class FunctionExpression: Expression
     {
         private string _function;
-        private string _param;
+        private Expression[] _parameters;
 
-        public FunctionExpression(string function, string param)
+        public FunctionExpression(string function, Expression[] parameters)
         {
             _function = function;
-            _param = param;
+            _parameters = parameters;
         }
 
         public override IConvertible Evaluate(IEvaluateContext context)
         {
-            return context.EvaluateFunction(_function, _param);
+            return context.EvaluateFunction(_function, _parameters);
         }
     }
 }

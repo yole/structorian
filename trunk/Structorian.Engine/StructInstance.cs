@@ -297,11 +297,11 @@ namespace Structorian.Engine
             throw new LoadDataException("Unknown symbol " + symbol);
         }
 
-        public IConvertible EvaluateFunction(string symbol, string param)
+        public IConvertible EvaluateFunction(string symbol, Expression[] parameters)
         {
             NeedData();
 
-            IConvertible funcValue = ExpressionFunctions.Evaluate(symbol, param, this);
+            IConvertible funcValue = ExpressionFunctions.Evaluate(symbol, parameters, this);
             if (funcValue != null)
                 return funcValue;
 

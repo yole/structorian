@@ -5,7 +5,7 @@ namespace Structorian.Engine
 {
     enum ExprTokenType { Symbol, Number, String, Plus,  Minus, Mult, Div, Mod, Dot, 
         Open, Close, EQ, NE, GT, GE, LT, LE, 
-        AND, OR, NOT, BitAND, BitOR, SHL, SHR, EOF };
+        AND, OR, NOT, BitAND, BitOR, SHL, SHR, Comma, EOF };
     
     class ExpressionLexer: BaseLexer<ExprTokenType, object>
     {
@@ -24,6 +24,7 @@ namespace Structorian.Engine
             RegisterCharToken('.', ExprTokenType.Dot);
             RegisterCharToken('(', ExprTokenType.Open);
             RegisterCharToken(')', ExprTokenType.Close);
+            RegisterCharToken(',', ExprTokenType.Comma);
         }
 
         protected override Token FetchNextToken()

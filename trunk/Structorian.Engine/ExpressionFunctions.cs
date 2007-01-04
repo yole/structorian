@@ -19,15 +19,15 @@ namespace Structorian.Engine
             return result;
         }
         
-        public static IConvertible Evaluate(string function, string param, IEvaluateContext context)
+        public static IConvertible Evaluate(string function, Expression[] parameters, IEvaluateContext context)
         {
             EvaluateDelegate evalDelegate;
             if (!_functionRegistry.TryGetValue(function, out evalDelegate))
                 return null;
-            return evalDelegate(context, param);
+            return evalDelegate(context, parameters);
         }
-        
-        private static IConvertible StructOffset(IEvaluateContext context, string param)
+
+        private static IConvertible StructOffset(IEvaluateContext context, Expression[] parameters)
         {
             if (context is StructInstance)
             {
@@ -36,7 +36,7 @@ namespace Structorian.Engine
             throw new LoadDataException("Invalid StructOffset context");
         }
 
-        private static IConvertible CurOffset(IEvaluateContext context, string param)
+        private static IConvertible CurOffset(IEvaluateContext context, Expression[] parameters)
         {
             if (context is StructInstance)
             {
@@ -45,7 +45,7 @@ namespace Structorian.Engine
             throw new LoadDataException("Invalid CurOffset context");
         }
 
-        private static IConvertible ParentCount(IEvaluateContext context, string param)
+        private static IConvertible ParentCount(IEvaluateContext context, Expression[] parameters)
         {
             if (context is StructInstance)
             {
@@ -54,7 +54,7 @@ namespace Structorian.Engine
             throw new LoadDataException("Invalid ParentCount context");
         }
 
-        private static IConvertible StructName(IEvaluateContext context, string param)
+        private static IConvertible StructName(IEvaluateContext context, Expression[] parameters)
         {
             if (context is StructInstance)
             {
@@ -63,7 +63,7 @@ namespace Structorian.Engine
             throw new LoadDataException("Invalid StructName context");
         }
 
-        private static IConvertible FileSize(IEvaluateContext context, string param)
+        private static IConvertible FileSize(IEvaluateContext context, Expression[] parameters)
         {
             if (context is StructInstance)
             {
@@ -72,14 +72,19 @@ namespace Structorian.Engine
             throw new LoadDataException("Invalid FileSize context");
         }
 
-        private static IConvertible SizeOf(IEvaluateContext context, string param)
+        private static IConvertible SizeOf(IEvaluateContext context, Expression[] parameters)
         {
-            if (param == null) throw new LoadDataException("SizeOf function requires an argument");
+            if (parameters.Length != 1) 
+                throw new LoadDataException("SizeOf function requires an argument");
+            if (!(parameters [0] is SymbolExpression))
+                throw new LoadDataException("SizeOf argument must be a symbol");
+            string symbol = ((SymbolExpression) parameters[0]).Symbol;
+
             if (context is StructInstance)
             {
                 StructFile structFile = ((StructInstance) context).Def.StructFile;
-                StructDef def = structFile.GetStructByName(param);
-                if (def == null) throw new LoadDataException("Structure '" + param + "' not found");
+                StructDef def = structFile.GetStructByName(symbol);
+                if (def == null) throw new LoadDataException("Structure '" + symbol + "' not found");
                 return def.GetDataSize();
             }
             throw new LoadDataException("Invalid SizeOf context");
