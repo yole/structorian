@@ -159,5 +159,10 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(4, ExpressionParser.Parse("1 << 2").EvaluateInt(null));
             Assert.AreEqual(4, ExpressionParser.Parse("16 >> 2").EvaluateInt(null));
         }
+
+        [Test] public void EndsWith()
+        {
+            Assert.IsTrue(ExpressionParser.Parse("EndsWith(\"1.txt\",\".txt\")").EvaluateBool(null));
+        }
     }
 }

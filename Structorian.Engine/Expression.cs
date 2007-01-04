@@ -251,7 +251,12 @@ namespace Structorian.Engine
 
         public override IConvertible Evaluate(IEvaluateContext context)
         {
-            return context.EvaluateFunction(_function, _parameters);
+            IConvertible baseResult = BaseFunctions.Instance.Evaluate(_function, _parameters, context);
+            if (baseResult != null)
+                return baseResult;
+            if (context != null)
+                return context.EvaluateFunction(_function, _parameters);
+            throw new Exception("Function '" + _function + "' not found in current context");
         }
     }
 }
