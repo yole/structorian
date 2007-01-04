@@ -5,7 +5,6 @@ namespace Structorian.Engine
 {
     public abstract class InstanceTreeNode
     {
-        private StructInstance lastChild;
         public abstract InstanceTreeNode Parent { get; }
         public abstract void AddChild(InstanceTreeNode instance);
         public abstract string NodeName { get; }
