@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Structorian.Engine
 {
@@ -98,9 +99,15 @@ namespace Structorian.Engine
                 else if (lexer.PeekNextToken() == ExprTokenType.Open)
                 {
                     lexer.GetNextToken(ExprTokenType.Open);
-                    string param = (string) lexer.GetNextToken(ExprTokenType.Symbol);
+                    List <Expression> parameters = new List<Expression>();
+                    while (lexer.PeekNextToken() != ExprTokenType.Close)
+                    {
+                        if (parameters.Count > 0)
+                            lexer.GetNextToken(ExprTokenType.Comma);
+                        parameters.Add(ParseCondCombo(lexer));
+                    }
                     lexer.GetNextToken(ExprTokenType.Close);
-                    return new FunctionExpression(symbol, param);
+                    return new FunctionExpression(symbol, parameters.ToArray());
                 }
                 else
                     return new SymbolExpression(symbol);
