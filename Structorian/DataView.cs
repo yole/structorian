@@ -1,10 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
 using System.IO;
-using System.Text;
 using System.Windows.Forms;
 using Structorian.Engine;
 
@@ -18,6 +18,7 @@ namespace Structorian
         private InstanceTreeNode _activeInstance;
         private Dictionary<InstanceTreeNode, TreeNode> _nodeMap = new Dictionary<InstanceTreeNode, TreeNode>();
         private HexDump _hexDump;
+        private bool _showLocalOffsets;
 
         public event CellSelectedEventHandler CellSelected;
 
@@ -39,6 +40,16 @@ namespace Structorian
         public DataGridView StructGridView
         {
             get { return _structGridView; }
+        }
+
+        public bool ShowLocalOffsets
+        {
+            get { return _showLocalOffsets; }
+            set
+            {
+                _showLocalOffsets = value;
+                _structGridView.Invalidate();
+            }
         }
 
         public void LoadData(string fileName, StructDef def)
@@ -148,8 +159,18 @@ namespace Structorian
                     CellSelected(this, new CellSelectedEventArgs(cell));
             }
         }
+
+        private void _structGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.ColumnIndex == 0 && _showLocalOffsets && _activeInstance is StructInstance)
+            {
+                StructInstance instance = (StructInstance) _activeInstance;
+                e.Value = ((int) e.Value - instance.Offset).ToString();
+                e.FormattingApplied = true;
+            }
+        }
     }
-    
+
     public class CellSelectedEventArgs: EventArgs
     {
         private StructCell _cell;
