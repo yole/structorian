@@ -14,6 +14,8 @@ namespace Structorian.Engine.Fields
         {
             int offset = (int)reader.BaseStream.Position;
             int len = GetExpressionAttribute("len").EvaluateInt(instance);
+            if (offset + len > reader.BaseStream.Length)
+                throw new LoadDataException("Blob size " + len + " exceeds stream length");
             byte[] blobBytes = reader.ReadBytes(len);
             int bytesToDisplay = Math.Min(16, len);
             StringBuilder bytesBuilder = new StringBuilder();
