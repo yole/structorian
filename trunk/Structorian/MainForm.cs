@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using ICSharpCode.TextEditor.Document;
 using Structorian.Engine;
@@ -171,8 +172,25 @@ namespace Structorian
             if (_structFile == null || _structFile.Structs.Count == 0) return;
             if (_openDataDialog.ShowDialog(this) == DialogResult.OK)
             {
-                _dataView.LoadData(Path.GetFullPath(_openDataDialog.FileName), _structFile.Structs[0]);
+                string fileName = _openDataDialog.FileName;
+                _dataView.LoadData(Path.GetFullPath(fileName), FindMatchingStruct(fileName));
             }
+        }
+
+        private StructDef FindMatchingStruct(string fileName)
+        {
+            foreach(StructDef def in _structFile.Structs)
+            {
+                string fileMask = def.FileMask;
+                if (fileMask == null)
+                    continue;
+                string rx = fileMask.Replace(".", "\\.").Replace("*", ".+").Replace("?", ".");
+                if (new Regex(rx, RegexOptions.IgnoreCase).IsMatch(fileName))
+                {
+                    return def;
+                }
+            }
+            return _structFile.Structs[0];
         }
 
         private void showLocalOffsetsToolStripMenuItem_Click(object sender, EventArgs e)
