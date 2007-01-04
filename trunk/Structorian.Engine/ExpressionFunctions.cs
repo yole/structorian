@@ -2,21 +2,48 @@ using System;
 
 namespace Structorian.Engine
 {
-    class ExpressionFunctions: FunctionRegistry<StructInstance>
+    class BaseFunctions: FunctionRegistry<IEvaluateContext>
     {
-        private static ExpressionFunctions _instance;
+        private static BaseFunctions _instance;
 
-        public static ExpressionFunctions Instance
+        public static BaseFunctions Instance
         {
             get
             {
                 if (_instance == null)
-                    _instance = new ExpressionFunctions();
+                    _instance = new BaseFunctions();
                 return _instance;
             }
         }
 
-        private ExpressionFunctions()
+        private BaseFunctions()
+        {
+            Register("EndsWith", new FunctionDelegate(EndsWith));
+        }
+
+        private static IConvertible EndsWith(IEvaluateContext context, Expression[] parameters)
+        {
+            string param1 = parameters[0].EvaluateString(context);
+            string param2 = parameters[1].EvaluateString(context);
+            return param1.EndsWith(param2);
+        }
+    }
+
+    class StructFunctions: FunctionRegistry<StructInstance>
+    {
+        private static StructFunctions _instance;
+
+        public static StructFunctions Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new StructFunctions();
+                return _instance;
+            }
+        }
+
+        private StructFunctions()
         {
             Register("StructOffset", new FunctionDelegate(StructOffset));
             Register("ParentCount", new FunctionDelegate(ParentCount));

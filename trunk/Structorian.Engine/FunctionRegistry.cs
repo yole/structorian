@@ -19,7 +19,7 @@ namespace Structorian.Engine
             FunctionDelegate evalDelegate;
             if (!_functions.TryGetValue(function, out evalDelegate))
                 return null;
-            if (!(context is T))
+            if (context != null && !(context is T))
                 throw new Exception("Invalid context type");
 
             return evalDelegate((T) context, parameters);
