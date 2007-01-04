@@ -175,6 +175,12 @@ namespace Structorian
             }
         }
 
+        private void showLocalOffsetsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _dataView.ShowLocalOffsets = !_dataView.ShowLocalOffsets;
+            ((ToolStripMenuItem) sender).Checked = _dataView.ShowLocalOffsets;
+        }
+
         private void _dataView_OnCellSelected(object sender, CellSelectedEventArgs e)
         {
             TextPosition pos = e.Cell.GetStructDef().Position;

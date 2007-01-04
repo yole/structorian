@@ -81,6 +81,7 @@ namespace Structorian
             this._structGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this._structGridView.Size = new System.Drawing.Size(364, 286);
             this._structGridView.TabIndex = 2;
+            this._structGridView.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this._structGridView_CellFormatting);
             this._structGridView.SelectionChanged += new System.EventHandler(this._structGridView_SelectionChanged);
             // 
             // splitContainer2
