@@ -12,6 +12,7 @@ namespace Structorian.Engine.Fields
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             int size = GetExpressionAttribute("size").EvaluateInt(instance);
+            long baseOffset = reader.BaseStream.Position;
             uint baseValue;
             switch(size)
             {
@@ -21,7 +22,7 @@ namespace Structorian.Engine.Fields
                 default:
                     throw new LoadDataException("Invalid bitfield size " + size);
             }
-            BitfieldReader bitFieldReader = new BitfieldReader(baseValue, size);
+            BitfieldReader bitFieldReader = new BitfieldReader(baseValue, size, baseOffset);
             
             foreach(StructField field in ChildFields)
             {
@@ -58,7 +59,8 @@ namespace Structorian.Engine.Fields
             private int _fromBit;
             private int _toBit;
 
-            public BitfieldReader(uint baseValue, int size) : base(new MemoryStream())
+            public BitfieldReader(uint baseValue, int size, long baseOffset) 
+                : base(new BitfieldMemoryStream(baseOffset))
             {
                 _baseValue = baseValue;
                 _size = size;
@@ -99,6 +101,22 @@ namespace Structorian.Engine.Fields
             public override uint ReadUInt32()
             {
                 return _curValue;
+            }
+        }
+
+        private class BitfieldMemoryStream: MemoryStream
+        {
+            private long _baseOffset;
+
+            public BitfieldMemoryStream(long baseOffset)
+            {
+                _baseOffset = baseOffset;
+            }
+
+            public override long Position
+            {
+                get { return _baseOffset; }
+                set { throw new NotImplementedException(); }
             }
         }
     }
