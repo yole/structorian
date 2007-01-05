@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Structorian.Engine.Fields
 {
@@ -30,9 +28,15 @@ namespace Structorian.Engine.Fields
                 if (field is IntBasedField)
                 {
                     IntBasedField intBasedField = (IntBasedField) field;
-                    int? fromBit = intBasedField.GetIntAttribute("frombit");
-                    int? toBit = intBasedField.GetIntAttribute("tobit");
-                    bitFieldReader.SetBits(fromBit.Value, toBit.Value);
+                    int? bit = intBasedField.GetIntAttribute("bit");
+                    if (bit.HasValue)
+                        bitFieldReader.SetBits(bit.Value, bit.Value);
+                    else
+                    {
+                        int? fromBit = intBasedField.GetIntAttribute("frombit");
+                        int? toBit = intBasedField.GetIntAttribute("tobit");
+                        bitFieldReader.SetBits(fromBit.Value, toBit.Value);
+                    }
                 }
                 field.LoadData(bitFieldReader, instance);
             }
