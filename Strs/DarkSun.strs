@@ -1,0 +1,79 @@
+[filemask="*.gff]
+struct GFFHeader
+{
+  str [len=4] Signature;
+  u16;
+  u16;
+  u32;
+  x32 IndexOffset;
+  child GFFIndex [offset=IndexOffset];
+}
+
+struct GFFIndex
+{
+  u32;
+  u32 IndexSize;
+  u16 TagCount;
+  child GFFTagEntry [count=TagCount];
+}
+
+struct GFFTagEntry
+{
+  str [len=4] Tag;
+  bitfield(4)
+  {
+    u32 Count [frombit=0, tobit=30];
+    u8 UseChildIndex [bit=31];
+  }
+  if (UseChildIndex)
+  {
+    u32;
+    u32 ChildIndexNumber;
+    u32 SequenceNumber; 
+    child GFFIndexSequence [offset=CurOffset, count=SequenceNumber];
+    skip (SequenceNumber*SizeOf(GFFIndexSequence));
+  }
+  else
+  {
+    child GFFIndexEntry [offset=CurOffset, count=Count];  
+    skip (Count*SizeOf(GFFIndexEntry));
+  }
+}
+
+struct GFFIndexEntry
+{
+  u32 ID;
+  x32 Offset;
+  u32 Size;
+  if (Parent.StructName == "GFFTagEntry" && Parent.Tag == "GFFI")
+  {
+    child GFFChildIndexEntry [offset=Offset];
+  }
+  else
+  {
+    seek Offset;
+    blob [len=Size];
+    rewind;
+  }
+}
+
+struct GFFChildIndexEntry
+{
+  u32 Count;
+  child OffsetAndSize [count=Count];
+}
+
+struct GFFIndexSequence
+{
+  u32 StartIndex;
+  u32 Count;
+}
+
+struct OffsetAndSize
+{
+  x32 Offset;
+  u32 Size;
+  seek Offset;
+  blob Data [len=Size];
+  rewind;
+}
