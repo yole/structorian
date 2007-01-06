@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Structorian.Engine.Fields
 {
-    public class ChildField: StructField, IChildSeed
+    public class ChildField: StructField
     {
         private bool _isSibling;
         
@@ -25,19 +25,18 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
+            long? offset = EvaluateOffset(instance);
+            int count = EvaluateCount(instance);
             if (_isSibling)
-                DoLoadChildren(instance, instance.Parent, reader.BaseStream);
+                DoLoadChildren(instance, instance.Parent, reader.BaseStream, offset, count);
             else
-                instance.AddChildSeed(this);
+            {
+                instance.AddChildSeed(new ChildSeed(this, offset, count, _isSibling));
+            }
         }
 
-        public void LoadChildren(StructInstance instance, Stream stream)
-        {
-            if (!_isSibling)
-                DoLoadChildren(instance, instance, stream);
-        }
-
-        private void DoLoadChildren(StructInstance instance, InstanceTreeNode parent, Stream stream)
+        private void DoLoadChildren(StructInstance instance, InstanceTreeNode parent, Stream stream,
+            long? offset, int count)
         {
             StructInstance lastChild = instance.LastChild;
             string groupName = GetStringAttribute("group");
@@ -47,28 +46,18 @@ namespace Structorian.Engine.Fields
                 parent.AddChild(container);
                 parent = container;
             }
-            
-            int count;
-            Expression countExpr = GetExpressionAttribute("count");
-            if (countExpr != null)
-            {
-                count = countExpr.EvaluateInt(instance);
-                if (count == 0) return;
-            }
-            else
-                count = 1;
+
+            if (count == 0) return;
 
             StructDef childDef = GetStructAttribute("struct");
             if (childDef == null)
                 childDef = _structDef;
-            
+
             StructInstance childInstance;
-            Expression offsetExpr = GetExpressionAttribute("offset");
             bool followChildren = GetBoolAttribute("followchildren");
-            if (offsetExpr != null)
+            if (offset.HasValue)
             {
-                long childOffset = offsetExpr.EvaluateLong(instance);
-                childInstance = new StructInstance(childDef, parent, stream, childOffset);
+                childInstance = new StructInstance(childDef, parent, stream, offset.Value);
             }
             else
             {
@@ -76,13 +65,54 @@ namespace Structorian.Engine.Fields
                 childInstance = new StructInstance(childDef, parent, stream, lastChild, firstFollowChildren);
             }
             parent.AddChild(childInstance);
-            
-            for(int i=1; i<count; i++)
+
+            for (int i = 1; i < count; i++)
             {
                 StructInstance nextInstance = new StructInstance(childDef, parent, stream, childInstance, followChildren);
                 parent.AddChild(nextInstance);
                 childInstance = nextInstance;
             }
+        }
+
+        private long? EvaluateOffset(StructInstance instance)
+        {
+            Expression offsetExpr = GetExpressionAttribute("offset");
+            if (offsetExpr != null)
+                return offsetExpr.EvaluateLong(instance);
+            else
+                return null;
+        }
+
+        private int EvaluateCount(StructInstance instance)
+        {
+            Expression countExpr = GetExpressionAttribute("count");
+            if (countExpr != null)
+                return countExpr.EvaluateInt(instance);
+            else
+                return 1;
+        }
+
+        class ChildSeed : IChildSeed
+        {
+            private readonly ChildField _field;
+            private long? _offset;
+            private int _count;
+            private bool _isSibling;
+
+            public ChildSeed(ChildField field, long? offset, int count, bool isSibling)
+            {
+                _field = field;
+                _offset = offset;
+                _count = count;
+                _isSibling = isSibling;
+            }
+
+            public void LoadChildren(StructInstance instance, Stream stream)
+            {
+                if (!_isSibling)
+                    _field.DoLoadChildren(instance, instance, stream, _offset, _count);
+            }
+
         }
     }
 }
