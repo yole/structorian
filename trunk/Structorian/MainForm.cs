@@ -94,6 +94,7 @@ namespace Structorian
                 ParseStructures();
             }
             _btnSaveStructures.Enabled = true;
+            Text = Path.GetFileName(name) + " - Structorian";
         }
 
         private bool CheckSaveStructures()
@@ -165,6 +166,7 @@ namespace Structorian
             {
                 writer.Close();
             }
+            _structuresModified = false;
         }
 
         private void loadDataToolStripMenuItem_Click(object sender, EventArgs e)
@@ -209,9 +211,12 @@ namespace Structorian
                 doc.MarkerStrategy.RemoveMarker(_currentCellMarker);
             int offset = doc.PositionToOffset(new Point(pos.Col, pos.Line-1));
             int endOffset = doc.PositionToOffset(new Point(endPos.Col, endPos.Line - 1));
-            _currentCellMarker = new TextMarker(offset, endOffset-offset, TextMarkerType.SolidBlock, 
-                                                Color.LightSkyBlue);
-            doc.MarkerStrategy.AddMarker(_currentCellMarker);
+            if (offset != endOffset)
+            {
+                _currentCellMarker = new TextMarker(offset, endOffset - offset, TextMarkerType.SolidBlock,
+                                                    Color.LightSkyBlue);
+                doc.MarkerStrategy.AddMarker(_currentCellMarker);
+            }
             _structEditControl.ActiveTextAreaControl.ScrollTo(pos.Line-1);
             _structEditControl.Refresh();
         }
