@@ -164,5 +164,10 @@ namespace Structorian.Engine.Tests
         {
             Assert.IsTrue(ExpressionParser.Parse("EndsWith(\"1.txt\",\".txt\")").EvaluateBool(null));
         }
+
+        [Test] public void LazyEval()
+        {
+            Assert.IsFalse(ExpressionParser.Parse("0 && Bad == Good").EvaluateBool(null));
+        }
     }
 }
