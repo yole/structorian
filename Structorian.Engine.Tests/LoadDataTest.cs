@@ -856,5 +856,13 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("17", instance.Children[0].Cells[0].Value);
             Assert.AreEqual("37", instance.Children[1].Cells[0].Value);
         }
+
+        [Test] public void EvaluateChildOffset()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 q; child B [offset=CurOffset]; skip 3; } struct B { u8 p; }",
+                new byte[] {1, 2, 3, 4, 5, 6});
+            Assert.AreEqual("2", instance.Children [0].Cells [0].Value);
+        }
     }
 }
