@@ -186,6 +186,11 @@ namespace Structorian.Engine
         public override IConvertible Evaluate(IEvaluateContext context)
         {
             bool lhs = _lhs.EvaluateBool(context);
+            if (_operation == ExprTokenType.AND && !lhs)
+                return false;
+            if (_operation == ExprTokenType.OR && lhs)
+                return true;
+
             bool rhs = _rhs.EvaluateBool(context);
             switch(_operation)
             {
