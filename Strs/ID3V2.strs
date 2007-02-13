@@ -1,0 +1,133 @@
+enum ID3V2HeaderFlags
+{
+  Unsynchronization=7, ExtendedHeader=6, ExperimentalIndicator=5,
+  FooterPresent=4
+}
+
+[filemask="*.mp3", byteorder=motorola]
+struct ID3V2Header
+{
+  str [len=3] signature;
+  u16 version;
+  set8 [enum=ID3V2HeaderFlags] flags;
+  [hidden] u8 _size0;
+  [hidden] u8 _size1;
+  [hidden] u8 _size2;
+  [hidden] u8 _size3;
+  calc size [value=_size0 << 21 + _size1 << 14 + _size2 << 7 + _size3];
+  child ID3V2Frame;
+}
+
+enum ID3V2FrameFlags
+{
+  TagAlterPreservation=15,
+  FileAlterPreservation=14,
+  ReadOnly=13,
+  Compression=7,
+  Encryption=6,
+  GroupingIdentity=5
+}
+
+[byteorder=motorola]
+struct ID3V2Frame
+{
+  [hidden] str [len=1] _IDMarker;
+  skip -1;
+  if (Parent.version == 512)
+  {
+    str [len=3] ID;
+    [hidden] u8 _size0;
+    [hidden] u8 _size1;
+    [hidden] u8 _size2;
+    calc Size [value=_size0 << 16 + _size1 << 8 + _size2];
+  }
+  else
+  {
+    str [len=4] ID;
+    u32 Size;
+    enum16 Flags [enum=ID3V2FrameFlags];
+  }
+  local _frameStart [value=CurOffset];
+  if (ID == "TCON")
+  {
+    u8 contentType;
+    skip Size-1;
+  }
+  elif (ID == "COMM")
+  {
+    u8 encoding;
+    str [len=3] language;
+    if (encoding == 0)
+    {
+      str shortContentDescription;
+      str value [len=_frameStart+Size-CurOffset];
+    }
+    else
+    {
+      [hidden] u16 _byteOrderMark;
+      wstr shortContentDescription;
+      [hidden] u16 _byteOrderMark2;
+      wstr value [len=(_frameStart+Size-CurOffset)/2];
+    }
+  }
+  elif (ID == "WXXX")
+  {
+    u8 encoding;
+    if (encoding == 0)
+    {
+      str description;
+    }
+    else
+    {
+      [hidden] u16 _byteOrderMark;
+      wstr description;
+    }
+    str url [len=_frameStart+Size-CurOffset];
+  }
+  elif (ID == "POPM")
+  {
+    str user;
+    skip _frameStart+Size-CurOffset;
+  }
+  elif (ID == "APIC")
+  {
+    u8 encoding;
+    str mimeType;
+    u8 pictureType;
+    if (encoding == 0)
+    {
+      str description;
+    }
+    else
+    {
+      wstr description;
+    }
+    blob picture [len=_frameStart+Size-CurOffset];
+  }
+  elif (_IDMarker == "T")
+  {
+    u8 encoding;
+    if (encoding == 0)
+    {
+      str value [len=Size-1];
+    }
+    else
+    {
+      [hidden] u16 _byteOrderMark;
+      wstr value [len=(Size-3)/2];
+    }
+  }
+  else 
+  {
+    skip Size;
+  }
+  if (CurOffset - Parent.StructOffset < Parent.size)
+  {
+    [hidden] u8 _nextFrame;
+    if (_nextFrame != 0)
+    {
+      skip -1;
+      sibling;
+    }
+  }  
+}
