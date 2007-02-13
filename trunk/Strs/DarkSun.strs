@@ -29,9 +29,9 @@ struct GFFTagEntry
   {
     u32;
     u32 ChildIndexNumber;
-    u32 SequenceNumber; 
-    child GFFIndexSequence [offset=CurOffset, count=SequenceNumber];
-    skip (SequenceNumber*SizeOf(GFFIndexSequence));
+    u32 SequenceCount;
+    child GFFIndexSequence [offset=CurOffset, count=SequenceCount];
+    skip (SequenceCount*SizeOf(GFFIndexSequence));
   }
   else
   {
@@ -76,4 +76,35 @@ struct OffsetAndSize
   seek Offset;
   blob Data [len=Size];
   rewind;
+}
+
+[filemask="*.bmp"]
+struct BMP
+{
+  u32 fileSize;
+  u16 imageCount;
+  repeat(imageCount)
+  {
+    x32 offset;
+    child BMPImage [offset=offset];
+  }
+}
+
+struct BMPImage
+{
+  u16 width;
+  u16 height;
+  u8;
+  str [len=4] Tag;
+}
+
+[filemask="*.wind"]
+struct WIND
+{
+  str [len=4] Tag;
+  repeat(0xBE-4)
+  {
+    u8;
+  }
+  u16;
 }

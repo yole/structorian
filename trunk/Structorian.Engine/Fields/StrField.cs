@@ -60,9 +60,12 @@ namespace Structorian.Engine.Fields
                 else
                 {
                     StringBuilder valueBuilder = new StringBuilder();
+                    BinaryReader charReader = 
+                        _wide ? new BinaryReader(reader.BaseStream, Encoding.Unicode)
+                              : reader;
                     while (true)
                     {
-                        char c = reader.ReadChar();
+                        char c = charReader.ReadChar();
                         if (c == '\0') break;
                         valueBuilder.Append(c);
                     }

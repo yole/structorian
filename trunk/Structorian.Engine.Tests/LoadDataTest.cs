@@ -461,6 +461,15 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("BM", instance.Cells[0].Value);
             Assert.AreEqual("5", instance.Cells[1].Value);
         }
+
+        [Test] public void NullTerminatedWStr()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { wstr s; u8 a; }",
+                new byte[] { (byte)'B', 0, (byte)'M', 0, 0, 0, 5});
+            Assert.AreEqual("BM", instance.Cells[0].Value);
+            Assert.AreEqual("5", instance.Cells[1].Value);
+        }
         
         [Test] public void IfElseFalse()
         {

@@ -33,6 +33,8 @@ namespace Structorian
                     _stream = value;
                     _streamSize = (int) _stream.Length;
                     _lineCount = (_streamSize/16 + 1);
+                    if (_topLine > _lineCount)
+                        _topLine = _lineCount - 1;
                     AdjustScrollbars();
                     Invalidate();
                 }
