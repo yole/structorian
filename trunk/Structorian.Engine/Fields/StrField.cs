@@ -39,10 +39,16 @@ namespace Structorian.Engine.Fields
                 if (lengthExpr != null)
                 {
                     int length = lengthExpr.EvaluateInt(instance);
+                    if (length < 0)
+                    {
+                        throw new LoadDataException("Length expression " + lengthExpr +
+                                                    " has the result of " + length + " which is negative");
+                    }
+
                     cellSize = length * charSize;
                     if (reader.BaseStream.Length - reader.BaseStream.Position < cellSize)
                     {
-                        throw new LoadDataException("Length expression " + lengthExpr.ToString() +
+                        throw new LoadDataException("Length expression " + lengthExpr +
                                                     " has the result of " + length + " and points outside the file");
                     }
                     byte[] bytes = reader.ReadBytes(length * charSize);
