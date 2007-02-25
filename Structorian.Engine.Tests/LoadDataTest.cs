@@ -873,5 +873,14 @@ namespace Structorian.Engine.Tests
                 new byte[] {1, 2, 3, 4, 5, 6});
             Assert.AreEqual("2", instance.Children [0].Cells [0].Value);
         }
+
+        [Test] public void NegativeStrLen()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { str q [len=-1]; }",
+                new byte[0] );
+            Assert.AreEqual(1, instance.Cells.Count);
+            Assert.IsTrue(instance.Cells [0].IsError());
+        }
     }
 }

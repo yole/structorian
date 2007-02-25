@@ -48,12 +48,7 @@ struct ID3V2Frame
     enum16 Flags [enum=ID3V2FrameFlags];
   }
   local _frameStart [value=CurOffset];
-  if (ID == "TCON")
-  {
-    u8 contentType;
-    skip Size-1;
-  }
-  elif (ID == "COMM")
+  if (ID == "COMM")
   {
     u8 encoding;
     str [len=3] language;
@@ -106,15 +101,22 @@ struct ID3V2Frame
   }
   elif (_IDMarker == "T")
   {
-    u8 encoding;
-    if (encoding == 0)
+    if (Size > 0)
     {
-      str value [len=Size-1];
+      u8 encoding;
+      if (encoding == 0)
+      {
+        str value [len=Size-1];
+      }
+      else
+      {
+        [hidden] u16 _byteOrderMark;
+        wstr value [len=(Size-3)/2];
+      }
     }
     else
     {
-      [hidden] u16 _byteOrderMark;
-      wstr value [len=(Size-3)/2];
+      str value [len=0];
     }
   }
   else 
