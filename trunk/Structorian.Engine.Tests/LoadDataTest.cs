@@ -139,8 +139,18 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(3, instance.Cells.Count);
             Assert.AreEqual("17", instance.Cells[2].ToString());
         }
-        
-        [Test] public void Repeat()
+
+        [Test] public void MultipleRewind()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { u8 a; seek(1); u8 b; seek(3); u8 c; rewind; u8 d;}",
+                new byte[] { 2, 17, 42, 37 });
+            Assert.AreEqual(4, instance.Cells.Count);
+            Assert.AreEqual("42", instance.Cells[3].ToString());
+        }
+
+        [Test]
+        public void Repeat()
         {
             StructInstance instance = PrepareInstance(
                 "struct A { u8 a; repeat(a) { u8 c; } }",

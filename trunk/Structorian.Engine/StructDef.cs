@@ -90,8 +90,9 @@ namespace Structorian.Engine
                     break;
                 }
             }
-            if (instance.RewindOffset != -1)
-                stream.Position = instance.RewindOffset;
+            long offset = instance.GetLastRewindOffset();
+            if (offset != -1)
+                stream.Position = offset;
         }
 
         public void SetAttribute(string name, string value, TextPosition position)

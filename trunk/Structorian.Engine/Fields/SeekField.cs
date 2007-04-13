@@ -21,8 +21,7 @@ namespace Structorian.Engine.Fields
                 reader.BaseStream.Seek(offset, SeekOrigin.Current);
             else
             {
-                if (instance.RewindOffset == -1)
-                    instance.RewindOffset = reader.BaseStream.Position;
+                instance.MarkRewindOffset(reader.BaseStream.Position);
                 reader.BaseStream.Position = offset;
             }
         }

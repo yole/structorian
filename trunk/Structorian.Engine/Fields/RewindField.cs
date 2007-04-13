@@ -11,10 +11,7 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
-            if (instance.RewindOffset < 0)
-                throw new Exception("No rewind offset found");
-            reader.BaseStream.Position = instance.RewindOffset;
-            instance.RewindOffset = -1;
+            reader.BaseStream.Position = instance.PopRewindOffset();
         }
     }
 }
