@@ -19,7 +19,7 @@ namespace Structorian.Engine
         private Stream _stream;
         private long _offset;
         private long _endOffset;
-        private long _rewindOffset = -1;
+        private Stack<long> _rewindStack;
         private string _nodeName;
         private List<StructCell> _cells = null;
         private List<StructCell> _hiddenCells = null;
@@ -112,12 +112,31 @@ namespace Structorian.Engine
             }
         }
 
-        public long RewindOffset
+        public void MarkRewindOffset(long offset)
         {
-            get { return _rewindOffset; }
-            set { _rewindOffset = value; }
+            if (_rewindStack == null)
+                _rewindStack = new Stack<long>();
+            _rewindStack.Push(offset);
         }
-        
+
+        public long PopRewindOffset()
+        {
+            if (_rewindStack == null || _rewindStack.Count == 0)
+                throw new Exception("No rewind offset found");
+            return _rewindStack.Pop();
+        }
+
+        public long GetLastRewindOffset()
+        {
+            long result = -1;
+            if (_rewindStack != null)
+            {
+                while (_rewindStack.Count > 0)
+                    result = _rewindStack.Pop();
+            }
+            return result;
+        }
+
         public long CurOffset
         {
             get { return _stream.Position; }
