@@ -36,6 +36,10 @@ namespace Structorian.Engine.Fields
             BlobCell cell = new BlobCell(this, blobBytes, offset);
             instance.AddCell(cell, _hidden);
             instance.RegisterCellSize(cell, len);
+
+            StructDef structDef = GetStructAttribute("struct");
+            if (structDef != null)
+                instance.AddChildSeed(new BlobChildSeed(structDef, cell));
         }
 
         public override int GetDataSize()
@@ -45,6 +49,29 @@ namespace Structorian.Engine.Fields
                 return lengthExpr.EvaluateInt(null);
 
             return base.GetDataSize();
+        }
+
+        public override bool ProvidesChildren()
+        {
+            return GetStructAttribute("struct") != null;
+        }
+
+        private class BlobChildSeed: IChildSeed
+        {
+            private readonly StructDef _def;
+            private readonly BlobCell _cell;
+
+            public BlobChildSeed(StructDef def, BlobCell cell)
+            {
+                _def = def;
+                _cell = cell;
+            }
+
+            public void LoadChildren(StructInstance instance, Stream stream)
+            {
+                StructInstance childInstance = new StructInstance(_def, instance, _cell.DataStream, 0);
+                instance.AddChild(childInstance);
+            }
         }
     }
 }

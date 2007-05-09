@@ -63,15 +63,22 @@ struct BIFF
 struct BAM
 {
   str [len=8] Signature;
-  i16 "Frame count"         [id=FrameCnt];
-  u8  "Animation count"     [id=AnimCnt];
-  x8  "Transparent color";
-  x32 "Frame header offset" [id=FrameHeaderOffset];
-  x32 "Palette offset";
-  x32 "Frame lookup table offset" [id=FrameLookupOffset];
-  local AbsFrameHeaderOffset [value=StructOffset+FrameHeaderOffset];
-  local AbsFrameLookupOffset [value=StructOffset+FrameLookupOffset];
-  child BAMAnim [offset=(StructOffset+FrameHeaderOffset+FrameCnt*SizeOf(BAMFrameHdr)), count=AnimCnt];
+  if (Signature == "BAMCV1  ")
+  {
+    u32 "Uncompressed size";
+    blob BAMC [len=FileSize-12, encoding=zlib, struct=BAM];
+  }
+  else {
+    i16 "Frame count"         [id=FrameCnt];
+    u8  "Animation count"     [id=AnimCnt];
+    x8  "Transparent color";
+    x32 "Frame header offset" [id=FrameHeaderOffset];
+    x32 "Palette offset";
+    x32 "Frame lookup table offset" [id=FrameLookupOffset];
+    local AbsFrameHeaderOffset [value=StructOffset+FrameHeaderOffset];
+    local AbsFrameLookupOffset [value=StructOffset+FrameLookupOffset];
+    child BAMAnim [offset=(StructOffset+FrameHeaderOffset+FrameCnt*SizeOf(BAMFrameHdr)), count=AnimCnt];
+  }
 }
 
 [hidden] struct BAMAnim
