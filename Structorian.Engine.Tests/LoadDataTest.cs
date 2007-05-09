@@ -906,13 +906,22 @@ namespace Structorian.Engine.Tests
             DeflaterOutputStream deflaterStream = new DeflaterOutputStream(compressedStream);
             StreamUtils.Copy(sourceStream, deflaterStream, new byte[4096]);
             deflaterStream.Finish();
-            Assert.AreEqual(12, compressedStream.Length);
             compressedStream.Capacity = (int) compressedStream.Length;
             StructInstance instance = PrepareInstance(
                 "struct A { blob q [len=FileSize, encoding=zlib]; }",
                 compressedStream.GetBuffer());
             BlobCell cell = (BlobCell) instance.Cells[0];
             Assert.AreEqual(4, cell.DataStream.Length);
+        }
+
+        [Test] public void StructInZip()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { blob q [len=4, struct=B]; } struct B { u8 a; u16 b; }",
+                new byte[] {17, 37, 0, 2});
+            Assert.AreEqual(1, instance.Children.Count);
+            Assert.AreEqual("17", instance.Children [0].Cells [0].Value);
+            Assert.AreEqual("37", instance.Children [0].Cells [1].Value);
         }
     }
 }
