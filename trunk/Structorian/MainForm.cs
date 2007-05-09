@@ -19,6 +19,7 @@ namespace Structorian
         private TextMarker _currentCellMarker;
         private Settings _settings = new Settings();
         private bool _structuresModified = false;
+        private bool _settingsLoaded = false;
         
         public MainForm()
         {
@@ -35,6 +36,7 @@ namespace Structorian
             _structEditControl.Document.DocumentChanged += delegate { _structuresModified = true; };
 
             RestoreFormPosition();
+            _settingsLoaded = true;
         }
 
         private void RestoreFormPosition()
@@ -68,21 +70,38 @@ namespace Structorian
             }
             _settings.Save();
         }
-        
+
+        private void newStructuresToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckSaveStructures();
+            _structEditControl.Text = "";
+            SetLastStructFile(null);
+        }
+
+        private void SetLastStructFile(string file)
+        {
+            _structFileName = file;
+            string name = (file == null) ? "<untitled>" : Path.GetFileName(file);
+            Text = name + " - Structorian";
+            if (_settingsLoaded)
+            {
+                _settings.LastStrsFile = file;
+                _settings.Save();
+            }
+        }
+
         private void loadStructuresToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_openStructsDialog.ShowDialog(this) == DialogResult.OK)
             {
                 LoadStructsFile(_openStructsDialog.FileName);
-                _settings.LastStrsFile = _openStructsDialog.FileName;
-                _settings.Save();
             }
         }
 
         private void LoadStructsFile(string name)
         {
             if (!CheckSaveStructures()) return;
-            _structFileName = Path.GetFullPath(name);
+            SetLastStructFile(Path.GetFullPath(name));
             using(Stream stream = new FileStream(name, FileMode.Open))
             {
                 string strs = new StreamReader(stream).ReadToEnd();
@@ -93,8 +112,6 @@ namespace Structorian
                 _structuresModified = false;
                 ParseStructures();
             }
-            _btnSaveStructures.Enabled = true;
-            Text = Path.GetFileName(name) + " - Structorian";
         }
 
         private bool CheckSaveStructures()
@@ -148,6 +165,12 @@ namespace Structorian
 
         private void _btnSaveStructures_Click(object sender, EventArgs e)
         {
+            if (_structFileName == null)
+            {
+                if (_saveStructsDialog.ShowDialog(this) != DialogResult.OK)
+                    return;
+                SetLastStructFile(Path.GetFullPath(_saveStructsDialog.FileName));
+            }
             SaveStructuresToDisk();
             ParseStructures();
             

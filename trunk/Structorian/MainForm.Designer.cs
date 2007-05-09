@@ -33,6 +33,8 @@ namespace Structorian
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadStructuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showLocalOffsetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._openStructsDialog = new System.Windows.Forms.OpenFileDialog();
             this._openDataDialog = new System.Windows.Forms.OpenFileDialog();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -40,8 +42,8 @@ namespace Structorian
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this._btnLoadStuctures = new System.Windows.Forms.ToolStripButton();
             this._btnSaveStructures = new System.Windows.Forms.ToolStripButton();
-            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.showLocalOffsetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newStructuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._saveStructsDialog = new System.Windows.Forms.SaveFileDialog();
             this.menuStrip1.SuspendLayout();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.SuspendLayout();
@@ -62,6 +64,7 @@ namespace Structorian
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newStructuresToolStripMenuItem,
             this.loadStructuresToolStripMenuItem,
             this.loadDataToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -81,6 +84,21 @@ namespace Structorian
             this.loadDataToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.loadDataToolStripMenuItem.Text = "Load Data...";
             this.loadDataToolStripMenuItem.Click += new System.EventHandler(this.loadDataToolStripMenuItem_Click);
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showLocalOffsetsToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(41, 20);
+            this.viewToolStripMenuItem.Text = "&View";
+            // 
+            // showLocalOffsetsToolStripMenuItem
+            // 
+            this.showLocalOffsetsToolStripMenuItem.Name = "showLocalOffsetsToolStripMenuItem";
+            this.showLocalOffsetsToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.showLocalOffsetsToolStripMenuItem.Text = "Show &Local Offsets";
+            this.showLocalOffsetsToolStripMenuItem.Click += new System.EventHandler(this.showLocalOffsetsToolStripMenuItem_Click);
             // 
             // _openStructsDialog
             // 
@@ -140,7 +158,6 @@ namespace Structorian
             // _btnSaveStructures
             // 
             this._btnSaveStructures.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this._btnSaveStructures.Enabled = false;
             this._btnSaveStructures.Image = ((System.Drawing.Image)(resources.GetObject("_btnSaveStructures.Image")));
             this._btnSaveStructures.ImageTransparentColor = System.Drawing.Color.Magenta;
             this._btnSaveStructures.Name = "_btnSaveStructures";
@@ -148,20 +165,12 @@ namespace Structorian
             this._btnSaveStructures.Text = "Save Structure Definitions";
             this._btnSaveStructures.Click += new System.EventHandler(this._btnSaveStructures_Click);
             // 
-            // viewToolStripMenuItem
+            // newStructuresToolStripMenuItem
             // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showLocalOffsetsToolStripMenuItem});
-            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(41, 20);
-            this.viewToolStripMenuItem.Text = "&View";
-            // 
-            // showLocalOffsetsToolStripMenuItem
-            // 
-            this.showLocalOffsetsToolStripMenuItem.Name = "showLocalOffsetsToolStripMenuItem";
-            this.showLocalOffsetsToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.showLocalOffsetsToolStripMenuItem.Text = "Show &Local Offsets";
-            this.showLocalOffsetsToolStripMenuItem.Click += new System.EventHandler(this.showLocalOffsetsToolStripMenuItem_Click);
+            this.newStructuresToolStripMenuItem.Name = "newStructuresToolStripMenuItem";
+            this.newStructuresToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.newStructuresToolStripMenuItem.Text = "New Structures";
+            this.newStructuresToolStripMenuItem.Click += new System.EventHandler(this.newStructuresToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -203,6 +212,8 @@ namespace Structorian
         private System.Windows.Forms.ToolStripButton _btnSaveStructures;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showLocalOffsetsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newStructuresToolStripMenuItem;
+        private System.Windows.Forms.SaveFileDialog _saveStructsDialog;
     }
 }
 
