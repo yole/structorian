@@ -11,7 +11,7 @@ namespace Structorian.Engine
         private StructField _def;
         private string _tag;
         private IConvertible _value;
-        private string _displayValue;
+        protected string _displayValue;
         private int _offset;
         private bool _isError;
         
@@ -59,7 +59,7 @@ namespace Structorian.Engine
             set { _tag = value; }
         }
         
-        public string Value
+        public virtual string Value
         {
             get
             {

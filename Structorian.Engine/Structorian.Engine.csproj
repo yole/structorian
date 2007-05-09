@@ -45,6 +45,7 @@
     <Compile Include="AttributeRegistry.cs" />
     <Compile Include="Fields\BitfieldField.cs" />
     <Compile Include="Fields\BitsField.cs" />
+    <Compile Include="Fields\BlobCell.cs" />
     <Compile Include="Fields\BlobField.cs" />
     <Compile Include="Fields\BreakField.cs" />
     <Compile Include="Fields\BreakRepeatException.cs" />

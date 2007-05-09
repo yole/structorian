@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using NUnit.Framework;
+using Structorian.Engine.Fields;
 
 namespace Structorian.Engine.Tests
 {
@@ -762,7 +763,10 @@ namespace Structorian.Engine.Tests
             StructInstance instance = PrepareInstance(
                 "struct A { blob q [len=4]; calc x [value=CurOffset]; }",
                 new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
-            Assert.AreEqual("FF FF FF FF", instance.Cells[0].Value);
+            StructCell cell = instance.Cells[0];
+            Assert.IsInstanceOfType(typeof(BlobCell), cell);
+            Assert.AreEqual("FF FF FF FF", cell.Value);
+            Assert.AreEqual(4, ((BlobCell) cell).DataStream.Length);
             Assert.AreEqual("4", instance.Cells[1].Value);
         }
 
