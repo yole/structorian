@@ -1,0 +1,195 @@
+// Structures from newer BioWare games - NWN, KotOR, Jade Empire etc.
+// According to:
+// http://nwn.bioware.com/developers/gff2.html
+
+// -- GFF --------------------------------------------------------------------
+
+[filemask="*.dlg"]
+struct GFFHeader
+{
+  str [len=4] FileType;
+  str [len=4] FileVersion;
+  x32 StructOffset;
+  u32 StructCount;
+  x32 FieldOffset;
+  u32 FieldCount;
+  x32 LabelOffset;
+  u32 LabelCount;
+  x32 FieldDataOffset;
+  u32 FieldDataCount;
+  x32 FieldIndicesOffset;
+  u32 FieldIndicesCount;
+  x32 ListIndicesOffset;
+  u32 ListIndicesCount;
+  
+  child GFFStruct [offset=StructOffset];
+  child GFFField [offset=FieldOffset, count=FieldCount];
+
+  global Structs [value=StructOffset];
+  global Fields [value=FieldOffset];
+  global FieldIndices [value=FieldIndicesOffset];
+  global Labels [value=LabelOffset];
+  global ListIndices [value=ListIndicesOffset];
+  global FieldData [value=FieldDataOffset];
+}
+
+struct GFFStruct
+{
+  u32 Type;
+  u32 DataOrDataOffset;
+  u32 FieldCount;
+  if (FieldCount == 1)
+  {
+    child GFFField [offset=Fields + DataOrDataOffset * 12];
+  }
+  else 
+  {
+    child GFFFieldPtr [offset=FieldIndices + DataOrDataOffset, count=FieldCount];
+  }
+}
+
+[global] enum GFFFieldType
+{
+  BYTE, CHAR, WORD, SHORT, DWORD, INT, DWORD64, INT64, FLOAT, DOUBLE,
+  CExoString, ResRef, CExoLocString, VOID, Struct, List, UnknText=18
+}
+
+struct GFFFieldPtr
+{
+  u32 FieldIndex;
+  seek (Fields + FieldIndex * 12);
+  include GFFField;
+}
+
+struct GFFField
+{
+  enum32 Type [enum=GFFFieldType];
+  [hidden] u32 LabelIndex;
+  seek (Labels + LabelIndex * 16);
+  str [len=16] Label;
+  rewind;
+  if (Type == ResRef)
+  {
+    [hidden] u32 _offset;
+    seek (FieldData + _offset);
+    [hidden] u8 _length;
+    str [len=_length] Value;
+  }
+  elif (Type == CExoString)
+  {
+    [hidden] u32 _offset;
+    seek (FieldData + _offset);
+    [hidden] u32 _length;
+    str [len=_length] Value;
+  }
+  elif (Type == List)
+  {
+    [hidden] u32 _offset;
+    seek (ListIndices + _offset);
+    [hidden] u32 _count;
+    child GFFStructPtr [count=_count];
+  }
+  elif (Type == UnknText)
+  {
+    [hidden] u32 _offset;
+    seek (FieldData + _offset);
+    u32 value0;
+    u32 value1;
+  }
+  else
+  {
+    u32 DataOrDataOffset;
+  }
+}
+
+struct GFFStructPtr
+{
+  [hidden] u32 _index;
+  seek (Structs + _index*12);
+  include GFFStruct;
+}
+
+// -- TLK --------------------------------------------------------------------
+
+[filemask="*.tlk"]
+struct TLKHeader
+{
+  str [len=4] FileType;
+  str [len=4] FileVersion;
+  u32 LanguageID;
+  u32 StringCount;
+  u32 StringEntriesOffset;
+  if (FileVersion == "V4.0")
+  {
+    child TLKElement40 [offset=StringEntriesOffset, count=StringCount];
+  }
+}
+
+struct TLKElement40
+{
+  x32 Flags;
+  x32 OffsetToString;
+  u16 StringSize;
+  seek OffsetToString;
+  str [len=StringSize] value;
+}
+
+// -- KEY --------------------------------------------------------------------
+
+[filemask="chitin.key"]
+struct KEY
+{
+  str [len=8] Signature;
+  i32 "BIFF count"  [id=BIFFCount];
+  i32 "File count"  [id=FileCount];
+  x32 "BIFF offset" [id=BIFFOffset];
+  x32 "File offset" [id=FileOffset];
+  u32 BuildYear;
+  u32 BuildDay;
+  child KEYBIFF     [offset=BIFFOffset, count=BIFFCount];
+  child KEYFile     [offset=FileOffset, count=FileCount];
+}
+
+[hidden]
+struct KEYBIFF
+{
+  i32 "BIFF length";
+  x32 "Name offset" [id=NameOffset];
+  i16 "Name length" [id=NameLength];
+  bits16 "CD mask";
+  seek NameOffset;
+  cstr [len=NameLength] Name;
+}
+
+[hidden]
+struct KEYFile
+{
+  str [len=16] ResRef;
+  u16 ResourceType;
+  u32 ResID;
+}
+
+// -- ERF --------------------------------------------------------------------
+
+[filemask="*.rim"]
+struct RIMHeader
+{
+  str [len=4] FileType;
+  str [len=4] Version;
+  u32;
+  u32 EntryCount;
+  u32 OffsetToKeyList;
+  u32 OffsetToResourceList;
+  u32 BuildYear;
+  u32 BuildDay;
+  child RIMEntry [offset=OffsetToKeyList, count=EntryCount];
+}
+
+struct RIMEntry
+{
+  str [len=16] ResRef;
+  u32 ResType;
+  u32 ResID;
+  u32 Offset;
+  u32 Size;
+}
