@@ -19,6 +19,7 @@ namespace Structorian
         private Dictionary<InstanceTreeNode, TreeNode> _nodeMap = new Dictionary<InstanceTreeNode, TreeNode>();
         private HexDump _hexDump;
         private bool _showLocalOffsets;
+        private Stream _mainStream;
 
         public event CellSelectedEventHandler CellSelected;
 
@@ -68,18 +69,18 @@ namespace Structorian
                 viewState = DataViewState.Save(this);
             
             _rootStructDef = def;
-            Stream stream = new BufferedStream(new FileStream(_dataFileName, FileMode.Open, FileAccess.Read, FileShare.Read), 16384);
+            _mainStream = new BufferedStream(new FileStream(_dataFileName, FileMode.Open, FileAccess.Read, FileShare.Read), 16384);
             if (_instanceTree != null)
             {
                 _instanceTree.InstanceAdded -= new InstanceAddedEventHandler(HandleInstanceAdded);
                 _instanceTree.NodeNameChanged -= new NodeNameChangedEventHandler(HandleNodeNameChanged);
                 _nodeMap.Clear();
             }
-            _instanceTree = _rootStructDef.LoadData(stream);
+            _instanceTree = _rootStructDef.LoadData(_mainStream);
             _instanceTree.InstanceAdded += new InstanceAddedEventHandler(HandleInstanceAdded);
             _instanceTree.NodeNameChanged += new NodeNameChangedEventHandler(HandleNodeNameChanged);
             FillStructureTree();
-            _hexDump.Stream = stream;
+            _hexDump.Stream = _mainStream;
             
             if (viewState != null)
                 viewState.Restore(this);
@@ -134,6 +135,11 @@ namespace Structorian
         {
             _activeInstance = (InstanceTreeNode)e.Node.Tag;
             _structGridView.DataSource = _activeInstance.Cells;
+            StructInstance instance = _activeInstance as StructInstance;
+            if (instance == null)
+                _hexDump.Stream = _mainStream;
+            else
+                _hexDump.Stream = instance.Stream;
         }
 
         private void _structTreeView_BeforeExpand(object sender, TreeViewCancelEventArgs e)
