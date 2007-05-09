@@ -16,6 +16,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(AssertField), "expr", AttributeType.Expression);
             RegisterAttribute(typeof(BitfieldField), "size", AttributeType.Expression);
             RegisterAttribute(typeof(BlobField), "len", AttributeType.Expression);
+            RegisterAttribute(typeof(BlobField), "encoding", AttributeType.String);
             RegisterAttribute(typeof(CalcField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(CaseField), "expr", AttributeType.Expression);
             RegisterAttribute(typeof(CaseField), "default", AttributeType.Bool);
