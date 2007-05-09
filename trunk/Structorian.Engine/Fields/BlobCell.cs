@@ -26,7 +26,7 @@ namespace Structorian.Engine.Fields
 
         public Stream DataStream
         {
-            get { return _dataStream; }
+            get { return _dataStream;  }
         }
     }
 }

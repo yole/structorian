@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using NUnit.Framework;
 using Structorian.Engine.Fields;
 
@@ -895,6 +897,22 @@ namespace Structorian.Engine.Tests
                 new byte[0] );
             Assert.AreEqual(1, instance.Cells.Count);
             Assert.IsTrue(instance.Cells [0].IsError());
+        }
+
+        [Test] public void ZipBlob()
+        {
+            MemoryStream sourceStream = new MemoryStream(new byte[] { 12, 34, 56, 78 });
+            MemoryStream compressedStream = new MemoryStream();
+            DeflaterOutputStream deflaterStream = new DeflaterOutputStream(compressedStream);
+            StreamUtils.Copy(sourceStream, deflaterStream, new byte[4096]);
+            deflaterStream.Finish();
+            Assert.AreEqual(12, compressedStream.Length);
+            compressedStream.Capacity = (int) compressedStream.Length;
+            StructInstance instance = PrepareInstance(
+                "struct A { blob q [len=FileSize, encoding=zlib]; }",
+                compressedStream.GetBuffer());
+            BlobCell cell = (BlobCell) instance.Cells[0];
+            Assert.AreEqual(4, cell.DataStream.Length);
         }
     }
 }
