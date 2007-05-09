@@ -17,15 +17,8 @@ namespace Structorian.Engine.Fields
             if (offset + len > reader.BaseStream.Length)
                 throw new LoadDataException("Blob size " + len + " exceeds stream length");
             byte[] blobBytes = reader.ReadBytes(len);
-            int bytesToDisplay = Math.Min(16, len);
-            StringBuilder bytesBuilder = new StringBuilder();
-            for(int i=0; i<bytesToDisplay; i++)
-            {
-                if (bytesBuilder.Length > 0)
-                    bytesBuilder.Append(' ');
-                bytesBuilder.Append(blobBytes[i].ToString("X2"));
-            }
-            StructCell cell = AddCell(instance, bytesBuilder.ToString(), offset);
+            BlobCell cell = new BlobCell(this, blobBytes, offset);
+            instance.AddCell(cell, _hidden);
             instance.RegisterCellSize(cell, len);
         }
 
