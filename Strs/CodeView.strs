@@ -1,0 +1,59 @@
+// NB02 debug info
+[filemask="*.exe"]
+struct CodeViewDebugInfo {
+  seek FileSize-8;
+  str [len=4] Signature;
+  x32 Length;
+  seek FileSize-Length;
+  global lfaBase [value=FileSize-Length];
+  str [len=4] RepeatSignature;
+  x32 lfoDirectory;
+  child SSDirectory [offset=lfaBase+lfoDirectory];
+}
+
+struct SSDirectory {
+  x16 Count;
+  child SSEntry [count=Count];
+}
+
+struct SSEntry {
+  enum16 SubSectionType [enum=SSType];
+  u16 ModuleIndex;
+  i32 lfoStart;
+  u16 Size;
+  switch(SubSectionType)
+  {
+    case (SSTMODULE) { child SSTMODULE [offset=lfaBase+lfoStart]; }
+    case (SSTPUBLIC) { child SSTPUBLIC [offset=lfaBase+lfoStart]; }
+  }
+}
+
+[global]
+enum SSType {
+  SSTMODULE=0x101, SSTPUBLIC, SSTTYPES, SSTSYMBOLS, SSTSRCLINES,
+  SSTLIBRARIES, SSTIMPORTS, SSTCOMPACTED, SSTSRCLNSEG
+}
+
+struct SSTMODULE {
+  x16 codeSegmentBase;
+  x16 offsetInCodeSegment;
+  x16 cb;
+  i16 overlayNumber;
+  i16 libraryNameIndex;
+  i16 numberOfSegments;
+  u8 cbName;
+  str [len=cbName] name;
+}
+
+struct SSTPUBLIC
+{
+  x16 offset;
+  x16 segment;
+  x16 type;
+  u8 cbName;
+  str [len=cbName] name;
+  if (CurOffset < lfaBase + Parent.lfoStart + Parent.Size)
+  {
+    sibling SSTPUBLIC;
+  }
+}
