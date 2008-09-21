@@ -1,0 +1,58 @@
+[filemask="*.msg"]
+struct FTS1MSGHeader
+{
+  include CommonMSGHeader;
+  u16 DestZone;
+  u16 OrigZone;
+  u16 DestPoint;
+  u16 OrigPoint;
+  u16 Reply;
+  u16 Attr;
+  u16 NextReply;
+}
+
+[hidden] struct CommonMSGHeader
+{
+  str [len=36] FromName;
+  str [len=36] ToName;
+  str [len=72] Subject;
+  str [len=20] MsgDateTime;
+  u16 TimesRead;
+  u16 DestNode;
+  u16 OrigNode;
+  u16 Cost;
+  u16 OrigNet;
+  u16 DestNet;
+}
+
+[filemask="*.pkt]
+struct PKTHeader
+{
+  u16 origNode;
+  u16 destNode;
+  u16 year;
+  u16 month;
+  u16 day;
+  u16 hour;
+  u16 minute;
+  u16 second;
+  u16 baud;
+  u16 version;
+  u16 origNet;
+  u16 destNet;
+  u8  ProductCodeLo;
+  u8  "Revision (major)";
+  str [len=8]  Password;
+  u16 "origZone (QMail)";
+  u16 "destZone (QMail)";
+  u16  AuxNet;
+  u16 CWValidationCopy;
+  u8  ProductCodeHi;
+  u8  "Revison (minor)";
+  u16 CapabilWord;
+  u16 "origZone (FD)";
+  u16 "destZone (FD)";
+  u16 origPoint;
+  u16 destPoint;
+  u32 "Product Specific Data";
+}
