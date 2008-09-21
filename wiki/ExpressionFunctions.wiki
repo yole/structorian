@@ -4,6 +4,10 @@
 
   The parent instance of the current structure instance.
 
+*`PrevSibling`: structure*
+
+  The previous instance in the list of children of this instance's parent.
+
 *`EndsWith(string1, string2)`: boolean*
 
   true if _string1_ ends with _string2_, false otherwise.
@@ -31,3 +35,7 @@
 *`SizeOf(name)`: int*
 
   Constant data size for the structure definition _name_.
+
+*`ChildIndex`: int*
+
+  The index of the current structure instance in the list of its parent's children.
