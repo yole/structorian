@@ -1,29 +1,33 @@
 #summary Functions which can be used in expressions
 
-*`EndsWith(string1, string2)`*
+*`Parent`: structure*
+
+  The parent instance of the current structure instance.
+
+*`EndsWith(string1, string2)`: boolean*
 
   true if _string1_ ends with _string2_, false otherwise.
 
-*`StructOffset`*
+*`StructOffset`: int*
 
   Absolute offset of the start of the current structure instance from the start of file.
 
-*`CurOffset`*
+*`CurOffset`: int*
 
   Absolute offset of the start of the current field from the start of file.
 
-*`ParentCount`*
+*`ParentCount`: int*
 
   Number of parent instances for the current structure instance (0 for the top-level instance).
 
-*`StructName`*
+*`StructName`: string*
 
   Name of the structure definition for the current structure instance.
 
-*`FileSize`*
+*`FileSize`: int*
 
   Size of the stream (file, blob etc.) from which the current structure instance was loaded.
 
-*`SizeOf(name)`
+*`SizeOf(name): int`
 
   Constant data size for the structure definition _name_.
