@@ -1,18 +1,26 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
+using System.IO;
+using System.Reflection;
 
 namespace Structorian.Engine
 {
     public class StructFile
     {
-        private List<StructDef> _structDefs = new List<StructDef>();
-        private List<EnumDef> _enumDefs = new List<EnumDef>();
-        private Dictionary<string, uint> _globalEnumConstants = new Dictionary<string, uint>();
-        private List<ReferenceBase> _references = new List<ReferenceBase>();
-        
+        private readonly string _baseDir;
+        private readonly List<StructDef> _structDefs = new List<StructDef>();
+        private readonly List<EnumDef> _enumDefs = new List<EnumDef>();
+        private readonly Dictionary<string, uint> _globalEnumConstants = new Dictionary<string, uint>();
+        private readonly List<ReferenceBase> _references = new List<ReferenceBase>();
+        private readonly List<string> _pluginFileNames = new List<string>();
+        private readonly List<Type> _pluginExportedTypes = new List<Type>();
+
+        public StructFile(string baseDir)
+        {
+            _baseDir = baseDir;
+        }
+
         public ReadOnlyCollection<StructDef> Structs
         {
             get { return _structDefs.AsReadOnly();  }
@@ -21,6 +29,11 @@ namespace Structorian.Engine
         public ReadOnlyCollection<ReferenceBase> References
         {
             get { return _references.AsReadOnly();  }
+        }
+
+        public ReadOnlyCollection<string> PluginFileNames
+        {
+            get { return _pluginFileNames.AsReadOnly(); }
         }
         
         public void Add(StructDef def)
@@ -59,6 +72,23 @@ namespace Structorian.Engine
         internal void AddReference(ReferenceBase reference)
         {
             _references.Add(reference);
+        }
+
+        internal void AddPlugin(string pluginFile)
+        {
+            _pluginFileNames.Add(pluginFile);
+
+            string path = Path.Combine(_baseDir, pluginFile + ".dll");
+            Assembly plugin = Assembly.LoadFrom(path);
+            Type[] exportedTypes = plugin.GetExportedTypes();
+            _pluginExportedTypes.AddRange(exportedTypes);
+        }
+
+        public List<T> GetPluginExtensions<T>()
+        {
+            return _pluginExportedTypes
+                .FindAll(t => typeof(T).IsAssignableFrom(t))
+                .ConvertAll(t => (T) Activator.CreateInstance(t));
         }
     }
 }
