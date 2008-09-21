@@ -1,5 +1,9 @@
 #summary Functions which can be used in expressions
 
+*`EndsWith(string1, string2)`*
+
+  true if _string1_ ends with _string2_, false otherwise.
+
 *`StructOffset`*
 
   Absolute offset of the start of the current structure instance from the start of file.
@@ -20,6 +24,6 @@
 
   Size of the stream (file, blob etc.) from which the current structure instance was loaded.
 
-*`SizeOf(_name_)`
+*`SizeOf(name)`
 
   Constant data size for the structure definition _name_.
