@@ -28,6 +28,6 @@
 
   Size of the stream (file, blob etc.) from which the current structure instance was loaded.
 
-*`SizeOf(name): int`
+*`SizeOf(name)`: int*
 
   Constant data size for the structure definition _name_.
