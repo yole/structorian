@@ -31,7 +31,9 @@ namespace Structorian
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newStructuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadStructuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveStructuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showLocalOffsetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,7 +44,6 @@ namespace Structorian
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this._btnLoadStuctures = new System.Windows.Forms.ToolStripButton();
             this._btnSaveStructures = new System.Windows.Forms.ToolStripButton();
-            this.newStructuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._saveStructsDialog = new System.Windows.Forms.SaveFileDialog();
             this.menuStrip1.SuspendLayout();
             this.splitContainer2.Panel1.SuspendLayout();
@@ -66,10 +67,18 @@ namespace Structorian
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newStructuresToolStripMenuItem,
             this.loadStructuresToolStripMenuItem,
+            this.saveStructuresToolStripMenuItem,
             this.loadDataToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
             this.fileToolStripMenuItem.Text = "&File";
+            // 
+            // newStructuresToolStripMenuItem
+            // 
+            this.newStructuresToolStripMenuItem.Name = "newStructuresToolStripMenuItem";
+            this.newStructuresToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.newStructuresToolStripMenuItem.Text = "New Structures";
+            this.newStructuresToolStripMenuItem.Click += new System.EventHandler(this.newStructuresToolStripMenuItem_Click);
             // 
             // loadStructuresToolStripMenuItem
             // 
@@ -77,6 +86,13 @@ namespace Structorian
             this.loadStructuresToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.loadStructuresToolStripMenuItem.Text = "Load Structures...";
             this.loadStructuresToolStripMenuItem.Click += new System.EventHandler(this.loadStructuresToolStripMenuItem_Click);
+            // 
+            // saveStructuresToolStripMenuItem
+            // 
+            this.saveStructuresToolStripMenuItem.Name = "saveStructuresToolStripMenuItem";
+            this.saveStructuresToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.saveStructuresToolStripMenuItem.Text = "Save Structures";
+            this.saveStructuresToolStripMenuItem.Click += new System.EventHandler(this._btnSaveStructures_Click);
             // 
             // loadDataToolStripMenuItem
             // 
@@ -165,12 +181,9 @@ namespace Structorian
             this._btnSaveStructures.Text = "Save Structure Definitions";
             this._btnSaveStructures.Click += new System.EventHandler(this._btnSaveStructures_Click);
             // 
-            // newStructuresToolStripMenuItem
+            // _saveStructsDialog
             // 
-            this.newStructuresToolStripMenuItem.Name = "newStructuresToolStripMenuItem";
-            this.newStructuresToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
-            this.newStructuresToolStripMenuItem.Text = "New Structures";
-            this.newStructuresToolStripMenuItem.Click += new System.EventHandler(this.newStructuresToolStripMenuItem_Click);
+            this._saveStructsDialog.Filter = "Structure Definitions (*.strs)|*.strs|All files|*.*";
             // 
             // MainForm
             // 
@@ -214,6 +227,7 @@ namespace Structorian
         private System.Windows.Forms.ToolStripMenuItem showLocalOffsetsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newStructuresToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog _saveStructsDialog;
+        private System.Windows.Forms.ToolStripMenuItem saveStructuresToolStripMenuItem;
     }
 }
 
