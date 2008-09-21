@@ -890,6 +890,22 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("2", instance.Children [0].Cells [0].Value);
         }
 
+        [Test] public void EvaluateChildIndex()
+        {
+            var instance = PrepareInstance(
+                "struct A { child B [count=2]; } struct B { u8 p; calc i [value=ChildIndex]; }",
+                new byte[] {1, 2});
+            Assert.AreEqual("1", instance.Children [1].Cells [1].Value);
+        }
+
+        [Test] public void EvaluatePrevSibling()
+        {
+            var instance = PrepareInstance(
+                "struct A { child B; child C; } struct B { u8 p; } struct C { calc i [value=PrevSibling.p]; }",
+                new byte[] { 17, 37 });
+            Assert.AreEqual("17", instance.Children[1].Cells[0].Value);
+        }
+
         [Test] public void NegativeStrLen()
         {
             StructInstance instance = PrepareInstance(
