@@ -61,7 +61,7 @@ namespace Structorian.Engine
 
         public StructFile LoadStructs(string fileName, StructSourceContext context)
         {
-            StructFile result = new StructFile(Path.GetDirectoryName(fileName));
+            StructFile result = new StructFile(fileName.Length > 0 ? Path.GetDirectoryName(fileName) : "");
             _curStructFile = result;
             LoadStructFile(fileName, context);
             foreach(ReferenceBase reference in result.References)
