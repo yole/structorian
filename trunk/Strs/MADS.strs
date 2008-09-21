@@ -1,0 +1,60 @@
+plugin MADSPack;
+
+[filemask=".hag"]
+struct HAGFile
+{
+  str [len=16] Signature;
+  i16 NumEntries;
+  child HAGEntry [count=NumEntries];  
+}
+
+struct HAGEntry
+{
+  x32 Offset;
+  x32 Size;
+  str [len=14] Name;
+  nodename Name;
+  seek Offset;
+  [hidden] str DataSignature [len=8];
+  skip -8;
+  if (DataSignature == "MADSPACK")
+  {
+    child MADSPack [offset=Offset];
+  }
+  else
+  {
+    blob Data [len=Size];
+  } 
+}
+
+struct MADSPack
+{
+  str [len=14] Signature;
+  i16 NumEntries;
+  child MADSPackEntry [count=NumEntries];
+}
+
+struct MADSPackEntry
+{
+    x16 Hash;
+    u32 Size;
+    u32 CompressedSize;
+    if (ChildIndex == 0)
+    {
+      [hidden] calc DataOffset [value=Parent.StructOffset+176];
+    }
+    else
+    {
+      [hidden] calc DataOffset [value=PrevSibling.EndOffset];
+    }
+    seek DataOffset;
+    if (Size == CompressedSize)
+    {
+      blob Data [len=CompressedSize];
+    }
+    else 
+    {
+      blob Data [len=CompressedSize, encoding=madspack];
+    }
+    [hidden] calc EndOffset [value=DataOffset+CompressedSize];
+}
