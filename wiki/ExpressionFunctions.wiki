@@ -1,25 +1,25 @@
 #summary Functions which can be used in expressions
 
-*StructOffset*
+*`StructOffset`*
 
   Absolute offset of the start of the current structure instance from the start of file.
 
-*CurOffset*
+*`CurOffset`*
 
   Absolute offset of the start of the current field from the start of file.
 
-*ParentCount*
+*`ParentCount`*
 
   Number of parent instances for the current structure instance (0 for the top-level instance).
 
-*StructName*
+*`StructName`*
 
   Name of the structure definition for the current structure instance.
 
-*FileSize*
+*`FileSize`*
 
   Size of the stream (file, blob etc.) from which the current structure instance was loaded.
 
-*SizeOf(_name_)
+*`SizeOf(_name_)`
 
   Constant data size for the structure definition _name_.
