@@ -1,13 +1,25 @@
 #summary Functions which can be used in expressions
 
-= Introduction =
+*StructOffset*
 
-Add your content here.
+  Absolute offset of the start of the current structure instance from the start of file.
 
+*CurOffset*
 
-= Details =
+  Absolute offset of the start of the current field from the start of file.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+*ParentCount*
+
+  Number of parent instances for the current structure instance (0 for the top-level instance).
+
+*StructName*
+
+  Name of the structure definition for the current structure instance.
+
+*FileSize*
+
+  Size of the stream (file, blob etc.) from which the current structure instance was loaded.
+
+*SizeOf(_name_)
+
+  Constant data size for the structure definition _name_.
