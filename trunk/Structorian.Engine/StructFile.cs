@@ -15,6 +15,7 @@ namespace Structorian.Engine
         private readonly List<ReferenceBase> _references = new List<ReferenceBase>();
         private readonly List<string> _pluginFileNames = new List<string>();
         private readonly List<Type> _pluginExportedTypes = new List<Type>();
+        private bool _loadedPlugins;
 
         public StructFile(string baseDir)
         {
@@ -77,18 +78,25 @@ namespace Structorian.Engine
         internal void AddPlugin(string pluginFile)
         {
             _pluginFileNames.Add(pluginFile);
-
-            string path = Path.Combine(_baseDir, pluginFile + ".dll");
-            Assembly plugin = Assembly.LoadFrom(path);
-            Type[] exportedTypes = plugin.GetExportedTypes();
-            _pluginExportedTypes.AddRange(exportedTypes);
         }
 
         public List<T> GetPluginExtensions<T>()
         {
+            if (!_loadedPlugins)
+            {
+                _loadedPlugins = true;
+                _pluginFileNames.ForEach(LoadPlugin);
+            }
             return _pluginExportedTypes
                 .FindAll(t => typeof(T).IsAssignableFrom(t))
                 .ConvertAll(t => (T) Activator.CreateInstance(t));
+        }
+
+        private void LoadPlugin(string fileName)
+        {
+            string path = Path.Combine(_baseDir, fileName + ".dll");
+            Assembly plugin = Assembly.LoadFrom(path);
+            _pluginExportedTypes.AddRange(plugin.GetExportedTypes());
         }
     }
 }
