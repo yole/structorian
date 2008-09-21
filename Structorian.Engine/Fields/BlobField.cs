@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using ICSharpCode.SharpZipLib.Zip.Compression;
@@ -20,18 +21,10 @@ namespace Structorian.Engine.Fields
                 throw new LoadDataException("Blob size " + len + " exceeds stream length");
             byte[] blobBytes = reader.ReadBytes(len);
             string encoding = GetStringAttribute("encoding");
-            if (encoding == "zlib")
+            BlobDecoder blobDecoder = FindBlobEncoding(instance, encoding);
+            if (blobDecoder != null)
             {
-                InflaterInputStream stream = new InflaterInputStream(new MemoryStream(blobBytes));
-                byte[] data = new byte[4096];
-                MemoryStream outStream = new MemoryStream();
-                int size;
-                while((size = stream.Read(data, 0, data.Length)) > 0)
-                {
-                    outStream.Write(data, 0, size);
-                }
-                outStream.Capacity = (int) outStream.Length;
-                blobBytes = outStream.GetBuffer();
+                blobBytes = blobDecoder.Decode(blobBytes);
             }
             BlobCell cell = new BlobCell(this, blobBytes, offset);
             instance.AddCell(cell, _hidden);
@@ -40,6 +33,19 @@ namespace Structorian.Engine.Fields
             StructDef structDef = GetStructAttribute("struct");
             if (structDef != null)
                 instance.AddChildSeed(new BlobChildSeed(structDef, cell));
+        }
+
+        private static BlobDecoder FindBlobEncoding(StructInstance instance, string encoding)
+        {
+            if (encoding == null) return null;
+            if (encoding == "zlib")
+            {
+                return new ZLibDecoder();
+            }
+            var decoders = instance.Def.StructFile.GetPluginExtensions<BlobDecoder>();
+            var result = decoders.Find(d => d.Name == encoding);
+            if (result == null) throw new Exception("Couldn't find decoder for encoding " + encoding);
+            return result;
         }
 
         public override int GetDataSize()

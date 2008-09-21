@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using Structorian.Engine.Fields;
 
 namespace Structorian.Engine
@@ -60,7 +61,7 @@ namespace Structorian.Engine
 
         public StructFile LoadStructs(string fileName, StructSourceContext context)
         {
-            StructFile result = new StructFile();
+            StructFile result = new StructFile(Path.GetDirectoryName(fileName));
             _curStructFile = result;
             LoadStructFile(fileName, context);
             foreach(ReferenceBase reference in result.References)
@@ -93,6 +94,8 @@ namespace Structorian.Engine
                     LoadEnum(lexer, attrs);
                 else if (token == "alias")
                     LoadAlias(lexer, attrs);
+                else if (token == "plugin")
+                    LoadPlugin(lexer);
                 else if (token == "include")
                 {
                     string includeName = lexer.GetNextToken(StructTokenType.String);
@@ -268,6 +271,13 @@ namespace Structorian.Engine
             lexer.GetNextToken(StructTokenType.Semicolon);
             
             _fieldFactory.RegisterAlias(aliasName, baseName, attrs);
+        }
+
+        private void LoadPlugin(StructLexer lexer)
+        {
+            string pluginFile = lexer.GetNextToken(StructTokenType.String);
+            _curStructFile.AddPlugin(pluginFile);
+            lexer.GetNextToken(StructTokenType.Semicolon);
         }
     }
 }

@@ -165,5 +165,12 @@ namespace Structorian.Engine.Tests
             EnumDef e = file.GetEnumByName("E");
             Assert.AreEqual("c", e.ValueToString(2));
         }
+
+        [Test] public void ParsePlugin()
+        {
+            var parser = new StructParser();
+            var file = parser.LoadStructs("plugin MyPlugin;");
+            Assert.AreEqual(1, file.PluginFileNames.Count);
+        }
     }
 }
