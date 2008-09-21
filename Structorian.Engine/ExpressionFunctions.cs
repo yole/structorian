@@ -18,7 +18,7 @@ namespace Structorian.Engine
 
         private BaseFunctions()
         {
-            Register("EndsWith", new FunctionDelegate(EndsWith));
+            Register("EndsWith", EndsWith);
         }
 
         private static IConvertible EndsWith(IEvaluateContext context, Expression[] parameters)
@@ -45,12 +45,13 @@ namespace Structorian.Engine
 
         private StructFunctions()
         {
-            Register("StructOffset", new FunctionDelegate(StructOffset));
-            Register("ParentCount", new FunctionDelegate(ParentCount));
-            Register("CurOffset", new FunctionDelegate(CurOffset));
-            Register("StructName", new FunctionDelegate(StructName));
-            Register("FileSize", new FunctionDelegate(FileSize));
-            Register("SizeOf", new FunctionDelegate(SizeOf));
+            Register("StructOffset", StructOffset);
+            Register("ParentCount", ParentCount);
+            Register("CurOffset", CurOffset);
+            Register("StructName", StructName);
+            Register("FileSize", FileSize);
+            Register("SizeOf", SizeOf);
+            Register("ChildIndex", ChildIndex);
         }
 
         private static IConvertible StructOffset(StructInstance context, Expression[] parameters)
@@ -90,6 +91,11 @@ namespace Structorian.Engine
             StructDef def = structFile.GetStructByName(symbol);
             if (def == null) throw new LoadDataException("Structure '" + symbol + "' not found");
             return def.GetDataSize();
+        }
+
+        private static IConvertible ChildIndex(StructInstance context, Expression[] parameters)
+        {
+            return context.ChildIndex;
         }
     }
 }

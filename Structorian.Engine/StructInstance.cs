@@ -204,6 +204,17 @@ namespace Structorian.Engine
             }
         }
 
+        public IConvertible ChildIndex
+        {
+            get
+            {
+                StructInstance parent = EvaluateParent();
+                if (parent == null)
+                    throw new Exception("Structure instance doesn't have any parent");
+                return parent.Children.IndexOf(this);
+            }
+        }
+
         internal void AddChildSeed(IChildSeed childSeed)
         {
             if (_childSeeds == null)
@@ -335,6 +346,12 @@ namespace Structorian.Engine
                 if (parent == null) throw new Exception("Expression does not have a parent");
                 return parent;
             }
+            if (symbol.ToLowerInvariant() == "prevsibling")
+            {
+                StructInstance prevSibling = EvaluatePrevSibling();
+                if (prevSibling == null) throw new Exception("Expression doesn't have a previous sibling");
+                return prevSibling;
+            }
             throw new LoadDataException("Unknown context " + symbol);
         }
 
@@ -346,6 +363,15 @@ namespace Structorian.Engine
                 parent = parent.Parent;
             }
             return (StructInstance) parent;
+        }
+
+        private StructInstance EvaluatePrevSibling()
+        {
+            StructInstance parent = EvaluateParent();
+            if (parent == null) return null;
+            int index = parent.Children.IndexOf(this);
+            if (index <= 0) return null;
+            return (StructInstance) parent.Children[index - 1];
         }
 
         public void RegisterGlobal(string id, int result)
