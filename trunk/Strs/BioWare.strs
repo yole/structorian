@@ -136,18 +136,32 @@ struct TLKElement40
 
 // -- KEY --------------------------------------------------------------------
 
-[filemask="chitin.key"]
+[filemask="*.key"]
 struct KEY
 {
   str [len=8] Signature;
   i32 "BIFF count"  [id=BIFFCount];
   i32 "File count"  [id=FileCount];
+  if (Signature == "KEY V1.1")
+  {
+    x32;
+  }
   x32 "BIFF offset" [id=BIFFOffset];
   x32 "File offset" [id=FileOffset];
-  u32 BuildYear;
-  u32 BuildDay;
+  if (Signature == "KEY V1  ")
+  {
+    u32 BuildYear;
+    u32 BuildDay;
+  }
   child KEYBIFF     [offset=BIFFOffset, count=BIFFCount];
-  child KEYFile     [offset=FileOffset, count=FileCount];
+  if (Signature == "KEY V1.1")
+  {
+    child KEYFile11   [offset=FileOffset, count=FileCount];
+  }
+  else 
+  {
+    child KEYFile     [offset=FileOffset, count=FileCount];
+  }
 }
 
 [hidden]
@@ -167,6 +181,15 @@ struct KEYFile
   str [len=16] ResRef;
   u16 ResourceType;
   u32 ResID;
+}
+
+[hidden]
+struct KEYFile11
+{
+  str [len=16] ResRef;
+  u16 ResourceType;
+  u32 ResID;
+  u32;
 }
 
 // -- ERF --------------------------------------------------------------------
