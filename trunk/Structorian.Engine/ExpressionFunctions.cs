@@ -19,6 +19,7 @@ namespace Structorian.Engine
         private BaseFunctions()
         {
             Register("EndsWith", EndsWith);
+            Register("Length", Length);
         }
 
         private static IConvertible EndsWith(IEvaluateContext context, Expression[] parameters)
@@ -26,6 +27,12 @@ namespace Structorian.Engine
             string param1 = parameters[0].EvaluateString(context);
             string param2 = parameters[1].EvaluateString(context);
             return param1.EndsWith(param2);
+        }
+
+        private static IConvertible Length(IEvaluateContext context, Expression[] parameters)
+        {
+            string param = parameters[0].EvaluateString(context);
+            return param.Length;
         }
     }
 
