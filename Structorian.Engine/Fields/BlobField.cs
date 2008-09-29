@@ -1,9 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using ICSharpCode.SharpZipLib.Zip.Compression;
-using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
 namespace Structorian.Engine.Fields
 {
@@ -19,6 +15,8 @@ namespace Structorian.Engine.Fields
             int len = GetExpressionAttribute("len").EvaluateInt(instance);
             if (offset + len > reader.BaseStream.Length)
                 throw new LoadDataException("Blob size " + len + " exceeds stream length");
+            if (len < 0)
+                throw new LoadDataException("Blob size " + len + " is negative");
             byte[] blobBytes = reader.ReadBytes(len);
             string encoding = GetStringAttribute("encoding");
             BlobDecoder blobDecoder = FindBlobEncoding(instance, encoding);
