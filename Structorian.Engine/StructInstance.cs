@@ -122,7 +122,7 @@ namespace Structorian.Engine
         public long PopRewindOffset()
         {
             if (_rewindStack == null || _rewindStack.Count == 0)
-                throw new Exception("No rewind offset found");
+                throw new LoadDataException("No rewind offset found");
             return _rewindStack.Pop();
         }
 
