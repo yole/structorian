@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -72,13 +73,13 @@ namespace Structorian
             _mainStream = new BufferedStream(new FileStream(_dataFileName, FileMode.Open, FileAccess.Read, FileShare.Read), 16384);
             if (_instanceTree != null)
             {
-                _instanceTree.InstanceAdded -= new InstanceAddedEventHandler(HandleInstanceAdded);
-                _instanceTree.NodeNameChanged -= new NodeNameChangedEventHandler(HandleNodeNameChanged);
+                _instanceTree.InstanceAdded -= HandleInstanceAdded;
+                _instanceTree.NodeNameChanged -= HandleNodeNameChanged;
                 _nodeMap.Clear();
             }
             _instanceTree = _rootStructDef.LoadData(_mainStream);
-            _instanceTree.InstanceAdded += new InstanceAddedEventHandler(HandleInstanceAdded);
-            _instanceTree.NodeNameChanged += new NodeNameChangedEventHandler(HandleNodeNameChanged);
+            _instanceTree.InstanceAdded += HandleInstanceAdded;
+            _instanceTree.NodeNameChanged += HandleNodeNameChanged;
             FillStructureTree();
             _hexDump.Stream = _mainStream;
             
@@ -180,11 +181,24 @@ namespace Structorian
                 e.FormattingApplied = true;
             }
         }
+
+        private void _structGridView_CellContextMenuStripNeeded(object sender, DataGridViewCellContextMenuStripNeededEventArgs e)
+        {
+            if (_structGridView.SelectedRows.Count > 0)
+            {
+                StructCell cell = (StructCell) _structGridView.SelectedRows[0].DataBoundItem;
+                CellUI ui = CellUIRegistry.GetUI(cell);
+                if (ui != null)
+                {
+                    ui.ContextMenuStripNeeded(e);
+                }
+            }
+        }
     }
 
     public class CellSelectedEventArgs: EventArgs
     {
-        private StructCell _cell;
+        private readonly StructCell _cell;
 
         public CellSelectedEventArgs(StructCell cell)
         {
