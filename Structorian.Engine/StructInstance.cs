@@ -338,7 +338,7 @@ namespace Structorian.Engine
             throw new LoadDataException("Unknown symbol " + symbol);
         }
 
-        public IEvaluateContext EvaluateContext(string symbol)
+        public IEvaluateContext EvaluateContext(string symbol, Expression[] parameters)
         {
             if (symbol.ToLowerInvariant() == "parent")
             {
@@ -351,6 +351,12 @@ namespace Structorian.Engine
                 StructInstance prevSibling = EvaluatePrevSibling();
                 if (prevSibling == null) throw new Exception("Expression doesn't have a previous sibling");
                 return prevSibling;
+            }
+            if (symbol.ToLowerInvariant() == "child")
+            {
+                if (parameters.Length != 1) throw new Exception("'child' context requires 1 parameter");
+                int index = parameters [0].EvaluateInt(this);
+                return (IEvaluateContext) _children [index];
             }
             throw new LoadDataException("Unknown context " + symbol);
         }
