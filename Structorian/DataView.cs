@@ -17,20 +17,23 @@ namespace Structorian
         private StructDef _rootStructDef;
         private InstanceTree _instanceTree;
         private InstanceTreeNode _activeInstance;
-        private Dictionary<InstanceTreeNode, TreeNode> _nodeMap = new Dictionary<InstanceTreeNode, TreeNode>();
-        private HexDump _hexDump;
+        private readonly Dictionary<InstanceTreeNode, TreeNode> _nodeMap = new Dictionary<InstanceTreeNode, TreeNode>();
+        private readonly HexDump _hexDump;
         private bool _showLocalOffsets;
         private Stream _mainStream;
+        private Control _nodeControl;
 
         public event CellSelectedEventHandler CellSelected;
 
         public DataView()
         {
             InitializeComponent();
-            _hexDump = new HexDump();
-            _hexDump.Font = new Font("Lucida Console", 9);
-            _hexDump.BackColor = SystemColors.Window;
-            _hexDump.Dock = DockStyle.Fill;
+            _hexDump = new HexDump
+                           {
+                               Font = new Font("Lucida Console", 9),
+                               BackColor = SystemColors.Window,
+                               Dock = DockStyle.Fill
+                           };
             splitContainer2.Panel2.Controls.Add(_hexDump);
         }
 
@@ -135,12 +138,40 @@ namespace Structorian
         private void _structTreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
             _activeInstance = (InstanceTreeNode)e.Node.Tag;
-            _structGridView.DataSource = _activeInstance.Cells;
+            if (_nodeControl != null)
+            {
+                _nodeControl.Parent.Controls.Remove(_nodeControl);
+                _nodeControl.Dispose();
+                _nodeControl = null;
+            }
+            NodeUI ui = FindNodeUI(_activeInstance);
+            if (ui != null)
+            {
+                _nodeControl = ui.CreateControl();
+                _nodeControl.Dock = DockStyle.Fill;
+                splitContainer1.Panel2.Controls.Add(_nodeControl);
+                _structGridView.Visible = false;
+            }
+            else
+            {
+                _structGridView.Visible = true;
+                _structGridView.DataSource = _activeInstance.Cells;
+            }
             StructInstance instance = _activeInstance as StructInstance;
             if (instance == null)
                 _hexDump.Stream = _mainStream;
             else
                 _hexDump.Stream = instance.Stream;
+        }
+
+        private static NodeUI FindNodeUI(InstanceTreeNode instance)
+        {
+            foreach(var cell in instance.Cells)
+            {
+                var ui = NodeUIRegistry.GetNodeUI(cell);
+                if (ui != null) return ui;
+            }
+            return null;
         }
 
         private void _structTreeView_BeforeExpand(object sender, TreeViewCancelEventArgs e)

@@ -7,6 +7,7 @@ struct BITMAPFILEHEADER
   u16 bfReserved2;
   x32 bfOffBits;
   child BITMAPINFOHEADER;
+  child BitmapImage [offset=0];
 }
 
 struct BITMAPINFOHEADER
@@ -22,4 +23,9 @@ struct BITMAPINFOHEADER
   i32 biYPelsPerMeter;
   u32 biClrUsed;
   u32 biClrImportant;
+}
+
+struct BitmapImage
+{
+  image bitmap [format=bmp];
 }
