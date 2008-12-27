@@ -50,11 +50,91 @@ struct MADSPackEntry
     seek DataOffset;
     if (Size == CompressedSize)
     {
-      blob Data [len=CompressedSize];
+      blob Data [len=CompressedSize, struct=MADSPackedData];
     }
     else 
     {
-      blob Data [len=CompressedSize, encoding=madspack];
+      blob Data [len=CompressedSize, encoding=madspack, struct=MADSPackedData];
     }
     [hidden] calc EndOffset [value=DataOffset+CompressedSize];
+}
+
+struct MADSPackedData
+{
+  local filename [value=Parent.Parent.Parent.Name];
+  if (EndsWith(filename, ".ART"))
+  {
+    if (Parent.ChildIndex == 0)
+    {
+      u16 SceneWidth;
+      u16 SceneHeight;
+      u16 PaletteColors;
+      repeat(PaletteColors)
+      {
+        u8 r;
+        u8 g;
+        u8 b;
+        skip 3;
+      }
+    }
+    elif (Parent.ChildIndex == 1)
+    {
+      image Img [format=ART];
+    }
+  }
+  elif (EndsWith(filename, ".HH"))
+  {
+    if (Parent.ChildIndex == 0)
+    {
+      u16 HotspotCount;
+    }
+    elif (Parent.ChildIndex == 1)
+    {
+      child Hotspot [count=Parent.PrevSibling.Child(0).HotspotCount];
+    }
+  }
+  elif (EndsWith(filename, ".SS"))
+  {
+    if (Parent.ChildIndex == 0)
+    {
+      repeat(19) { u16; }
+      u16 FrameCount;
+    }
+    elif (Parent.ChildIndex == 1)
+    {
+      child SpriteFrame [count=Parent.Parent.Child(0).Child(0).FrameCount];
+    }
+    elif (Parent.ChildIndex == 2)
+    {
+    }
+    elif (Parent.ChildIndex == 3)
+    {
+    }
+  }
+}
+
+struct Hotspot
+{
+  u16 x1;
+  u16 y1;
+  u16 x2;
+  u16 y2;
+  u16 feetX;
+  u16 feetY;
+  u8 facing;
+  u8 active;
+  u8;
+  u8 cursor;
+  u16 vocabID;
+  u16 verbID;
+}
+
+struct SpriteFrame
+{
+  x32 Offset;
+  x32 Size;
+  u16 x;
+  u16 y;
+  u16 w;
+  u16 h;
 }

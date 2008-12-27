@@ -17,7 +17,7 @@ namespace Structorian.Engine.Fields
         {
             var format = GetStringAttribute("format");
             ImageDecoder decoder = FindImageDecoder(instance, format);
-            var image = decoder.Decode(reader.BaseStream);
+            var image = decoder.Decode(reader.BaseStream, instance);
             instance.AddCell(new ImageCell(this, image, (int)reader.BaseStream.Position), false);
         }
 
