@@ -2,27 +2,29 @@
 // Based on scummvm source code
 
 [filemask="*.pak"]
-struct Pak
-{
-  u32 count;
-  child PakEntry;
-}
-
 struct PakEntry
 {
-  str fileName;
-  u32 offset;
-  if (offset > 0)
+  u32 StartOffset;
+  str FileName;
+  [hidden] u32 NextOffset;
+  skip -4;
+  if (Length(FileName) > 0)
   {
-    sibling;
+    sibling PakEntry;
+    seek StartOffset;
+    blob Data [len=NextOffset-StartOffset];
   }
-  if (EndsWith(fileName, ".WSA"))
+  if (EndsWith(FileName, ".WSA"))
   {
-    child WSAMovie [offset=offset];
+    child WSAMovie [offset=StartOffset];
   }
-  elif (EndsWith(fileName, ".DAT"))
+  elif (EndsWith(FileName, ".DAT"))
   {
-    child DAT [offset=offset];
+    child DAT [offset=StartOffset];
+  }
+  elif (EndsWith(FileName, ".EMC"))
+  {
+    child Chunk [offset=StartOffset];
   }
 }
 
@@ -79,7 +81,7 @@ struct SubChunk
   }
   if (CurOffset < Parent.StructOffset + Parent.size)
   {
-    sibling SubChunk;
+    sibling SubChunk [offset=StructOffset+size+8];
   }
 }
 

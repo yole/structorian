@@ -43,6 +43,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +75,8 @@
     <Compile Include="Fields\FloatField.cs" />
     <Compile Include="Fields\GlobalField.cs" />
     <Compile Include="Fields\IfField.cs" />
+    <Compile Include="Fields\ImageDecoder.cs" />
+    <Compile Include="Fields\ImageField.cs" />
     <Compile Include="Fields\IncludeField.cs" />
     <Compile Include="Fields\IntBasedField.cs" />
     <Compile Include="Fields\MessageField.cs" />
