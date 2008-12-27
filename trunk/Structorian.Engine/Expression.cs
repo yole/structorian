@@ -7,7 +7,7 @@ namespace Structorian.Engine
     {
         IConvertible EvaluateSymbol(string symbol);
         IConvertible EvaluateFunction(string symbol, Expression[] parameters);
-        IEvaluateContext EvaluateContext(string symbol);
+        IEvaluateContext EvaluateContext(string symbol, Expression[] parameters);
     }
     
     public delegate IConvertible EvaluateDelegate(IEvaluateContext context, Expression[] parameters);
@@ -91,7 +91,7 @@ namespace Structorian.Engine
     
     public class SymbolExpression: Expression
     {
-        private string _symbol;
+        private readonly string _symbol;
 
         public SymbolExpression(string symbol)
         {
@@ -203,26 +203,28 @@ namespace Structorian.Engine
 
     class ContextExpression: Expression
     {
-        private string _contextExpr;
-        private Expression _expr;
+        private readonly string _contextExpr;
+        private readonly Expression _expr;
+        private readonly Expression[] _parameters;
 
-        public ContextExpression(string contextExpr, Expression expr)
+        public ContextExpression(string contextExpr, Expression expr, Expression[] parameters)
         {
             _contextExpr = contextExpr;
             _expr = expr;
+            _parameters = parameters;
         }
 
         public override IConvertible Evaluate(IEvaluateContext context)
         {
-            IEvaluateContext ctx = context.EvaluateContext(_contextExpr);
+            IEvaluateContext ctx = context.EvaluateContext(_contextExpr, _parameters);
             return _expr.Evaluate(ctx);
         }
     }
     
     class UnaryExpression: Expression
     {
-        private Expression _operand;
-        private ExprTokenType _operation;
+        private readonly Expression _operand;
+        private readonly ExprTokenType _operation;
 
         public UnaryExpression(Expression operand, ExprTokenType operation)
         {
@@ -245,8 +247,8 @@ namespace Structorian.Engine
     
     class FunctionExpression: Expression
     {
-        private string _function;
-        private Expression[] _parameters;
+        private readonly string _function;
+        private readonly Expression[] _parameters;
 
         public FunctionExpression(string function, Expression[] parameters)
         {

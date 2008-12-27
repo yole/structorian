@@ -5,21 +5,21 @@ namespace Structorian.Engine
 {
     public class ExpressionParser
     {
-        private static ExprTokenType[] _condComboTokens = new ExprTokenType[]
+        private static readonly ExprTokenType[] _condComboTokens = new[]
             {
                 ExprTokenType.AND, ExprTokenType.OR
             };
-        private static ExprTokenType[] _condTokens = new ExprTokenType[]
+        private static readonly ExprTokenType[] _condTokens = new[]
             {
                 ExprTokenType.GT, ExprTokenType.GE, ExprTokenType.EQ, ExprTokenType.NE,
                 ExprTokenType.LT, ExprTokenType.LE
             };
-        private static ExprTokenType[] _exprTokens = new ExprTokenType[]
+        private static readonly ExprTokenType[] _exprTokens = new[]
             {
                 ExprTokenType.Plus, ExprTokenType.Minus, ExprTokenType.BitAND, ExprTokenType.BitOR,
                 ExprTokenType.SHL, ExprTokenType.SHR
             };
-        private static ExprTokenType[] _termTokens = new ExprTokenType[]
+        private static readonly ExprTokenType[] _termTokens = new[]
             {
                 ExprTokenType.Mult, ExprTokenType.Div, ExprTokenType.Mod
             };
@@ -55,29 +55,29 @@ namespace Structorian.Engine
         private static Expression ParseCondCombo(ExpressionLexer lexer)
         {
             return RecursiveDescentStep(lexer, _condComboTokens,
-                delegate(ExpressionLexer l) { return ParseCond(l); },
-                delegate(ExprTokenType o, Expression lhs, Expression rhs) { return new LogicalExpression(o, lhs, rhs); });
+                ParseCond,
+                (o, lhs, rhs) => new LogicalExpression(o, lhs, rhs));
         }
 
         private static Expression ParseCond(ExpressionLexer lexer)
         {
             return RecursiveDescentStep(lexer, _condTokens,
-                delegate(ExpressionLexer l) { return ParseExpr(l); },
-                delegate(ExprTokenType o, Expression lhs, Expression rhs) { return new CompareExpression(o, lhs, rhs);} );
+                ParseExpr,
+                (o, lhs, rhs) => new CompareExpression(o, lhs, rhs));
         }
 
         private static Expression ParseExpr(ExpressionLexer lexer)
         {
             return RecursiveDescentStep(lexer, _exprTokens,
-                delegate(ExpressionLexer l) { return ParseTerm(l); },
-                delegate(ExprTokenType o, Expression lhs, Expression rhs) { return new BinaryExpression(o, lhs, rhs); });
+                ParseTerm,
+                (o, lhs, rhs) => new BinaryExpression(o, lhs, rhs));
         }
         
         private static Expression ParseTerm(ExpressionLexer lexer)
         {
             return RecursiveDescentStep(lexer, _termTokens,
-                delegate(ExpressionLexer l) { return ParseFactor(l); },
-                delegate(ExprTokenType o, Expression lhs, Expression rhs) { return new BinaryExpression(o, lhs, rhs); });
+                ParseFactor,
+                (o, lhs, rhs) => new BinaryExpression(o, lhs, rhs));
         }
         
         private static Expression ParseFactor(ExpressionLexer lexer)
@@ -94,12 +94,13 @@ namespace Structorian.Engine
                 {
                     lexer.GetNextToken(ExprTokenType.Dot);
                     Expression exprInContext = ParseFactor(lexer);
-                    return new ContextExpression(symbol, exprInContext);
+                    return new ContextExpression(symbol, exprInContext, new Expression[0]);
                 }
-                else if (lexer.PeekNextToken() == ExprTokenType.Open)
+                
+                if (lexer.PeekNextToken() == ExprTokenType.Open)
                 {
                     lexer.GetNextToken(ExprTokenType.Open);
-                    List <Expression> parameters = new List<Expression>();
+                    var parameters = new List<Expression>();
                     while (lexer.PeekNextToken() != ExprTokenType.Close)
                     {
                         if (parameters.Count > 0)
@@ -107,10 +108,15 @@ namespace Structorian.Engine
                         parameters.Add(ParseCondCombo(lexer));
                     }
                     lexer.GetNextToken(ExprTokenType.Close);
+                    if (lexer.PeekNextToken() == ExprTokenType.Dot)
+                    {
+                        lexer.GetNextToken(ExprTokenType.Dot);
+                        Expression exprInContext = ParseFactor(lexer);
+                        return new ContextExpression(symbol, exprInContext, parameters.ToArray());
+                    }
                     return new FunctionExpression(symbol, parameters.ToArray());
                 }
-                else
-                    return new SymbolExpression(symbol);
+                return new SymbolExpression(symbol);
             }
             if (tokenType == ExprTokenType.Open)
             {
