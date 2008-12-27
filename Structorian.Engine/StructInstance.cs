@@ -356,6 +356,7 @@ namespace Structorian.Engine
             {
                 if (parameters.Length != 1) throw new Exception("'child' context requires 1 parameter");
                 int index = parameters [0].EvaluateInt(this);
+                NeedChildren();
                 return (IEvaluateContext) _children [index];
             }
             throw new LoadDataException("Unknown context " + symbol);
