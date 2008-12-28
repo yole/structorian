@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using Structorian.Engine;
@@ -228,7 +229,19 @@ namespace Structorian
                 {
                     ui.ContextMenuStripNeeded(e);
                 }
+                else
+                {
+                    e.ContextMenuStrip = contextMenuStrip1;
+                }
             }
+        }
+
+        private void miFollowOffset_Click(object sender, EventArgs e)
+        {
+            var cell = (StructCell)_structGridView.SelectedRows[0].DataBoundItem;
+            IConvertible value = cell.GetValue();
+            long offset = value.ToInt64(CultureInfo.CurrentCulture);
+            _hexDump.SelectBytes(offset, 1);
         }
     }
 

@@ -28,16 +28,20 @@ namespace Structorian
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this._structTreeView = new System.Windows.Forms.TreeView();
             this._structGridView = new System.Windows.Forms.DataGridView();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.miFollowOffset = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._structGridView)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -99,6 +103,20 @@ namespace Structorian
             this.splitContainer2.SplitterDistance = 286;
             this.splitContainer2.TabIndex = 6;
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miFollowOffset});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 48);
+            // 
+            // miFollowOffset
+            // 
+            this.miFollowOffset.Name = "miFollowOffset";
+            this.miFollowOffset.Size = new System.Drawing.Size(152, 22);
+            this.miFollowOffset.Text = "Follow Offset";
+            this.miFollowOffset.Click += new System.EventHandler(this.miFollowOffset_Click);
+            // 
             // DataView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -113,6 +131,7 @@ namespace Structorian
             ((System.ComponentModel.ISupportInitialize)(this._structGridView)).EndInit();
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.ResumeLayout(false);
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -123,5 +142,7 @@ namespace Structorian
         private System.Windows.Forms.TreeView _structTreeView;
         private System.Windows.Forms.DataGridView _structGridView;
         private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem miFollowOffset;
     }
 }
