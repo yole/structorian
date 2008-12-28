@@ -47,6 +47,11 @@ namespace Structorian
             get { return _structGridView; }
         }
 
+        internal HexDump HexDump
+        {
+            get { return _hexDump; }
+        }
+
         public bool ShowLocalOffsets
         {
             get { return _showLocalOffsets; }

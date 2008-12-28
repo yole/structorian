@@ -48,6 +48,7 @@ namespace Structorian
             _selectionEnd = Math.Max(1, Math.Min(startOffset+count, _streamSize));
             ScrollInView();
             Invalidate();
+            UpdateStatusText();
         }
 
         private void ScrollInView()
@@ -258,5 +259,30 @@ namespace Structorian
                 TextRenderer.DrawText(g, lineCharsBuilder.ToString(), Font, new Point(0, top), SystemColors.WindowText);
             }
         }
+
+        private void UpdateStatusText()
+        {
+            string text = "Selected " + (_selectionEnd - _selectionStart) + " bytes at offset " + _selectionStart;
+            StatusTextChanged(this, new StatusTextEventArgs(text));
+        }
+
+        public event StatusTextEventHandler StatusTextChanged;
     }
+
+    class StatusTextEventArgs: EventArgs
+    {
+        private readonly string _text;
+
+        public StatusTextEventArgs(string text)
+        {
+            _text = text;
+        }
+
+        public string Text
+        {
+            get { return _text; }
+        }
+    }
+
+    delegate void StatusTextEventHandler(object sender, StatusTextEventArgs e);
 }

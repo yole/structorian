@@ -25,7 +25,7 @@ namespace Structorian
         {
             InitializeComponent();
             _dataView = new DataView();
-            _dataView.CellSelected += new CellSelectedEventHandler(_dataView_OnCellSelected);
+            _dataView.CellSelected += _dataView_OnCellSelected;
             _dataView.Dock = DockStyle.Fill;
             splitContainer2.Panel2.Controls.Add(_dataView);
             
@@ -34,7 +34,8 @@ namespace Structorian
             if (lastStrsFile != null && lastStrsFile.Length > 0)
                 LoadStructsFile(lastStrsFile);
             _structEditControl.Document.DocumentChanged += delegate { _structuresModified = true; };
-
+            _dataView.HexDump.StatusTextChanged += (sender, e) => toolStripStatusLabel1.Text = e.Text;
+            
             RestoreFormPosition();
             _settingsLoaded = true;
         }
