@@ -9,14 +9,15 @@ namespace Structorian
     class HexDump: ScrollableControl
     {
         private Stream _stream;
-        private int _streamSize;
+        private long _streamSize;
         private int _charHeight;
-        private int _topLine;
-        private int _lineCount;
+        private long _topLine;
+        private long _lineCount;
         private int _visibleLines;
         private int _visibleWholeLines;
-        private int _selectionStart = 0;
-        private int _selectionEnd = 1;
+        private long _selectionStart = 0;
+        private long _selectionEnd = 1;
+        private long _selectionAnchor;
 
         public HexDump()
         {
@@ -31,7 +32,7 @@ namespace Structorian
                 if (_stream != value)
                 {
                     _stream = value;
-                    _streamSize = (int) _stream.Length;
+                    _streamSize = _stream.Length;
                     _lineCount = (_streamSize/16 + 1);
                     if (_topLine > _lineCount)
                         _topLine = _lineCount - 1;
@@ -41,7 +42,7 @@ namespace Structorian
             }
         }
         
-        public void SelectBytes(int startOffset, int count)
+        public void SelectBytes(long startOffset, int count)
         {
             _selectionStart = Math.Max(0, Math.Min(startOffset, _streamSize - 1));
             _selectionEnd = Math.Max(1, Math.Min(startOffset+count, _streamSize));
@@ -51,8 +52,8 @@ namespace Structorian
 
         private void ScrollInView()
         {
-            int selStartLine = _selectionStart/16;
-            int selEndLine = _selectionEnd/16;
+            long selStartLine = _selectionStart/16;
+            long selEndLine = _selectionEnd/16;
             if (selStartLine < _topLine)
                 SetTopLine(selStartLine);
             else if (selEndLine >= _topLine + _visibleWholeLines)
@@ -66,7 +67,7 @@ namespace Structorian
 
         private void AdjustScrollbars()
         {
-            VerticalScroll.Maximum = _lineCount;
+            VerticalScroll.Maximum = (int) _lineCount;
             VerticalScroll.LargeChange = _visibleLines;
             VerticalScroll.Visible = true;
         }
@@ -94,7 +95,7 @@ namespace Structorian
         protected override void OnScroll(ScrollEventArgs se)
         {
             base.OnScroll(se);
-            int newTopLine = _topLine;
+            long newTopLine = _topLine;
             switch(se.Type)
             {
                 case ScrollEventType.SmallDecrement:
@@ -130,7 +131,7 @@ namespace Structorian
             SetTopLine(_topLine - e.Delta/60);
         }
         
-        private void SetTopLine(int newTopLine)
+        private void SetTopLine(long newTopLine)
         {
             if (newTopLine < 0)
                 newTopLine = 0;
@@ -144,7 +145,7 @@ namespace Structorian
             if (newTopLine != _topLine)
             {
                 _topLine = newTopLine;
-                VerticalScroll.Value = _topLine;
+                VerticalScroll.Value = (int) _topLine;
                 Invalidate();
             }
         }
@@ -154,15 +155,23 @@ namespace Structorian
             base.OnMouseDown(e);
             if (e.Button == MouseButtons.Left)
             {
-                int clickOffset = GetOffsetAt(e.X, e.Y);
+                long clickOffset = GetOffsetAt(e.X, e.Y);
                 if (clickOffset != -1 && (clickOffset < _selectionStart || clickOffset >= _selectionEnd))
                 {
-                    SelectBytes(clickOffset, 1);
+                    if ((ModifierKeys & Keys.Shift) != 0)
+                    {
+                        SelectBytes(Math.Min(_selectionAnchor, clickOffset), (int) Math.Abs(_selectionAnchor - clickOffset) + 1);
+                    }
+                    else
+                    {
+                        SelectBytes(clickOffset, 1);
+                        _selectionAnchor = clickOffset;
+                    }
                 }
             }
         }
 
-        private int GetOffsetAt(int x, int y)
+        private long GetOffsetAt(int x, int y)
         {
             int charsInLine = 10 + 16*4 + 2;
             Size size = TextRenderer.MeasureText(new string('A', charsInLine), Font);
@@ -176,7 +185,7 @@ namespace Structorian
             else
                 return -1;
 
-            int result = _topLine*16 + row*16 + byteCol;
+            long result = _topLine*16 + row*16 + byteCol;
             if (result >= _streamSize) return -1;
             return result;
         }
@@ -185,7 +194,7 @@ namespace Structorian
         {
             base.OnPaint(e);
             if (_stream == null) return;
-            int offset = _topLine * 16;
+            long offset = _topLine * 16;
             int y = 0;
             for (int i = 0; i < _visibleLines; i++)
             {
@@ -197,12 +206,13 @@ namespace Structorian
             }
         }
 
-        private void DrawHexLine(Graphics g, int top, int offset)
+        private void DrawHexLine(Graphics g, int top, long offset)
         {
             StringBuilder lineCharsBuilder = new StringBuilder(10 + 16 * 4 + 2);
             lineCharsBuilder.Append(offset.ToString("X8")).Append(": ");
 
-            int bytesInLine = Math.Min(16, _streamSize - offset);
+            long bytesToEnd = _streamSize - offset;
+            int bytesInLine = bytesToEnd < 16 ? (int) bytesToEnd : 16;
             _stream.Position = offset;
             byte[] bytes = new byte[bytesInLine];
             _stream.Read(bytes, 0, bytesInLine);
@@ -216,8 +226,8 @@ namespace Structorian
             byteChars = byteChars.Replace('\0', (char) 1);
             lineCharsBuilder.Append(byteChars);
 
-            int selectionStartInLine = (_selectionStart < offset) ? 0 : _selectionStart - offset;
-            int selectionEndInLine = (_selectionEnd >= offset + 16) ? 16 : _selectionEnd - offset;
+            int selectionStartInLine = (int) ((_selectionStart < offset) ? 0 : _selectionStart - offset);
+            int selectionEndInLine = (int) ((_selectionEnd >= offset + 16) ? 16 : _selectionEnd - offset);
             if (selectionStartInLine < 16 && selectionEndInLine > 0 && selectionStartInLine != selectionEndInLine)
             {
                 Size defSize = new Size(100, 100);
