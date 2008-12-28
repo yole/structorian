@@ -40,6 +40,10 @@ namespace Structorian.Engine.Fields
                     value = _unsigned ? (IConvertible)reader.ReadUInt32() : reader.ReadInt32();
                     break;
 
+                case 8:
+                    value = _unsigned ? (IConvertible) reader.ReadUInt64() : reader.ReadInt64();
+                    break;
+
                 default:
                     throw new Exception("Unsupported integer size " + _size);
             }
@@ -80,6 +84,18 @@ namespace Structorian.Engine.Fields
         {
             byte[] data = ReadBytes(4);
             return (uint)(data[3] | data[2] << 8 | data[1] << 16 | data[0] << 24);
+        }
+
+        public override long ReadInt64()
+        {
+            byte[] data = ReadBytes(8);
+            return data[7] | data[6] << 8 | data[5] << 16 | data[4] << 24 | data[3] << 32 | data[2] << 40 | data[1] << 48 | data[0] << 56;
+        }
+
+        public override ulong ReadUInt64()
+        {
+            byte[] data = ReadBytes(8);
+            return (ulong) (data[7] | data[6] << 8 | data[5] << 16 | data[4] << 24 | data[3] << 32 | data[2] << 40 | data[1] << 48 | data[0] << 56);
         }
     }
 }

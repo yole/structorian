@@ -85,9 +85,9 @@ namespace Structorian.Engine.Fields
                 size = 1;
                 name = name.Substring(0, name.Length - 1);
             }
-            else if (name.EndsWith("16") || name.EndsWith("32"))
+            else if (name.EndsWith("16") || name.EndsWith("32") || name.EndsWith("64"))
             {
-                size = name.EndsWith("16") ? 2 : 4;
+                size = name.EndsWith("16") ? 2 : name.EndsWith("32") ? 4 : 8;
                 name = name.Substring(0, name.Length - 2);
             }
             else

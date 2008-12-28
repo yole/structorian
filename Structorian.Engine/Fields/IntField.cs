@@ -5,7 +5,7 @@ namespace Structorian.Engine.Fields
 {
     class IntField: IntBasedField
     {
-        private bool _hex;
+        private readonly bool _hex;
 
         public IntField(StructDef structDef, int size, bool unsigned, bool hex)
             : base(structDef, size, unsigned)
@@ -32,6 +32,10 @@ namespace Structorian.Engine.Fields
                     
                 case 4:
                     displayValue = _unsigned ? ((UInt32)value).ToString(format) : ((Int32)value).ToString(format);
+                    break;
+
+                case 8:
+                    displayValue = _unsigned ? ((UInt64) value).ToString(format) : ((Int64) value).ToString(format);
                     break;
 
                 case 0:
