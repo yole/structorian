@@ -359,6 +359,10 @@ namespace Structorian.Engine
                 NeedChildren();
                 return (IEvaluateContext) _children [index];
             }
+            if (symbol.ToLowerInvariant() == "root")
+            {
+                return EvaluateRoot();
+            }
             throw new LoadDataException("Unknown context " + symbol);
         }
 
@@ -379,6 +383,16 @@ namespace Structorian.Engine
             int index = parent.Children.IndexOf(this);
             if (index <= 0) return null;
             return (StructInstance) parent.Children[index - 1];
+        }
+
+        private StructInstance EvaluateRoot()
+        {
+            InstanceTreeNode root = this;
+            while (!(root.Parent is InstanceTree))
+            {
+                root = root.Parent;
+            }
+            return (StructInstance) root;
         }
 
         public void RegisterGlobal(string id, int result)
