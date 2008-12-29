@@ -7,7 +7,7 @@ namespace Structorian.Engine
     {
         IConvertible EvaluateSymbol(string symbol);
         IConvertible EvaluateFunction(string symbol, Expression[] parameters);
-        IEvaluateContext EvaluateContext(string symbol, Expression[] parameters);
+        IEvaluateContext EvaluateContext(string symbol, IConvertible[] parameters);
     }
     
     public delegate IConvertible EvaluateDelegate(IEvaluateContext context, Expression[] parameters);
@@ -216,7 +216,21 @@ namespace Structorian.Engine
 
         public override IConvertible Evaluate(IEvaluateContext context)
         {
-            IEvaluateContext ctx = context.EvaluateContext(_contextExpr, _parameters);
+            return EvaluateContextExpression(context, context);
+        }
+
+        private IConvertible EvaluateContextExpression(IEvaluateContext context, IEvaluateContext paramContext)
+        {
+            var paramValues = new IConvertible[_parameters.Length];
+            for(int i=0; i<_parameters.Length; i++)
+            {
+                paramValues[i] = _parameters[i].Evaluate(paramContext);
+            }
+            IEvaluateContext ctx = context.EvaluateContext(_contextExpr, paramValues);
+            if (_expr is ContextExpression)
+            {
+                return ((ContextExpression) _expr).EvaluateContextExpression(ctx, paramContext);
+            }
             return _expr.Evaluate(ctx);
         }
     }

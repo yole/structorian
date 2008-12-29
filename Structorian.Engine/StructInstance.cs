@@ -338,7 +338,7 @@ namespace Structorian.Engine
             throw new LoadDataException("Unknown symbol " + symbol);
         }
 
-        public IEvaluateContext EvaluateContext(string symbol, Expression[] parameters)
+        public IEvaluateContext EvaluateContext(string symbol, IConvertible[] parameters)
         {
             if (symbol.ToLowerInvariant() == "parent")
             {
@@ -363,18 +363,18 @@ namespace Structorian.Engine
             throw new LoadDataException("Unknown context " + symbol);
         }
 
-        private IEvaluateContext EvaluateChild(Expression[] parameters)
+        private IEvaluateContext EvaluateChild(IConvertible[] parameters)
         {
             int childIndex;
             InstanceTreeNode parent = this;
             NeedChildren();
             if (parameters.Length == 1)
             {
-                childIndex = parameters[0].EvaluateInt(this);
+                childIndex = parameters[0].ToInt32(null);
             }
             else if (parameters.Length == 2)
             {
-                string groupName = parameters[0].EvaluateString(this);
+                string groupName = parameters[0].ToString(null);
                 bool groupFound = false;
                 foreach (InstanceTreeNode child in Children)
                 {
@@ -385,7 +385,7 @@ namespace Structorian.Engine
                     }
                 }
                 if (!groupFound) throw new Exception("Could not find child group " + groupName);
-                childIndex = parameters[1].EvaluateInt(this);
+                childIndex = parameters[1].ToInt32(null);
             }
             else
                 throw new Exception("'child' context requires 1 or 2 parameters");
