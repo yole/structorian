@@ -1,0 +1,101 @@
+struct UnrealPackage
+{
+  i32 Signature;
+  i32 PackageVersion;
+  i32 FirstExportOffset;
+  i32 FolderNameLength;
+  str FolderName [len=FolderNameLength];
+  i32 PackageFlags;
+  i32 NamesCount;
+  i32 NamesOffset;
+  i32 ExportsCount;
+  i32 ExportsOffset;
+  i32 ImportsCount;
+  i32 ImportsOffset;
+  i32;
+  repeat(4) { x32 GUID; }
+  i32 GenerationsCount;
+  repeat(GenerationsCount)
+  {
+    i32 GenExportCount;
+    i32 GenNamesCount;
+    i32 GenNetObjectCount;
+  }
+  i32 EngineVersion;
+  i32 CookerVersion;
+  if (EngineVersion == 3240)
+  {
+    repeat(7) { i32; }
+  }
+  if ((PackageFlags & 0x00800000) != 0)
+  {
+    i32 CompressionFlag;
+    i32 NumberOfChunks;
+    child LZOChunk [count=NumberOfChunks];
+  }
+  else
+  {
+    child UnrealName [offset=NamesOffset, count=NamesCount, group=Names];
+    child UnrealImport [offset=ImportsOffset, count=ImportsCount, group=Imports];
+    child UnrealExport [offset=ExportsOffset, count=ExportsCount, group=Exports];
+  }
+}
+
+struct LZOChunk
+{
+  u32 UncompressedOffset;
+  u32 UncompressedSize;
+  u32 CompressedOffset;
+  u32 CompressedSize;
+}
+
+struct UnrealName
+{
+  i32 NameLength;
+  str Name [len=NameLength];
+  x64 Flags;
+}
+
+struct UnrealImport
+{
+  [hidden] i64 PackageNameIndex;
+  str PackageName [value=Root.Child("Names", PackageNameIndex).Name];
+  [hidden] i64 ClassNameIndex;
+  str PackageName [value=Root.Child("Names", ClassNameIndex).Name];
+  i32 Outer;
+  [hidden] i32 NameIndex;
+  str Name [value=Root.Child("Names", NameIndex).Name];
+  i32 Flags;
+}
+
+struct UnrealExport
+{
+  i32 Import;
+  i32 Parent;
+  i32 Outer;
+  [hidden] i32 ExportNameIndex;
+  str ExportName [value=Root.Child("Names", ExportNameIndex).Name];
+  i32 ExportNameSuffix;
+  i32 ArchetypeIndex;
+  i64 Flags;
+  i32 ExportSize;
+  i32 ExportOffset;
+  i32 ComponentMapCount;
+  repeat(ComponentMapCount)
+  {
+    include ExportComponent;
+  }
+  i32 ExportFlags;
+  i32 NetObjectCount;
+  repeat(NetObjectCount) { i32 NetObject; }
+  repeat(4) { x32 GUID; }
+  
+}
+
+struct ExportComponent
+{
+  i32 ComponentNameIndex;
+  i32;
+  i32 ComponentClassIndex;
+}
+
