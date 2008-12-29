@@ -270,6 +270,7 @@ namespace Structorian.Engine
             if (_cells == null)
             {
                 _cells = new List<StructCell>();
+                long oldPosition = _stream.Position;
                 _stream.Position = Offset;
                 _def.LoadInstanceData(this, _stream);
                 _endOffset = _stream.Position;
@@ -277,6 +278,7 @@ namespace Structorian.Engine
                 {
                     NeedChildren();
                 }
+                _stream.Position = oldPosition;
             }
         }
 
