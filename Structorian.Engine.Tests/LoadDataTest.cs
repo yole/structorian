@@ -948,5 +948,14 @@ namespace Structorian.Engine.Tests
 
             Assert.AreEqual("5", instance.Children[1].Cells[0].Value);
         }
+
+        [Test] public void Root()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct data { u8 value; child C2 [group=C, offset=1]; } struct C2 { calc q [value=root.value]; } ",
+                new byte[] { 5, 17 });
+
+            Assert.AreEqual("5", instance.Children[0].Children[0].Cells[0].Value);
+        }
     }
 }
