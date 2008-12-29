@@ -968,5 +968,16 @@ namespace Structorian.Engine.Tests
             group.NeedChildren();
             Assert.AreEqual("5", group.Children[0].Cells[0].Value);
         }
+
+        [Test] public void ChildEvaluateContext()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct data { child C1 [group=C, offset=0]; child C2 [group=C2, offset=1]; } struct C1 { i8 v; } struct C2 { [hidden] u8 ci; calc q [value=(root.child(\"C\", ci).v)]; } ",
+                new byte[] { 5, 0 });
+
+            InstanceTreeNode group = instance.Children[1];
+            group.NeedChildren();
+            Assert.AreEqual("5", group.Children[0].Cells[0].Value);
+        }
     }
 }
