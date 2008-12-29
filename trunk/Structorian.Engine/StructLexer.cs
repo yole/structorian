@@ -94,8 +94,23 @@ namespace Structorian.Engine
         {
             pos = BuildTextPosition(_position);
             int startPosition = _position;
-            while(_position < _text.Length && !IsAttributeEnd(_text [_position]))
+            int parenCount = 0;
+            while(_position < _text.Length)
+            {
+                if (_text[_position] == '(')
+                {
+                    parenCount++;
+                }
+                else if (_text[_position] == ')')
+                {
+                    parenCount--;
+                }
+                else if (parenCount == 0 && IsAttributeEnd(_text [_position]))
+                {
+                    break;
+                }
                 _position++;
+            }
 
             if (_text[_position] != ',' && _text[_position] != ']')
                 throw new ParseException("Unclosed attribute value", BuildTextPosition(startPosition));
