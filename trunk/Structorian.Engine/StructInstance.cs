@@ -354,16 +354,43 @@ namespace Structorian.Engine
             }
             if (symbol.ToLowerInvariant() == "child")
             {
-                if (parameters.Length != 1) throw new Exception("'child' context requires 1 parameter");
-                int index = parameters [0].EvaluateInt(this);
-                NeedChildren();
-                return (IEvaluateContext) _children [index];
+                return EvaluateChild(parameters);
             }
             if (symbol.ToLowerInvariant() == "root")
             {
                 return EvaluateRoot();
             }
             throw new LoadDataException("Unknown context " + symbol);
+        }
+
+        private IEvaluateContext EvaluateChild(Expression[] parameters)
+        {
+            int childIndex;
+            InstanceTreeNode parent = this;
+            NeedChildren();
+            if (parameters.Length == 1)
+            {
+                childIndex = parameters[0].EvaluateInt(this);
+            }
+            else if (parameters.Length == 2)
+            {
+                string groupName = parameters[0].EvaluateString(this);
+                bool groupFound = false;
+                foreach (InstanceTreeNode child in Children)
+                {
+                    if (child is GroupContainer && child.NodeName == groupName)
+                    {
+                        parent = child;
+                        groupFound = true;
+                    }
+                }
+                if (!groupFound) throw new Exception("Could not find child group " + groupName);
+                childIndex = parameters[1].EvaluateInt(this);
+            }
+            else
+                throw new Exception("'child' context requires 1 or 2 parameters");
+            parent.NeedChildren();
+            return (IEvaluateContext) parent.Children[childIndex];
         }
 
         private StructInstance EvaluateParent()
