@@ -1,0 +1,11 @@
+[filemask="*.swf"]
+struct SWFFile
+{
+  str [len=3] Signature;
+  u8 Version;
+  u32 Length;
+  if (Signature == "CWS")
+  {
+    blob Compressed [len=FileSize-8, encoding=zlib];
+  }
+}

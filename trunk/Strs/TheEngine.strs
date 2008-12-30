@@ -1,0 +1,18 @@
+struct PkFile
+{
+  u32 EntryCount;
+  u32;
+  child PkEntry [count=EntryCount];
+}
+
+struct PkEntry
+{
+  str [len=64] Name;
+  u32 Size;
+  u32 CompressedSize;
+  u32 StartOffset;
+  u32;
+  x32;
+  x32;
+  u32 CompressionType;
+}
