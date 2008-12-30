@@ -1,0 +1,31 @@
+[filemask="*.class", byteorder=motorola]
+struct ClassFile
+{
+  u32 magic;
+  u16 minor_version;
+  u16 major_version;
+  u16 constant_pool_count;
+  set16 access_flags [enum=AccessFlag];
+}
+
+enum AccessFlag
+{
+  ACC_PUBLIC    = 0,
+  ACC_FINAL     = 4,
+  ACC_SUPER     = 5,
+  ACC_INTERFACE = 9,
+  ACC_ABSTRACT  = 10
+}
+
+[global] enum ConstantTag
+{
+  CONSTANT_Utf8               = 1,
+  CONSTANT_Float              = 4,
+  CONSTANT_Class              = 7,
+  CONSTANT_String             = 8,
+  CONSTANT_Fieldref           = 9,
+  CONSTANT_Methodref          = 10,
+  CONSTANT_InterfaceMethodref = 11,
+  CONSTANT_NameAndType        = 12
+}
+
