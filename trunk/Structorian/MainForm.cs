@@ -174,9 +174,11 @@ namespace Structorian
             }
             SaveStructuresToDisk();
             ParseStructures();
-            
-            if (_structFile != null)
+
+            if (_structFile != null && _dataView.DataFileName != null)
+            {
                 _dataView.ReloadData(FindMatchingStruct(_dataView.DataFileName), true);
+            }
         }
 
         private void SaveStructuresToDisk()
