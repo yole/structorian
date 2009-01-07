@@ -305,6 +305,7 @@ namespace Structorian
             string byteChars = Encoding.Default.GetString(_data).Replace('\n', (char)1).Replace('\r', (char)1);
             byteChars = byteChars.Replace('\0', (char)1);
             _lineCharsBuilder.Append(byteChars);
+            _lineCharsBuilder.Append(' ', 16 - bytesInLine);
 
             if (_spans != null)
             {
