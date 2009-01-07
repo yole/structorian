@@ -52,38 +52,14 @@ namespace Structorian.Engine
 
         private StructFunctions()
         {
-            Register("StructOffset", StructOffset);
-            Register("ParentCount", ParentCount);
-            Register("CurOffset", CurOffset);
-            Register("StructName", StructName);
-            Register("FileSize", FileSize);
+            Register("StructOffset", (context, parameters) => context.Offset);
+            Register("EndOffset", (context, parameters) => context.EndOffset);
+            Register("ParentCount", (context, parameters) => context.ParentCount);
+            Register("CurOffset", (context, parameters) => context.CurOffset);
+            Register("StructName", (context, parameters) => context.Def.Name);
+            Register("FileSize", (context, parameters) => context.Stream.Length);
             Register("SizeOf", SizeOf);
-            Register("ChildIndex", ChildIndex);
-        }
-
-        private static IConvertible StructOffset(StructInstance context, Expression[] parameters)
-        {
-            return context.Offset;
-        }
-
-        private static IConvertible CurOffset(StructInstance context, Expression[] parameters)
-        {
-            return context.CurOffset;
-        }
-
-        private static IConvertible ParentCount(StructInstance context, Expression[] parameters)
-        {
-            return context.ParentCount;
-        }
-
-        private static IConvertible StructName(StructInstance context, Expression[] parameters)
-        {
-            return context.Def.Name;
-        }
-
-        private static IConvertible FileSize(StructInstance context, Expression[] parameters)
-        {
-            return context.Stream.Length;
+            Register("ChildIndex", (context, parameters) => context.ChildIndex);
         }
 
         private static IConvertible SizeOf(StructInstance context, Expression[] parameters)
@@ -98,11 +74,6 @@ namespace Structorian.Engine
             StructDef def = structFile.GetStructByName(symbol);
             if (def == null) throw new LoadDataException("Structure '" + symbol + "' not found");
             return def.GetDataSize();
-        }
-
-        private static IConvertible ChildIndex(StructInstance context, Expression[] parameters)
-        {
-            return context.ChildIndex;
         }
     }
 }
