@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace Structorian.Engine
 {
-    class FunctionRegistry<T> where T : IEvaluateContext
+    class FunctionRegistry<T, U, P> where T : IEvaluateContext where U : class
     {
-        protected delegate IConvertible FunctionDelegate(T context, Expression[] parameters);
+        protected delegate U FunctionDelegate(T context, P[] parameters);
 
-        private Dictionary<String, FunctionDelegate> _functions = new Dictionary<string, FunctionDelegate>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<String, FunctionDelegate> _functions = new Dictionary<string, FunctionDelegate>(StringComparer.InvariantCultureIgnoreCase);
 
         protected void Register(string name, FunctionDelegate functionDelegate)
         {
             _functions[name] = functionDelegate;
         }
 
-        public IConvertible Evaluate(string function, Expression[] parameters, IEvaluateContext context)
+        public U Evaluate(string function, P[] parameters, IEvaluateContext context)
         {
             FunctionDelegate evalDelegate;
             if (!_functions.TryGetValue(function, out evalDelegate))

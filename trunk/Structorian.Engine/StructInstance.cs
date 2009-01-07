@@ -173,21 +173,6 @@ namespace Structorian.Engine
             }
         }
 
-        public int ParentCount
-        {
-            get
-            {
-                int count = 0;
-                StructInstance p = EvaluateParent();
-                while(p != null)
-                {
-                    count++;
-                    p = p.EvaluateParent();
-                }
-                return count;
-            }
-        }
-
         public override StructInstance LastChild
         {
             get
@@ -208,7 +193,7 @@ namespace Structorian.Engine
         {
             get
             {
-                StructInstance parent = EvaluateParent();
+                InstanceTreeNode parent = Parent;
                 if (parent == null)
                     throw new Exception("Structure instance doesn't have any parent");
                 return parent.Children.IndexOf(this);
@@ -342,89 +327,11 @@ namespace Structorian.Engine
 
         public IEvaluateContext EvaluateContext(string symbol, IConvertible[] parameters)
         {
-            if (symbol.ToLowerInvariant() == "parent")
-            {
-                StructInstance parent = EvaluateParent();
-                if (parent == null) throw new Exception("Expression does not have a parent");
-                return parent;
-            }
-            if (symbol.ToLowerInvariant() == "prevsibling")
-            {
-                StructInstance prevSibling = EvaluatePrevSibling();
-                if (prevSibling == null) throw new Exception("Expression doesn't have a previous sibling");
-                return prevSibling;
-            }
-            if (symbol.ToLowerInvariant() == "child")
-            {
-                return EvaluateChild(parameters);
-            }
-            if (symbol.ToLowerInvariant() == "root")
-            {
-                return EvaluateRoot();
-            }
+            IEvaluateContext context = ContextFunctions.Instance.Evaluate(symbol, parameters, this);
+            if (context != null)
+                return context;
+
             throw new LoadDataException("Unknown context " + symbol);
-        }
-
-        private IEvaluateContext EvaluateChild(IConvertible[] parameters)
-        {
-            int childIndex;
-            InstanceTreeNode parent = this;
-            NeedChildren();
-            if (parameters.Length == 1)
-            {
-                childIndex = parameters[0].ToInt32(null);
-            }
-            else if (parameters.Length == 2)
-            {
-                string groupName = parameters[0].ToString(null);
-                bool groupFound = false;
-                foreach (InstanceTreeNode child in Children)
-                {
-                    if (child is GroupContainer && child.NodeName == groupName)
-                    {
-                        parent = child;
-                        groupFound = true;
-                    }
-                }
-                if (!groupFound) throw new Exception("Could not find child group " + groupName);
-                childIndex = parameters[1].ToInt32(null);
-            }
-            else
-                throw new Exception("'child' context requires 1 or 2 parameters");
-            parent.NeedChildren();
-            var children = parent.Children;
-            if (childIndex < 0 || childIndex >= children.Count)
-                throw new Exception("Invalid child index " + childIndex + ": child count " + children.Count);
-            return (IEvaluateContext) children[childIndex];
-        }
-
-        private StructInstance EvaluateParent()
-        {
-            InstanceTreeNode parent = _parent;
-            while(parent != null && !(parent is StructInstance))
-            {
-                parent = parent.Parent;
-            }
-            return (StructInstance) parent;
-        }
-
-        private StructInstance EvaluatePrevSibling()
-        {
-            StructInstance parent = EvaluateParent();
-            if (parent == null) return null;
-            int index = parent.Children.IndexOf(this);
-            if (index <= 0) return null;
-            return (StructInstance) parent.Children[index - 1];
-        }
-
-        private StructInstance EvaluateRoot()
-        {
-            InstanceTreeNode root = this;
-            while (!(root.Parent is InstanceTree))
-            {
-                root = root.Parent;
-            }
-            return (StructInstance) root;
         }
 
         public void RegisterGlobal(string id, int result)
