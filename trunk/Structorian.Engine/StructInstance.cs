@@ -392,7 +392,10 @@ namespace Structorian.Engine
             else
                 throw new Exception("'child' context requires 1 or 2 parameters");
             parent.NeedChildren();
-            return (IEvaluateContext) parent.Children[childIndex];
+            var children = parent.Children;
+            if (childIndex < 0 || childIndex >= children.Count)
+                throw new Exception("Invalid child index " + childIndex + ": child count " + children.Count);
+            return (IEvaluateContext) children[childIndex];
         }
 
         private StructInstance EvaluateParent()

@@ -17,14 +17,9 @@ namespace Structorian.Engine.Fields
                 throw new LoadDataException("Blob size " + len + " exceeds stream length");
             if (len < 0)
                 throw new LoadDataException("Blob size " + len + " is negative");
-            byte[] blobBytes = reader.ReadBytes(len);
             string encoding = GetStringAttribute("encoding");
             BlobDecoder blobDecoder = FindBlobEncoding(instance, encoding);
-            if (blobDecoder != null)
-            {
-                blobBytes = blobDecoder.Decode(blobBytes);
-            }
-            BlobCell cell = new BlobCell(this, blobBytes, offset);
+            BlobCell cell = new BlobCell(this, reader.BaseStream, offset, len, blobDecoder);
             instance.AddCell(cell, _hidden);
             instance.RegisterCellSize(cell, len);
 

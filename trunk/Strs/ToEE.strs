@@ -1,0 +1,149 @@
+[filemask="*.dat"]
+struct ToEEFile
+{
+  seek FileSize-4;
+  u32 IndexSize;
+  child IndexEntry [offset=FileSize-IndexSize+4];
+}
+
+struct IndexEntry
+{
+  x32 NameLength;
+  str [len=NameLength] Name;
+  x32;
+  x32 Attributes;
+  x32 CompressedSize;
+  x32 UncompressedSize;
+  x32 StartOffset;
+  i32 ParentIndex;
+  i32 FirstChildIndex;
+  i32 NextSiblingIndex;
+  if (CurOffset < FileSize-SizeOf(IndexEntry))
+  {
+    sibling IndexEntry;
+  }
+  if (ParentIndex >= 0)
+  {
+    str FullName [value=Parent.Child(ParentIndex).FullName+"\"+Name];
+  }
+  else
+  {
+    str FullName [value=Name];
+  }
+  if (CompressedSize > 0)
+  {
+    seek StartOffset;
+    if ((Attributes & 0x02) != 0)
+    {
+      blob CompressedSize [tag=Data, encoding=zlib];
+    }
+    else
+    {
+      blob CompressedSize [tag=Data];
+    }
+  }
+}
+
+[filemask="clipping.cgf"]
+struct ClippingCgf
+{
+  x32 RecordCount;
+  child ClippingCgfRecord [count=RecordCount];
+}
+
+struct ClippingCgfRecord
+{
+  str [len=260] DagFileName;
+}
+
+[filemask="*.dag"]
+struct DagFile
+{
+  float;
+  float;
+  float;
+  float;
+  x32 DagRecordCount;
+  x32 DagRecordOffset;
+  child DagRecord [offset=DagRecordOffset, count=DagRecordCount];
+}
+
+struct DagRecord
+{
+  i32 NodeCount;
+  i32 EdgeCount;
+  x32 NodeOffset;
+  x32 EdgeOffset;
+  child DagNode [group=Nodes, offset=NodeOffset, count=NodeCount];
+  child DagEdge [group=Edges, offset=EdgeOffset, count=EdgeCount];
+}
+
+struct DagNode
+{
+  float;
+  float;
+  float;
+}
+
+struct DagEdge
+{
+  x16;
+  x16;
+  x16;
+}
+
+[filemask="*.mob"]
+struct MobFile
+{
+  u32 ObjectVersion;
+  u32;
+  u32;
+  u32;
+  u32;
+  u32;
+  u32;
+}
+
+[filemask="*.sec"]
+struct SectorFile
+{
+  child SectorLights;
+}
+
+struct SectorLights
+{
+  x32 LightCount;
+  child SectorLight [count=LightCount];
+}
+
+struct SectorLight
+{
+  u64 Handle;
+  x32 Flags;
+  u32 Type;
+  u8 Red;
+  u8 Green;
+  u8 Blue;
+  u8 Padding;
+  u32;
+  u32 x;
+  u32 y;
+  float ofs_x;
+  float ofs_y;
+  float height;
+  float dir_x;
+  float dir_y;
+  float dir_z;
+  float range;
+  float angle;
+  if (Flags & 0x10 != 0)
+  {
+    u32;
+    u32;
+  }
+  elif (Flags & 0x40 != 0)
+  {
+    repeat(2) { u32; }
+    repeat(9) { u32; }
+  }
+}
