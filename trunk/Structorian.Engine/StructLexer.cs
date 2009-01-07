@@ -112,7 +112,7 @@ namespace Structorian.Engine
                 _position++;
             }
 
-            if (_text[_position] != ',' && _text[_position] != ']')
+            if (_position >= _text.Length || (_text[_position] != ',' && _text[_position] != ']'))
                 throw new ParseException("Unclosed attribute value", BuildTextPosition(startPosition));
             
             string result = _text.Substring(startPosition, _position - startPosition).Trim();
