@@ -22,6 +22,7 @@ namespace Structorian.Engine.Fields
             BlobCell cell = new BlobCell(this, reader.BaseStream, offset, len, blobDecoder);
             instance.AddCell(cell, _hidden);
             instance.RegisterCellSize(cell, len);
+            reader.BaseStream.Position += len;
 
             StructDef structDef = GetStructAttribute("struct");
             if (structDef != null)
