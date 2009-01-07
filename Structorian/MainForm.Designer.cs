@@ -44,9 +44,13 @@ namespace Structorian
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this._btnLoadStuctures = new System.Windows.Forms.ToolStripButton();
             this._btnSaveStructures = new System.Windows.Forms.ToolStripButton();
-            this._saveStructsDialog = new System.Windows.Forms.SaveFileDialog();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this._saveStructsDialog = new System.Windows.Forms.SaveFileDialog();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.miSaveAllBlobs = new System.Windows.Forms.ToolStripMenuItem();
+            this._targetDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
@@ -59,7 +63,8 @@ namespace Structorian
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.viewToolStripMenuItem});
+            this.viewToolStripMenuItem,
+            this.toolsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(438, 24);
@@ -138,7 +143,6 @@ namespace Structorian
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.statusStrip1);
             this.splitContainer2.Size = new System.Drawing.Size(438, 400);
             this.splitContainer2.SplitterDistance = 108;
             this.splitContainer2.TabIndex = 4;
@@ -189,10 +193,6 @@ namespace Structorian
             this._btnSaveStructures.Text = "Save Structure Definitions";
             this._btnSaveStructures.Click += new System.EventHandler(this._btnSaveStructures_Click);
             // 
-            // _saveStructsDialog
-            // 
-            this._saveStructsDialog.Filter = "Structure Definitions (*.strs)|*.strs|All files|*.*";
-            // 
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -206,8 +206,32 @@ namespace Structorian
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(109, 17);
-            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 17);
+            // 
+            // _saveStructsDialog
+            // 
+            this._saveStructsDialog.Filter = "Structure Definitions (*.strs)|*.strs|All files|*.*";
+            // 
+            // toolsToolStripMenuItem
+            // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miSaveAllBlobs});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.toolsToolStripMenuItem.Text = "&Tools";
+            // 
+            // miSaveAllBlobs
+            // 
+            this.miSaveAllBlobs.Name = "miSaveAllBlobs";
+            this.miSaveAllBlobs.Size = new System.Drawing.Size(163, 22);
+            this.miSaveAllBlobs.Text = "&Save All Blobs...";
+            this.miSaveAllBlobs.Click += new System.EventHandler(this.miSaveAllBlobs_Click);
+            // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.WorkerReportsProgress = true;
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
             // MainForm
             // 
@@ -216,6 +240,7 @@ namespace Structorian
             this.ClientSize = new System.Drawing.Size(438, 424);
             this.Controls.Add(this.splitContainer2);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.statusStrip1);
             this.Location = new System.Drawing.Point(30, 30);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
@@ -258,6 +283,10 @@ namespace Structorian
         private System.Windows.Forms.ToolStripMenuItem saveStructuresToolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem miSaveAllBlobs;
+        private System.Windows.Forms.FolderBrowserDialog _targetDialog;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 

@@ -6,7 +6,7 @@ namespace Structorian.Engine
 {
     public class StructCell
     {
-        private static ReadOnlyCollection<StructCell> _emptyCollection = new List<StructCell>().AsReadOnly();
+        private static readonly ReadOnlyCollection<StructCell> _emptyCollection = new List<StructCell>().AsReadOnly();
         
         private StructField _def;
         private string _tag;

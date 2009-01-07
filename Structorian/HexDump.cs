@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -209,64 +210,173 @@ namespace Structorian
 
         private void DrawHexLine(Graphics g, int top, long offset)
         {
-            StringBuilder lineCharsBuilder = new StringBuilder(10 + 16 * 4 + 2);
-            lineCharsBuilder.Append(offset.ToString("X8")).Append(": ");
-
             long bytesToEnd = _streamSize - offset;
             int bytesInLine = bytesToEnd < 16 ? (int) bytesToEnd : 16;
             _stream.Position = offset;
             byte[] bytes = new byte[bytesInLine];
             _stream.Read(bytes, 0, bytesInLine);
-            for (int i = 0; i < bytesInLine; i++)
-            {
-                string byteStr = bytes[i].ToString("X2");
-                lineCharsBuilder.Append(byteStr).Append(" ");
-            }
-            lineCharsBuilder.Append(' ', 2 + (16 - bytesInLine)*3);
-            string byteChars = Encoding.Default.GetString(bytes).Replace('\n', (char) 1).Replace('\r', (char) 1);
-            byteChars = byteChars.Replace('\0', (char) 1);
-            lineCharsBuilder.Append(byteChars);
 
-            int selectionStartInLine = (int) ((_selectionStart < offset) ? 0 : _selectionStart - offset);
-            int selectionEndInLine = (int) ((_selectionEnd >= offset + 16) ? 16 : _selectionEnd - offset);
+            List<LineSpan> spans = GetHighlightedSpans(offset, offset + 16);
+            new LineRenderer(g, Font, top, (int) offset, bytes, spans).DrawLine();
+        }
+
+        private List<LineSpan> GetHighlightedSpans(long startOffset, long endOffset)
+        {
+            int selectionStartInLine = (int)((_selectionStart < startOffset) ? 0 : _selectionStart - startOffset);
+            int lineLength = (int) (endOffset - startOffset);
+            int selectionEndInLine = (int)((_selectionEnd >= endOffset) ? lineLength : _selectionEnd - startOffset);
             if (selectionStartInLine < 16 && selectionEndInLine > 0 && selectionStartInLine != selectionEndInLine)
             {
-                Size defSize = new Size(100, 100);
-                int x = 0;
-                int bound1 = 10 + 3*selectionStartInLine;
-                int bound2 = 10 + 3*selectionEndInLine - 1;
-                int bound3 = 10 + 3*16 + 2 + selectionStartInLine;
-                int bound4 = 10 + 3*16 + 2 + selectionEndInLine;
-                string part1 = lineCharsBuilder.ToString(0, bound1);
-                string part2 = lineCharsBuilder.ToString(bound1, bound2 - bound1);
-                string part3 = lineCharsBuilder.ToString(bound2, bound3 - bound2);
-                string part4 = lineCharsBuilder.ToString(bound3, bound4 - bound3);
-                string part5 = lineCharsBuilder.ToString(bound4, lineCharsBuilder.Length - bound4);
-                TextRenderer.DrawText(g, part1, Font, new Point(0, top), SystemColors.WindowText);
-                x += TextRenderer.MeasureText(g, part1, Font, defSize, TextFormatFlags.NoPadding).Width;
-                TextRenderer.DrawText(g, part2, Font, new Point(x, top),
-                                      SystemColors.HighlightText, SystemColors.Highlight);
-                x += TextRenderer.MeasureText(g, part2, Font, defSize, TextFormatFlags.NoPadding).Width;
-                TextRenderer.DrawText(g, part3, Font, new Point(x, top), SystemColors.WindowText);
-                x += TextRenderer.MeasureText(g, part3, Font, defSize, TextFormatFlags.NoPadding).Width;
-                TextRenderer.DrawText(g, part4, Font, new Point(x, top),
-                                      SystemColors.HighlightText, SystemColors.Highlight);
-                x += TextRenderer.MeasureText(g, part4, Font, defSize, TextFormatFlags.NoPadding).Width;
-                TextRenderer.DrawText(g, part5, Font, new Point(x, top), SystemColors.WindowText);
+                var result = new List<LineSpan>();
+                if (selectionStartInLine > 0)
+                    result.Add(new LineSpan(0, selectionStartInLine, SystemColors.WindowText, SystemColors.Window));
+                result.Add(new LineSpan(selectionStartInLine, selectionEndInLine, SystemColors.HighlightText, SystemColors.Highlight));
+                if (selectionEndInLine < lineLength)
+                    result.Add(new LineSpan(selectionEndInLine, lineLength, SystemColors.WindowText, SystemColors.Window));
+                return result;
             }
-            else
-            {
-                TextRenderer.DrawText(g, lineCharsBuilder.ToString(), Font, new Point(0, top), SystemColors.WindowText);
-            }
+            return null;
         }
 
         private void UpdateStatusText()
         {
-            string text = "Selected " + (_selectionEnd - _selectionStart) + " bytes at offset " + _selectionStart;
+            long selectedBytes = _selectionEnd - _selectionStart;
+            string text = "Selected " + selectedBytes + " bytes at offset " + _selectionStart;
+            if (selectedBytes == 4)
+            {
+                long selectionValue = CollectSelectionValue();
+                text += ". DWORD value " + selectionValue;
+            }
             StatusTextChanged(this, new StatusTextEventArgs(text));
         }
 
+        private long CollectSelectionValue()
+        {
+            long result = 0;
+            _stream.Position = _selectionStart;
+            long selectedBytes = _selectionEnd-_selectionStart;
+            byte[] selection = new byte[selectedBytes];
+            _stream.Read(selection, 0, (int) selectedBytes);
+            int mask = 0;
+            for (long offset = 0; offset < selectedBytes; offset++)
+            {
+                result += selection[offset] << mask;
+                mask += 8;    
+            }
+            return result;
+        }
+
         public event StatusTextEventHandler StatusTextChanged;
+    }
+
+    class LineRenderer
+    {
+        private Graphics _graphics;
+        private Font _font;
+        private int _top;
+        private int _offset;
+        private byte[] _data;
+        private List<LineSpan> _spans;
+        private StringBuilder _lineCharsBuilder;
+        private int _lastX;
+        private int _lastIndex;
+
+        public LineRenderer(Graphics graphics, Font font, int top, int offset, byte[] data, List<LineSpan> spans)
+        {
+            _graphics = graphics;
+            _font = font;
+            _top = top;
+            _offset = offset;
+            _data = data;
+            _spans = spans;
+            _lineCharsBuilder = new StringBuilder(10 + 16 * 4 + 2);
+        }
+
+        public void DrawLine()
+        {
+            _lineCharsBuilder.Append(_offset.ToString("X8")).Append(": ");
+            int bytesInLine = _data.Length;
+            for (int i = 0; i < bytesInLine; i++)
+            {
+                string byteStr = _data[i].ToString("X2");
+                _lineCharsBuilder.Append(byteStr).Append(" ");
+            }
+            _lineCharsBuilder.Append(' ', 2 + (16 - bytesInLine) * 3);
+            string byteChars = Encoding.Default.GetString(_data).Replace('\n', (char)1).Replace('\r', (char)1);
+            byteChars = byteChars.Replace('\0', (char)1);
+            _lineCharsBuilder.Append(byteChars);
+
+            if (_spans != null)
+            {
+                DrawSpan(10, SystemColors.WindowText, SystemColors.Window);
+                int carry = 0;
+                foreach (LineSpan span in _spans)
+                {
+                    int length = 3*(span.End - span.Start) + carry;
+                    if (span.BackgroundColor != SystemColors.Window)
+                    {
+                        length--;
+                        carry = 1;
+                    }
+                    else
+                    {
+                        carry = 0;
+                    }
+                    DrawSpan(length, span.TextColor, span.BackgroundColor);
+                }
+                DrawSpan(2, SystemColors.WindowText, SystemColors.Window);
+                foreach (LineSpan span in _spans)
+                {
+                    DrawSpan(span.End - span.Start, span.TextColor, span.BackgroundColor);
+                }
+            }
+            else
+            {
+                TextRenderer.DrawText(_graphics, _lineCharsBuilder.ToString(), _font, new Point(0, _top), SystemColors.WindowText);
+            }
+        }
+
+        private void DrawSpan(int chars, Color text, Color background)
+        {
+            Size defSize = new Size(100, 100);
+            string part = _lineCharsBuilder.ToString(_lastIndex, chars);
+            _lastIndex += chars;
+            TextRenderer.DrawText(_graphics, part, _font, new Point(_lastX, _top), text, background);
+            _lastX += TextRenderer.MeasureText(_graphics, part, _font, defSize, TextFormatFlags.NoPadding).Width;
+        } 
+    }
+
+    struct LineSpan
+    {
+        private readonly Color _textColor;
+        private readonly Color _backgroundColor;
+
+        public LineSpan(int start, int end, Color textColor, Color backgroundColor) : this()
+        {
+            _textColor = textColor;
+            _backgroundColor = backgroundColor;
+            Start = start;
+            End = end;
+        }
+
+        public LineSpan(Color textColor, Color backgroundColor): this()
+        {
+            _textColor = textColor;
+            _backgroundColor = backgroundColor;
+        }
+
+        public Color TextColor
+        {
+            get { return _textColor; }
+        }
+
+        public Color BackgroundColor
+        {
+            get { return _backgroundColor; }
+        }
+
+        public int Start { get; set; }
+        public int End { get; set; }
     }
 
     class StatusTextEventArgs: EventArgs

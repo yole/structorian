@@ -176,7 +176,7 @@ namespace Structorian
             ParseStructures();
             
             if (_structFile != null)
-                _dataView.ReloadData(_structFile.Structs [0], true);
+                _dataView.ReloadData(FindMatchingStruct(_dataView.DataFileName), true);
         }
 
         private void SaveStructuresToDisk()
@@ -264,7 +264,24 @@ namespace Structorian
             }
             _structEditControl.Refresh();
         }
-        
+
+        private void miSaveAllBlobs_Click(object sender, EventArgs e)
+        {
+            if (_targetDialog.ShowDialog(this) != DialogResult.OK) return;
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            var action = new SaveAllBlobsAction(_dataView.InstanceTree, _targetDialog.SelectedPath);
+            action.Run();
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            MessageBox.Show(this, "Done saving");
+        }
+
         private class WheelMessageFilter : IMessageFilter
         {
             public bool PreFilterMessage(ref Message m)

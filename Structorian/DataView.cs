@@ -63,6 +63,16 @@ namespace Structorian
             }
         }
 
+        public InstanceTree InstanceTree
+        {
+            get { return _instanceTree; }
+        }
+
+        public string DataFileName
+        {
+            get { return _dataFileName; }
+        }
+
         public void LoadData(string fileName, StructDef def)
         {
             _dataFileName = fileName;
@@ -98,6 +108,12 @@ namespace Structorian
 
         private void HandleInstanceAdded(object sender, InstanceAddedEventArgs e)
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new InstanceAddedEventHandler(HandleInstanceAdded), sender, e);
+                return;
+            }
+            
             if (e.Parent is InstanceTree)
                 AddInstanceNode(null, e.Child);
             else
