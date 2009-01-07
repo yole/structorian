@@ -177,13 +177,12 @@ namespace Structorian.Engine
         {
             get
             {
-                if (_children != null)
+                if (_children != null && _children.Count > 0)
                 {
-                    for (int i = _children.Count - 1; i >= 0; i--)
-                    {
-                        if (_children [i].Children.Count > 0)
-                            return _children[i].LastChild;
-                    }
+                    var child = _children [_children.Count-1];
+                    if (child.Children.Count > 0)
+                        return child.LastChild;
+                    return (StructInstance) child;
                 }
                 return this;
             }

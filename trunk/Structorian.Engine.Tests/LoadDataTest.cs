@@ -990,5 +990,14 @@ namespace Structorian.Engine.Tests
             group.NeedChildren();
             Assert.AreEqual("42", group.Children[0].Cells[1].Value);
         }
+
+        [Test] public void LastChild()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct data { child C1; child C2 [followchildren]; child C3; } struct C1 { child C11; } struct C11 { u8 data; } struct C2 { u8 data; } struct C3 { u8 data; }",
+                new byte[] { 5, 17, 42});
+            Assert.AreEqual("17", instance.Children[1].Cells[0].Value);
+            Assert.AreEqual("42", instance.Children[2].Cells[0].Value);
+        }
     }
 }
