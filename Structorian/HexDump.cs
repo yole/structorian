@@ -157,6 +157,7 @@ namespace Structorian
             base.OnMouseDown(e);
             if (e.Button == MouseButtons.Left)
             {
+                Focus();
                 long clickOffset = GetOffsetAt(e.X, e.Y);
                 if (clickOffset != -1 && (clickOffset < _selectionStart || clickOffset >= _selectionEnd))
                 {
@@ -190,6 +191,12 @@ namespace Structorian
             long result = _topLine*16 + row*16 + byteCol;
             if (result >= _streamSize) return -1;
             return result;
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
         }
 
         protected override void OnPaint(PaintEventArgs e)
