@@ -159,7 +159,7 @@ namespace Structorian.Engine
             parent.NeedChildren();
             var children = parent.Children;
             if (childIndex < 0 || childIndex >= children.Count)
-                throw new Exception("Invalid child index " + childIndex + ": child count " + children.Count);
+                throw new LoadDataException("Invalid child index " + childIndex + ": child count " + children.Count);
             return (IEvaluateContext)children[childIndex];
         }
 

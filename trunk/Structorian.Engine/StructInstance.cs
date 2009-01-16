@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 
 namespace Structorian.Engine
@@ -22,7 +23,7 @@ namespace Structorian.Engine
         private Stack<long> _rewindStack;
         private string _nodeName;
         private List<StructCell> _cells = null;
-        private List<StructCell> _hiddenCells = null;
+        private List<StructCell> _allCells = null;
         private List<InstanceTreeNode> _children = null;
         private List<IChildSeed> _childSeeds = null;
         private Dictionary<StructCell, int> _cellSizes = null;
@@ -235,12 +236,19 @@ namespace Structorian.Engine
         {
             if (hidden || _hideAddedCells)
             {
-                if (_hiddenCells == null) 
-                    _hiddenCells = new List<StructCell>();
-                _hiddenCells.Add(cell);
+                if (_allCells == null)
+                {
+                    _allCells = new List<StructCell>();
+                    _allCells.AddRange(_cells);
+                }
+                _allCells.Add(cell);
             }
             else
+            {
                 _cells.Add(cell);
+                if (_allCells != null)
+                    _allCells.Add(cell);
+            }
 
             foreach(CellHandler handler in _addedCellHandlers)
             {
@@ -297,9 +305,7 @@ namespace Structorian.Engine
         {
             NeedData();
             Predicate<StructCell> predicate = aCell => aCell.GetStructDef().Id == symbol || aCell.Tag == symbol;
-            StructCell cell = _cells.FindLast(predicate);
-            if (cell == null && _hiddenCells != null)
-                cell = _hiddenCells.FindLast(predicate);
+            StructCell cell = _allCells != null ? _allCells.FindLast(predicate) : _cells.FindLast(predicate);
             if (cell != null)
                 return cell.GetValue();
 
