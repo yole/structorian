@@ -28,6 +28,7 @@ namespace Structorian.Engine
         private Dictionary<StructCell, int> _cellSizes = null;
         private bool _preloading = false;
         private Stack<CellHandler> _addedCellHandlers = new Stack<CellHandler>();
+        private bool _hideAddedCells = false;
 
         private StructInstance _followInstance = null;
         private bool _followChildren;
@@ -232,7 +233,7 @@ namespace Structorian.Engine
 
         internal void AddCell(StructCell cell, bool hidden)
         {
-            if (hidden)
+            if (hidden || _hideAddedCells)
             {
                 if (_hiddenCells == null) 
                     _hiddenCells = new List<StructCell>();
@@ -365,6 +366,13 @@ namespace Structorian.Engine
         internal void PopAddedCellHandler()
         {
             _addedCellHandlers.Pop();
+        }
+
+        internal bool HideAddedCells(bool hide)
+        {
+            bool oldValue = _hideAddedCells;
+            _hideAddedCells = hide;
+            return oldValue;
         }
     }
 }

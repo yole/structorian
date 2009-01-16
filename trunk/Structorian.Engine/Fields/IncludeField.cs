@@ -14,7 +14,8 @@ namespace Structorian.Engine.Fields
             StructDef structDef = GetIncludedStruct();
 
             if (structDef.FieldLike)
-                instance.PushAddedCellHandler(delegate(StructCell cell) { cell.Tag = Tag; });
+                instance.PushAddedCellHandler(cell => cell.Tag = Tag);
+            bool oldHidden = instance.HideAddedCells(_hidden);
             
             try
             {
@@ -24,6 +25,7 @@ namespace Structorian.Engine.Fields
             {
                 if (structDef.FieldLike)
                     instance.PopAddedCellHandler();
+                instance.HideAddedCells(oldHidden);
             }
 
             if (GetBoolAttribute("replace"))
