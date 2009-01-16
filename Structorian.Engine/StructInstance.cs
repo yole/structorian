@@ -291,7 +291,7 @@ namespace Structorian.Engine
         public IConvertible EvaluateSymbol(string symbol)
         {
             NeedData();
-            Predicate<StructCell> predicate = delegate(StructCell aCell) { return aCell.GetStructDef().Id == symbol; };
+            Predicate<StructCell> predicate = aCell => aCell.GetStructDef().Id == symbol || aCell.Tag == symbol;
             StructCell cell = _cells.FindLast(predicate);
             if (cell == null && _hiddenCells != null)
                 cell = _hiddenCells.FindLast(predicate);

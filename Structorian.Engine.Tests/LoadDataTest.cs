@@ -850,12 +850,13 @@ namespace Structorian.Engine.Tests
         [Test] public void FieldLike()
         {
             StructInstance instance = PrepareInstance(
-                "struct A { include B [tag=T]; i q [value=a]; i p [value=b]; } [fieldlike] struct B { [hidden] u8 a; u8 b; }",
+                "struct A { include B [tag=T]; i q [value=a]; i p [value=b]; i f [value=T]; } [fieldlike] struct B { [hidden] u8 a; u8 b; }",
                 new byte[] {17, 37});
             Assert.AreEqual("37", instance.Cells [0].Value);
             Assert.AreEqual("T", instance.Cells [0].Tag);
             Assert.AreEqual("17", instance.Cells [1].Value);
             Assert.AreEqual("37", instance.Cells [2].Value);
+            Assert.AreEqual("37", instance.Cells [3].Value);
         }
 
         [Test] public void DuplicateGlobal()
