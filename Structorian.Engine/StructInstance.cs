@@ -34,6 +34,7 @@ namespace Structorian.Engine
 
         public StructInstance(StructDef def, InstanceTreeNode parent, Stream stream, long offset)
         {
+            SequenceIndex = -1;
             _def = def;
             _parent = parent;
             _stream = stream;
@@ -43,6 +44,7 @@ namespace Structorian.Engine
         public StructInstance(StructDef def, InstanceTreeNode parent, Stream stream, 
             StructInstance followInstance, bool followChildren)
         {
+            SequenceIndex = -1;
             _def = def;
             _parent = parent;
             _stream = stream;
@@ -78,7 +80,9 @@ namespace Structorian.Engine
         {
             get { return _def.HasChildProvidingFields(); }
         }
-        
+
+        public int SequenceIndex { get; set; }
+
         public long Offset
         {
             get
