@@ -1,0 +1,117 @@
+struct UnrealPackage
+{
+  x32 PackageId;
+  u16 Version;
+  u16 LicenseeMode;
+  x32 Flags;
+  i32 NameTableCount;
+  x32 NameTableOffset;
+  i32 ExportTableCount;
+  x32 ExportTableOffset;
+  i32 ImportTableCount;
+  x32 ImportTableOffset;
+  child UnrealName [group=Names, offset=NameTableOffset, count=NameTableCount];
+  child UnrealExport [group=Export, offset=ExportTableOffset, count=ExportTableCount];
+  child UnrealImport [group=Import, offset=ImportTableOffset, count=ImportTableCount];
+}
+
+struct UnrealName
+{
+  [hidden] u8 length;
+  str [len=length] Name;
+  x32 Flags;
+}
+
+[fieldlike]
+struct UnrealIndex
+{
+  [hidden] u8 b0;
+  local result [value=0];
+  if ((b0 & 0x40) != 0)
+  {
+    [hidden] u8 b1;
+    if ((b1 & 0x80) != 0)
+    {
+      [hidden] u8 b2;
+      if ((b2 & 0x80) != 0)
+      {
+        
+      }
+      local result [value=(result << 7) | (b2 & 0x7f)];
+    }
+    local result [value=(result << 7) | (b1 & 0x7f)];
+  }
+  local result [value=(result << 6) | (b0 & 0x3f)];
+  if ((b0 & 0x80) != 0)
+  {
+    local result [value=-result];
+  }
+  calc x [value=result];
+}
+
+[fieldlike]
+struct UnrealNameRef
+{
+  [hidden] include UnrealIndex;
+  str Name [value=Root.Child("Names", x).Name];
+}
+
+enum ObjectFlags
+{
+  RF_Transactional,
+  RF_Unreachable,
+  RF_Public,
+  RF_TagImp,
+  RF_TagExp,
+  RF_SourceModified,
+  RF_TagGarbage,
+  RF_Private,
+  RF_Unk_00000100,
+  RF_NeedLoad,
+  RF_HighlightedName,
+  RF_InSingularFunc,
+  RF_Suppress,
+  RF_InEndState,
+  RF_Transient,
+  RF_PreLoading,
+  RF_LoadForClient,
+  RF_LoadForServer,
+  RF_LoadForEdit,
+  RF_Standalone,
+  RF_NotForClient,
+  RF_NotForServer,
+  RF_NotForEdit,
+  RF_Destroyed,
+  RF_NeedPostLoad,
+  RF_HasStack,
+  RF_Native,
+  RF_Marked,
+  RF_ErrorShutdown,
+  RF_DebugPostLoad,
+  RF_DebugSerialize,
+  RF_DebugDestroy
+}
+
+struct UnrealExport
+{
+  include UnrealIndex [tag=ClassIndex];
+  include UnrealIndex [tag=SuperIndex];
+  u32 GroupIndex;
+  include UnrealNameRef [tag=ObjectName];
+  set32 Flags [enum=ObjectFlags];
+  include UnrealIndex [tag=SerialSize];
+  if (SerialSize > 0)
+  {
+    include UnrealIndex [tag=SerialOffset];
+    seek SerialOffset;
+    blob SerialSize [tag=Serialized];
+  }
+}
+
+struct UnrealImport
+{
+  include UnrealNameRef [tag=ClassPackageName];
+  include UnrealNameRef[tag=ClassName];
+  i32 Package;
+  include UnrealNameRef [tag=ObjectName];
+}
