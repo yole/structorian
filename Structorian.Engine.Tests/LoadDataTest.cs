@@ -1000,5 +1000,14 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("17", instance.Children[1].Cells[0].Value);
             Assert.AreEqual("42", instance.Children[2].Cells[0].Value);
         }
+
+        [Test] public void HiddenInclude()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { [hidden] include B; calc q [value=i+2]; } struct B { u8 i; }",
+                new byte[] {5});
+            Assert.AreEqual(1, instance.Cells.Count);
+            Assert.AreEqual("7", instance.Cells [0].Value);
+        }
     }
 }
