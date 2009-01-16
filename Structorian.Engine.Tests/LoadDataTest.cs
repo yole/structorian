@@ -1009,5 +1009,14 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(1, instance.Cells.Count);
             Assert.AreEqual("7", instance.Cells [0].Value);
         }
+
+        [Test] public void LookupLastCell()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { calc i [value=0]; [hidden] calc i [value=1]; calc j [value=i+1]; }",
+                new byte[0]);
+            Assert.AreEqual("2", instance.Cells[1].Value);
+        }
+
     }
 }
