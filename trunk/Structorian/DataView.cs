@@ -145,9 +145,17 @@ namespace Structorian
         {
             TreeNode node;
             if (parent == null)
-                node = _structTreeView.Nodes.Add(instance.NodeName);
+                node = _structTreeView.Nodes.Add(instance.NodeName + " (" + Path.GetFileName(_dataFileName) + ")");
             else
-                node = parent.Nodes.Add(instance.NodeName);
+            {
+                var name = instance.NodeName;
+                var structInstance = instance as StructInstance;
+                if (structInstance != null && structInstance.SequenceIndex >= 0)
+                {
+                    name = structInstance.SequenceIndex + ". " + name;
+                }
+                node = parent.Nodes.Add(name);
+            }
 
             _nodeMap.Add(instance, node);
             node.Tag = instance;

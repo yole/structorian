@@ -65,11 +65,16 @@ namespace Structorian.Engine.Fields
                 childInstance = new StructInstance(childDef, parent, stream, lastChild, firstFollowChildren);
             }
             parent.AddChild(childInstance);
+            if (count > 1)
+            {
+                childInstance.SequenceIndex = 0;
+            }
 
             for (int i = 1; i < count; i++)
             {
-                StructInstance nextInstance = new StructInstance(childDef, parent, stream, childInstance, followChildren);
+                var nextInstance = new StructInstance(childDef, parent, stream, childInstance, followChildren);
                 parent.AddChild(nextInstance);
+                nextInstance.SequenceIndex = i;
                 childInstance = nextInstance;
             }
         }
@@ -95,9 +100,9 @@ namespace Structorian.Engine.Fields
         class ChildSeed : IChildSeed
         {
             private readonly ChildField _field;
-            private long? _offset;
-            private int _count;
-            private bool _isSibling;
+            private readonly long? _offset;
+            private readonly int _count;
+            private readonly bool _isSibling;
 
             public ChildSeed(ChildField field, long? offset, int count, bool isSibling)
             {
@@ -112,7 +117,6 @@ namespace Structorian.Engine.Fields
                 if (!_isSibling)
                     _field.DoLoadChildren(instance, instance, stream, _offset, _count);
             }
-
         }
     }
 }
