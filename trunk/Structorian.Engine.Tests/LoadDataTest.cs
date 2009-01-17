@@ -1018,5 +1018,22 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("2", instance.Cells[1].Value);
         }
 
+        [Test] public void CalcCellDependencies()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { [hidden] u8 i; [hidden] u8 j; [hidden] u8 k; calc v [value=i+j+k]; }",
+                new byte[] { 1, 2, 3});
+            var cell = instance.Cells[0];
+            Assert.AreEqual(0, cell.Offset);
+            Assert.AreEqual(3, cell.GetStructDef().GetInstanceDataSize(cell, instance));
+        }
+
+        [Test] public void EvalEnumSymbol()
+        {
+            StructInstance instance = PrepareInstance(
+                "enum e { a } struct A { enum8 q [enum=e]; if (q == a) { calc n [value=42]; } } ",
+                new byte[] { 0 });
+            Assert.AreEqual("42", instance.Cells[1].Value);
+        }
     }
 }
