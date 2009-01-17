@@ -303,9 +303,7 @@ namespace Structorian.Engine
 
         public IConvertible EvaluateSymbol(string symbol)
         {
-            NeedData();
-            Predicate<StructCell> predicate = aCell => aCell.GetStructDef().Id == symbol || aCell.Tag == symbol;
-            StructCell cell = _allCells != null ? _allCells.FindLast(predicate) : _cells.FindLast(predicate);
+            StructCell cell = FindSymbolCell(symbol);
             if (cell != null)
                 return cell.GetValue();
 
@@ -322,6 +320,13 @@ namespace Structorian.Engine
                 return funcValue;
             
             throw new LoadDataException("Unknown symbol " + symbol);
+        }
+
+        public StructCell FindSymbolCell(string symbol)
+        {
+            NeedData();
+            Predicate<StructCell> predicate = aCell => aCell.GetStructDef().Id == symbol || aCell.Tag == symbol;
+            return _allCells != null ? _allCells.FindLast(predicate) : _cells.FindLast(predicate);
         }
 
         public IConvertible EvaluateFunction(string symbol, Expression[] parameters)

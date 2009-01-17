@@ -17,18 +17,32 @@ namespace Structorian.Engine.Fields
             IConvertible iValue = ReadIntValue(reader, instance);
             ulong value = iValue.ToUInt64(CultureInfo.CurrentCulture);
             EnumDef enumDef = GetEnumAttribute("enum");
+            AddCell(instance, new SetValue((uint) value, enumDef, _size), offset);
+        }
+    }
 
-            StringBuilder result = new StringBuilder();
-            for(int i=0; i<_size*8; i++)
+    internal class SetValue: EnumValue
+    {
+        private readonly int _size;
+
+        public SetValue(uint intValue, EnumDef enumDef, int size) : base(intValue, enumDef)
+        {
+            _size = size;
+        }
+
+        public override string ToString()
+        {
+            var result = new StringBuilder();
+            for (int i = 0; i < _size * 8; i++)
             {
-                if ((value & (1ul << i)) != 0)
+                if ((_intValue & (1ul << i)) != 0)
                 {
                     if (result.Length > 0)
                         result.Append(", ");
-                    result.Append(enumDef.ValueToString((uint) i));
+                    result.Append(EnumDef.ValueToString((uint)i));
                 }
             }
-            AddCell(instance, new EnumValue((uint) value, result.ToString()), offset);
+            return result.ToString();
         }
     }
 }

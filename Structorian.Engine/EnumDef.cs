@@ -24,6 +24,11 @@ namespace Structorian.Engine
             get { return _name; }
         }
 
+        public bool GlobalMask
+        {
+            get { return _globalMask; }
+        }
+
         public void AddValue(string name, uint value)
         {
             _values.Add(value, name);
@@ -40,15 +45,35 @@ namespace Structorian.Engine
             
             if (_inherit != null)
             {
-                if (_baseEnum == null)
-                {
-                    _baseEnum = _structFile.GetEnumByName(_inherit);
-                    if (_baseEnum == null)
-                        throw new LoadDataException("Base enum " + _inherit + " not found");
-                }
+                InitBaseEnum();
                 return _baseEnum.ValueToString(value);
             }
             return "";
+        }
+
+        private void InitBaseEnum()
+        {
+            if (_baseEnum == null)
+            {
+                _baseEnum = _structFile.GetEnumByName(_inherit);
+                if (_baseEnum == null)
+                    throw new LoadDataException("Base enum " + _inherit + " not found");
+            }
+        }
+
+        public uint? StringToValue(string s)
+        {
+            foreach(uint k in _values.Keys)
+            {
+                if (_values[k] == s)
+                    return k;
+            }
+            if (_inherit != null)
+            {
+                InitBaseEnum();
+                return _baseEnum.StringToValue(s);
+            }
+            return null;
         }
 
         public void SetAttribute(string key, string value)

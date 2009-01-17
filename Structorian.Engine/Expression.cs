@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Structorian.Engine.Fields;
 
 namespace Structorian.Engine
 {
@@ -11,6 +12,31 @@ namespace Structorian.Engine
     }
     
     public delegate IConvertible EvaluateDelegate(IEvaluateContext context, Expression[] parameters);
+
+    public abstract class DelegatingEvaluateContext: IEvaluateContext
+    {
+        private readonly IEvaluateContext _delegate;
+
+        protected DelegatingEvaluateContext(IEvaluateContext delegateContext)
+        {
+            _delegate = delegateContext;
+        }
+
+        public virtual IConvertible EvaluateSymbol(string symbol)
+        {
+            return _delegate.EvaluateSymbol(symbol);
+        }
+
+        public virtual IConvertible EvaluateFunction(string symbol, Expression[] parameters)
+        {
+            return _delegate.EvaluateFunction(symbol, parameters);
+        }
+
+        public virtual IEvaluateContext EvaluateContext(string symbol, IConvertible[] parameters)
+        {
+            return _delegate.EvaluateContext(symbol, parameters);
+        }
+    }
     
     public abstract class Expression
     {
@@ -40,6 +66,10 @@ namespace Structorian.Engine
         public IComparable EvaluateComparable(IEvaluateContext context)
         {
             IConvertible result = Evaluate(context);
+            if (result == null)
+                throw new LoadDataException("Could not evaluate " + _source);
+            if (result is EnumValue)
+                return (EnumValue) result;
             if (result.GetTypeCode() == TypeCode.String)
                 return result.ToString(CultureInfo.CurrentCulture);
             else if (result.GetTypeCode() == TypeCode.UInt32)
@@ -125,7 +155,7 @@ namespace Structorian.Engine
         public override IConvertible Evaluate(IEvaluateContext context)
         {
             IConvertible lhsValue = _lhs.Evaluate(context);
-            IConvertible rhsValue = _rhs.Evaluate(context);
+            IConvertible rhsValue = _rhs.Evaluate(GetRHSContext(context, lhsValue));
             CultureInfo culture = CultureInfo.CurrentCulture;
             if (_operation == ExprTokenType.Plus)
             {
@@ -149,8 +179,36 @@ namespace Structorian.Engine
             }
             throw new Exception("Unknown binary operation");
         }
+
+        protected static IEvaluateContext GetRHSContext(IEvaluateContext context, object lhsValue)
+        {
+            if (lhsValue is EnumValue)
+                return new EnumEvaluateContext(context, ((EnumValue) lhsValue).EnumDef);
+            return context;
+        }
     }
-    
+
+    internal class EnumEvaluateContext : DelegatingEvaluateContext
+    {
+        private readonly EnumDef _def;
+
+        public EnumEvaluateContext(IEvaluateContext context, EnumDef def) : base(context)
+        {
+            _def = def;
+        }
+
+        public override IConvertible EvaluateSymbol(string symbol)
+        {
+            if (!_def.GlobalMask)
+            {
+                uint? value = _def.StringToValue(symbol);
+                if (value.HasValue)
+                    return value.Value;
+            }
+            return base.EvaluateSymbol(symbol);
+        }
+    }
+
     class CompareExpression: BinaryExpression
     {
         public CompareExpression(ExprTokenType operation, Expression lhs, Expression rhs)
@@ -161,7 +219,7 @@ namespace Structorian.Engine
         public override IConvertible Evaluate(IEvaluateContext context)
         {
             IComparable lhs = _lhs.EvaluateComparable(context);
-            IComparable rhs = _rhs.EvaluateComparable(context);
+            IComparable rhs = _rhs.EvaluateComparable(GetRHSContext(context, lhs));
             int result = lhs.CompareTo(rhs);
             switch(_operation)
             {

@@ -15,20 +15,19 @@ namespace Structorian.Engine.Fields
             int offset = (int)reader.BaseStream.Position;
             uint value = ReadIntValue(reader, instance).ToUInt32(CultureInfo.CurrentCulture);
             EnumDef enumDef = GetEnumAttribute("enum");
-            string displayValue = enumDef.ValueToString(value);
-            AddCell(instance, new EnumValue(value, displayValue), displayValue, offset);
+            AddCell(instance, new EnumValue(value, enumDef), enumDef.ValueToString(value), offset);
         }
     }
 
-    internal class EnumValue: IConvertible
+    internal class EnumValue: IConvertible, IComparable
     {
-        private IConvertible _intValue;
-        private string _strValue;
+        protected readonly uint _intValue;
+        private readonly EnumDef _enumDef;
 
-        public EnumValue(uint intValue, string strValue)
+        public EnumValue(uint intValue, EnumDef enumDef)
         {
             _intValue = intValue;
-            _strValue = strValue;
+            _enumDef = enumDef;
         }
 
         public TypeCode GetTypeCode()
@@ -38,87 +37,101 @@ namespace Structorian.Engine.Fields
 
         public bool ToBoolean(IFormatProvider provider)
         {
-            return _intValue.ToBoolean(provider);
+            return ((IConvertible) _intValue).ToBoolean(provider);
         }
 
         public char ToChar(IFormatProvider provider)
         {
-            return _intValue.ToChar(provider);
+            return ((IConvertible)_intValue).ToChar(provider);
         }
 
         public sbyte ToSByte(IFormatProvider provider)
         {
-            return _intValue.ToSByte(provider);
+            return ((IConvertible)_intValue).ToSByte(provider);
         }
 
         public byte ToByte(IFormatProvider provider)
         {
-            return _intValue.ToByte(provider);
+            return ((IConvertible)_intValue).ToByte(provider);
         }
 
         public short ToInt16(IFormatProvider provider)
         {
-            return _intValue.ToInt16(provider);
+            return ((IConvertible)_intValue).ToInt16(provider);
         }
 
         public ushort ToUInt16(IFormatProvider provider)
         {
-            return _intValue.ToUInt16(provider);
+            return ((IConvertible)_intValue).ToUInt16(provider);
         }
 
         public int ToInt32(IFormatProvider provider)
         {
-            return _intValue.ToInt32(provider);
+            return ((IConvertible)_intValue).ToInt32(provider);
         }
 
         public uint ToUInt32(IFormatProvider provider)
         {
-            return _intValue.ToUInt32(provider);
+            return ((IConvertible)_intValue).ToUInt32(provider);
         }
 
         public long ToInt64(IFormatProvider provider)
         {
-            return _intValue.ToInt64(provider);
+            return ((IConvertible)_intValue).ToInt64(provider);
         }
 
         public ulong ToUInt64(IFormatProvider provider)
         {
-            return _intValue.ToUInt64(provider);
+            return ((IConvertible)_intValue).ToUInt64(provider);
         }
 
         public float ToSingle(IFormatProvider provider)
         {
-            return _intValue.ToSingle(provider);
+            return ((IConvertible)_intValue).ToSingle(provider);
         }
 
         public double ToDouble(IFormatProvider provider)
         {
-            return _intValue.ToDouble(provider);
+            return ((IConvertible)_intValue).ToDouble(provider);
         }
 
         public decimal ToDecimal(IFormatProvider provider)
         {
-            return _intValue.ToDecimal(provider);
+            return ((IConvertible)_intValue).ToDecimal(provider);
         }
 
         public DateTime ToDateTime(IFormatProvider provider)
         {
-            return _intValue.ToDateTime(provider);
+            return ((IConvertible)_intValue).ToDateTime(provider);
         }
 
         public override string ToString()
         {
-            return _strValue;
+            return _enumDef.ValueToString(_intValue);
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (obj is IConvertible)
+            {
+                return ToInt32(CultureInfo.CurrentCulture).CompareTo(((IConvertible)obj).ToInt32(CultureInfo.CurrentCulture));
+            }
+            return 0;
         }
 
         public string ToString(IFormatProvider provider)
         {
-            return _strValue;
+            return ToString();
         }
 
         public object ToType(Type conversionType, IFormatProvider provider)
         {
-            return _intValue.ToType(conversionType, provider);
+            return ((IConvertible)_intValue).ToType(conversionType, provider);
+        }
+
+        public EnumDef EnumDef
+        {
+            get { return _enumDef; }
         }
     }
 }
