@@ -8,7 +8,7 @@ namespace Structorian.Engine
 
     class AttributeRegistry
     {
-        private Dictionary<Type, Dictionary<string, AttributeType>> _registry = new Dictionary<Type, Dictionary<string, AttributeType>>();
+        private readonly Dictionary<Type, Dictionary<string, AttributeType>> _registry = new Dictionary<Type, Dictionary<string, AttributeType>>();
 
         internal AttributeRegistry()
         {
@@ -18,6 +18,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(BlobField), "len", AttributeType.Expression);
             RegisterAttribute(typeof(BlobField), "encoding", AttributeType.String);
             RegisterAttribute(typeof(BlobField), "struct", AttributeType.StructRef);
+            RegisterAttribute(typeof(BlobField), "decodedsize", AttributeType.Expression);
             RegisterAttribute(typeof(CalcField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(CaseField), "expr", AttributeType.Expression);
             RegisterAttribute(typeof(CaseField), "default", AttributeType.Bool);
@@ -92,7 +93,7 @@ namespace Structorian.Engine
             }
         }
 
-        private void SetFieldAttributeValue(StructField field, string key, AttributeType type, string value,
+        private static void SetFieldAttributeValue(StructField field, string key, AttributeType type, string value,
             TextPosition pos)
         {
             switch(type)

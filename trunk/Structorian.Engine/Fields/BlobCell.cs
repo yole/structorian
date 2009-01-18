@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -10,13 +9,15 @@ namespace Structorian.Engine.Fields
         private readonly Stream _baseStream;
         private readonly int _baseSize;
         private readonly BlobDecoder _decoder;
+        private readonly int _decodedSize;
 
-        public BlobCell(StructField def, Stream baseStream, int offset, int baseSize, BlobDecoder decoder) 
+        public BlobCell(StructField def, Stream baseStream, int offset, int baseSize, BlobDecoder decoder, int decodedSize) 
             : base(def, null, offset)
         {
             _baseStream = baseStream;
             _baseSize = baseSize;
             _decoder = decoder;
+            _decodedSize = decodedSize;
         }
 
         private void BuildDisplayValue()
@@ -56,7 +57,7 @@ namespace Structorian.Engine.Fields
                 _baseStream.Read(data, 0, _baseSize);
                 if (_decoder != null)
                 {
-                    data = _decoder.Decode(data);
+                    data = _decoder.Decode(data, _decodedSize);
                 }
                 return new MemoryStream(data);
             }

@@ -8,6 +8,6 @@ namespace Structorian.Engine.Fields
     public interface BlobDecoder
     {
         string Name { get; }
-        byte[] Decode(byte[] input);
+        byte[] Decode(byte[] input, int decompressedSize);
     }
 }
