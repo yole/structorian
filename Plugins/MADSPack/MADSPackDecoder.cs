@@ -12,7 +12,7 @@ namespace MADSPack
             get { return "madspack"; }
         }
 
-        public byte[] Decode(byte[] input)
+        public byte[] Decode(byte[] input, int decodedSize)
         {
             return new FABDecompressor(input).Result;
         }

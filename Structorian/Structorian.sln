@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Structorian.Engine.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MADSPack", "..\Plugins\MADSPack\MADSPack.csproj", "{157D7FB5-938D-4D21-BE12-D8A52FC2F78C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniLZO", "..\MiniLZO\MiniLZO.csproj", "{68AF930D-1172-4D5F-9722-99CB13C206D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{157D7FB5-938D-4D21-BE12-D8A52FC2F78C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{157D7FB5-938D-4D21-BE12-D8A52FC2F78C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{157D7FB5-938D-4D21-BE12-D8A52FC2F78C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68AF930D-1172-4D5F-9722-99CB13C206D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68AF930D-1172-4D5F-9722-99CB13C206D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68AF930D-1172-4D5F-9722-99CB13C206D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68AF930D-1172-4D5F-9722-99CB13C206D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

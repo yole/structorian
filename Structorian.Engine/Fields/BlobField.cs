@@ -17,9 +17,11 @@ namespace Structorian.Engine.Fields
                 throw new LoadDataException("Blob size " + len + " exceeds stream length");
             if (len < 0)
                 throw new LoadDataException("Blob size " + len + " is negative");
+            var decodedSizeExpr = GetExpressionAttribute("decodedsize");
+            int decodedSize = decodedSizeExpr != null ? decodedSizeExpr.EvaluateInt(instance) : -1;
             string encoding = GetStringAttribute("encoding");
             BlobDecoder blobDecoder = FindBlobEncoding(instance, encoding);
-            BlobCell cell = new BlobCell(this, reader.BaseStream, offset, len, blobDecoder);
+            BlobCell cell = new BlobCell(this, reader.BaseStream, offset, len, blobDecoder, decodedSize);
             instance.AddCell(cell, _hidden);
             instance.RegisterCellSize(cell, len);
             reader.BaseStream.Position += len;
@@ -32,9 +34,13 @@ namespace Structorian.Engine.Fields
         private static BlobDecoder FindBlobEncoding(StructInstance instance, string encoding)
         {
             if (encoding == null) return null;
-            if (encoding == "zlib")
+            if (encoding.ToLowerInvariant() == "zlib")
             {
                 return new ZLibDecoder();
+            }
+            if (encoding.ToLowerInvariant() == "minilzo")
+            {
+                return new MiniLZODecoder();
             }
             var decoders = instance.Def.StructFile.GetPluginExtensions<BlobDecoder>();
             var result = decoders.Find(d => d.Name == encoding);

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7275C649-8EDB-4BD2-AC99-9E0D2B610DE0}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -80,6 +80,7 @@
     <Compile Include="Fields\IncludeField.cs" />
     <Compile Include="Fields\IntBasedField.cs" />
     <Compile Include="Fields\MessageField.cs" />
+    <Compile Include="Fields\MiniLZODecoder.cs" />
     <Compile Include="Fields\NodenameField.cs" />
     <Compile Include="Fields\RepeatField.cs" />
     <Compile Include="Fields\RewindField.cs" />
@@ -109,6 +110,12 @@
     <Compile Include="StructReference.cs" />
     <Compile Include="StructSourceContext.cs" />
     <Compile Include="TextPosition.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MiniLZO\MiniLZO.csproj">
+      <Project>{68AF930D-1172-4D5F-9722-99CB13C206D6}</Project>
+      <Name>MiniLZO</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -10,7 +10,7 @@ namespace Structorian.Engine.Fields
             get { return "zlib";  }
         }
 
-        public byte[] Decode(byte[] input)
+        public byte[] Decode(byte[] input, int decompressedSize)
         {
             InflaterInputStream stream = new InflaterInputStream(new MemoryStream(input));
             byte[] data = new byte[4096];
