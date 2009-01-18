@@ -338,4 +338,23 @@ namespace Structorian.Engine
             throw new Exception("Function '" + _function + "' not found in current context");
         }
     }
+
+    class TernaryExpression: Expression
+    {
+        private readonly Expression _condition;
+        private readonly Expression _trueValue;
+        private readonly Expression _falseValue;
+
+        public TernaryExpression(Expression condition, Expression trueValue, Expression falseValue)
+        {
+            _condition = condition;
+            _trueValue = trueValue;
+            _falseValue = falseValue;
+        }
+
+        public override IConvertible Evaluate(IEvaluateContext context)
+        {
+            return _condition.EvaluateBool(context) ? _trueValue.Evaluate(context) : _falseValue.Evaluate(context);
+        }
+    }
 }

@@ -1043,5 +1043,14 @@ namespace Structorian.Engine.Tests
                 new byte[] {2, 2, 2, 2});
             Assert.AreEqual(3, instance.Cells.Count);
         }
+
+        [Test] public void TernaryOperator()
+        {
+            var instance = PrepareInstance(
+                "struct A { u8 x; calc y [value=x == 1 ? 2 : 3]; calc z [value=x == 2 ? 5 : 6]; }",
+                new byte[] {1});
+            Assert.AreEqual("2", instance.Cells[1].Value);
+            Assert.AreEqual("6", instance.Cells[2].Value);
+        }
     }
 }
