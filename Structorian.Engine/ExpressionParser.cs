@@ -29,9 +29,9 @@ namespace Structorian.Engine
         
         public static Expression Parse(string source)
         {
-            ExpressionLexer lexer = new ExpressionLexer(source);
+            var lexer = new ExpressionLexer(source);
 
-            Expression result = ParseCondCombo(lexer);
+            Expression result = ParseTernary(lexer);
             lexer.GetNextToken(ExprTokenType.EOF);
             result.Source = source;
             return result;
@@ -51,6 +51,21 @@ namespace Structorian.Engine
             }
             return expr;
         }
+
+        private static Expression ParseTernary(ExpressionLexer lexer)
+        {
+            var expr = ParseCondCombo(lexer);
+            if (lexer.PeekNextToken() == ExprTokenType.QuestionMark)
+            {
+                lexer.GetNextToken(ExprTokenType.QuestionMark);
+                var trueValue = ParseTernary(lexer);
+                lexer.GetNextToken(ExprTokenType.Colon);
+                var falseValue = ParseTernary(lexer);
+                return new TernaryExpression(expr, trueValue, falseValue);
+            }
+            return expr;
+        }
+
 
         private static Expression ParseCondCombo(ExpressionLexer lexer)
         {
