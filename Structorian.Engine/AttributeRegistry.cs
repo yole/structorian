@@ -32,6 +32,7 @@ namespace Structorian.Engine
             RegisterAttribute(typeof(EnumField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(GlobalField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(IfField), "expr", AttributeType.Expression);
+            RegisterAttribute(typeof(WhileField), "expr", AttributeType.Expression);
             RegisterAttribute(typeof (ImageField), "format", AttributeType.String);
             RegisterAttribute(typeof(IntField), "value", AttributeType.Expression);
             RegisterAttribute(typeof(ElseIfField), "expr", AttributeType.Expression);

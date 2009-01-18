@@ -1035,5 +1035,13 @@ namespace Structorian.Engine.Tests
                 new byte[] { 0 });
             Assert.AreEqual("42", instance.Cells[1].Value);
         }
+
+        [Test] public void While()
+        {
+            StructInstance instance = PrepareInstance(
+                "struct A { local x [value=0]; while(x<5) { u8 v; local x [value=x+v]; } }",
+                new byte[] {2, 2, 2, 2});
+            Assert.AreEqual(3, instance.Cells.Count);
+        }
     }
 }

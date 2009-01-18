@@ -90,6 +90,7 @@
     <Compile Include="Fields\StrField.cs" />
     <Compile Include="Fields\SwitchField.cs" />
     <Compile Include="Fields\UnixTimeField.cs" />
+    <Compile Include="Fields\WhileField.cs" />
     <Compile Include="Fields\ZLibDecoder.cs" />
     <Compile Include="FunctionRegistry.cs" />
     <Compile Include="GroupContainer.cs" />

@@ -54,6 +54,7 @@ namespace Structorian.Engine.Fields
                 case "if": return new IfField(structDef);
                 case "elif": return new ElseIfField(structDef);
                 case "else": return new ElseField(structDef);
+                case "while": return new WhileField(structDef);
                 case "include": return new IncludeField(structDef);
                 case "assert": return new AssertField(structDef);
                 case "bitfield": return new BitfieldField(structDef);
