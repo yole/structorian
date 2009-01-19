@@ -19,65 +19,63 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
+            Expression valueExpr = GetExpressionAttribute("value");
+            if (valueExpr != null)
+            {
+                AddCell(instance, valueExpr);
+                return;
+            }
+
             int offset = (int)reader.BaseStream.Position;
             string value;
             int cellSize;
 
-            Expression valueExpr = GetExpressionAttribute("value");
-            if (valueExpr != null)
+            int charSize = 1;
+            if (_wide)
+                charSize = 2;
+
+            Expression lengthExpr = GetExpressionAttribute("len");
+            if (lengthExpr != null)
             {
-                value = valueExpr.EvaluateString(instance);
-                cellSize = 0;
+                int length = lengthExpr.EvaluateInt(instance);
+                if (length < 0)
+                {
+                    throw new LoadDataException("Length expression " + lengthExpr +
+                                                " has the result of " + length + " which is negative");
+                }
+
+                cellSize = length * charSize;
+                if (reader.BaseStream.Length - reader.BaseStream.Position < cellSize)
+                {
+                    throw new LoadDataException("Length expression " + lengthExpr +
+                                                " has the result of " + length + " and points outside the file");
+                }
+                byte[] bytes = reader.ReadBytes(length * charSize);
+                char[] chars = _wide ? Encoding.Unicode.GetChars(bytes) : Encoding.Default.GetChars(bytes);
+                for (int i = 0; i < length; i++)
+                {
+                    if (chars[i] == '\0')
+                    {
+                        length = i;
+                        break;
+                    }
+                }
+                value = new string(chars, 0, length);
             }
             else
             {
-                int charSize = 1;
-                if (_wide)
-                    charSize = 2;
-
-                Expression lengthExpr = GetExpressionAttribute("len");
-                if (lengthExpr != null)
+                StringBuilder valueBuilder = new StringBuilder();
+                BinaryReader charReader = 
+                    _wide ? new BinaryReader(reader.BaseStream, Encoding.Unicode)
+                          : reader;
+                while (true)
                 {
-                    int length = lengthExpr.EvaluateInt(instance);
-                    if (length < 0)
-                    {
-                        throw new LoadDataException("Length expression " + lengthExpr +
-                                                    " has the result of " + length + " which is negative");
-                    }
-
-                    cellSize = length * charSize;
-                    if (reader.BaseStream.Length - reader.BaseStream.Position < cellSize)
-                    {
-                        throw new LoadDataException("Length expression " + lengthExpr +
-                                                    " has the result of " + length + " and points outside the file");
-                    }
-                    byte[] bytes = reader.ReadBytes(length * charSize);
-                    char[] chars = _wide ? Encoding.Unicode.GetChars(bytes) : Encoding.Default.GetChars(bytes);
-                    for (int i = 0; i < length; i++)
-                    {
-                        if (chars[i] == '\0')
-                        {
-                            length = i;
-                            break;
-                        }
-                    }
-                    value = new string(chars, 0, length);
+                    char c = charReader.ReadChar();
+                    if (c == '\0') break;
+                    valueBuilder.Append(c);
                 }
-                else
-                {
-                    StringBuilder valueBuilder = new StringBuilder();
-                    BinaryReader charReader = 
-                        _wide ? new BinaryReader(reader.BaseStream, Encoding.Unicode)
-                              : reader;
-                    while (true)
-                    {
-                        char c = charReader.ReadChar();
-                        if (c == '\0') break;
-                        valueBuilder.Append(c);
-                    }
-                    value = valueBuilder.ToString();
-                    cellSize = value.Length * charSize;
-                }
+                value = valueBuilder.ToString();
+                cellSize = value.Length * charSize;
             }
 
             StructCell cell = AddCell(instance, value, offset);

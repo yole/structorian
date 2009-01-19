@@ -151,7 +151,7 @@ namespace Structorian.Engine
                         groupFound = true;
                     }
                 }
-                if (!groupFound) throw new Exception("Could not find child group " + groupName);
+                if (!groupFound) throw new LoadDataException("Could not find child group " + groupName);
                 childIndex = parameters[1].ToInt32(null);
             }
             else

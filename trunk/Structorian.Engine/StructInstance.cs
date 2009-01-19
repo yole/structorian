@@ -307,6 +307,11 @@ namespace Structorian.Engine
             if (cell != null)
                 return cell.GetValue();
 
+            return EvaluateGlobalOrFunction(symbol);
+        }
+
+        internal IConvertible EvaluateGlobalOrFunction(string symbol)
+        {
             int? global = GetInstanceTree().GetGlobal(symbol);
             if (global.HasValue)
                 return global.Value;
@@ -322,11 +327,20 @@ namespace Structorian.Engine
             throw new LoadDataException("Unknown symbol " + symbol);
         }
 
-        public StructCell FindSymbolCell(string symbol)
+        internal StructCell FindSymbolCell(string symbol)
         {
             NeedData();
             Predicate<StructCell> predicate = aCell => aCell.GetStructDef().Id == symbol || aCell.Tag == symbol;
             return _allCells != null ? _allCells.FindLast(predicate) : _cells.FindLast(predicate);
+        }
+
+        internal StructCell FindSymbolCellBefore(string symbol, StructCell anchor)
+        {
+            var cellList = _allCells ?? _cells;
+            int index = cellList.IndexOf(anchor);
+            if (index == 0) return null;
+            index = cellList.FindLastIndex(index - 1, aCell => aCell.GetStructDef().Id == symbol || aCell.Tag == symbol);
+            return index >= 0 ? cellList[index] : null;
         }
 
         public IConvertible EvaluateFunction(string symbol, Expression[] parameters)

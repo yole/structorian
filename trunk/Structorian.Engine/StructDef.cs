@@ -81,12 +81,12 @@ namespace Structorian.Engine
                 }
                 catch(LoadDataException ex)
                 {
-                    instance.AddCell(StructCell.CreateErrorCell(field, ex.Message), false);
+                    instance.AddCell(ValueCell.CreateErrorCell(field, ex.Message), false);
                     break;
                 }
                 catch(IOException ex)
                 {
-                    instance.AddCell(StructCell.CreateErrorCell(field, ex.Message), false);
+                    instance.AddCell(ValueCell.CreateErrorCell(field, ex.Message), false);
                     break;
                 }
             }

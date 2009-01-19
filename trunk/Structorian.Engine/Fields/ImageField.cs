@@ -34,7 +34,7 @@ namespace Structorian.Engine.Fields
         }
     }
 
-    public class ImageCell : StructCell
+    public class ImageCell : ValueCell
     {
         private readonly Image _image;
 
