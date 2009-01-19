@@ -12,66 +12,21 @@ namespace Structorian.Engine.Fields
 
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
-            var context = new DependencyTrackingContext(instance);
-            var value = GetExpressionAttribute("value").Evaluate(context);
-            var cell = AddCell(instance, value, context.DependencyStartOffset);
-            if (context.DependencyStartOffset >= 0)
+            var expression = GetExpressionAttribute("value");
+            if (IsEagerEval(expression))
             {
-                instance.RegisterCellSize(cell, context.DependencySize);
+                var value = expression.Evaluate(instance);
+                AddCell(instance, value, -1);
             }
-        }
-    }
-
-    class DependencyTrackingContext: DelegatingEvaluateContext
-    {
-        private readonly StructInstance _instance;
-        private int _dependencyStartOffset = -1;
-        private int _dependencySize = 0;
-
-        public DependencyTrackingContext(StructInstance instance) : base(instance)
-        {
-            _instance = instance;
-        }
-
-        public override IConvertible EvaluateSymbol(string symbol)
-        {
-            var cell = _instance.FindSymbolCell(symbol);
-            if (cell != null)
+            else
             {
-                UpdateDependency(cell);
-                return cell.GetValue();
-            }
-            return _instance.EvaluateSymbol(symbol);
-        }
-
-        private void UpdateDependency(StructCell cell)
-        {
-            var dataSize = cell.GetStructDef().GetInstanceDataSize(cell, _instance);
-            if (_dependencyStartOffset < 0)
-            {
-                _dependencyStartOffset = cell.Offset;
-                _dependencySize = dataSize;
-            }
-            // include only adjacent cells in dependency range calculation    
-            else if (cell.Offset + dataSize == _dependencyStartOffset)
-            {
-                _dependencyStartOffset = cell.Offset;
-                _dependencySize += dataSize;
-            }
-            else if (cell.Offset == _dependencyStartOffset + _dependencySize)
-            {
-                _dependencySize += dataSize;
+                AddCell(instance, expression);
             }
         }
 
-        public int DependencyStartOffset
+        private static bool IsEagerEval(Expression expression)
         {
-            get { return _dependencyStartOffset; }
-        }
-
-        public int DependencySize
-        {
-            get { return _dependencySize; }
+            return expression.Source.ToLower().Contains("curoffset");
         }
     }
 }

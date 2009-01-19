@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Structorian.Engine.Fields
 {
-    public class BlobCell: StructCell
+    public class BlobCell: ValueCell
     {
         private readonly Stream _baseStream;
         private readonly int _baseSize;

@@ -1052,5 +1052,14 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("2", instance.Cells[1].Value);
             Assert.AreEqual("6", instance.Cells[2].Value);
         }
+
+        [Test] public void CircularRef()
+        {
+            var instance = PrepareInstance(
+                "struct A { child B; child C; } struct B { u8 b1; calc b2 [value=Root.Child(1).c1]; } struct C { u8 c1; calc c2 [value=Root.Child(0).b1]; }",
+                new byte[] {1, 2});
+            Assert.AreEqual("2", instance.Children [0].Cells [1].Value);
+            Assert.AreEqual("1", instance.Children [1].Cells [1].Value);
+        }
     }
 }

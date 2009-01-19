@@ -50,6 +50,7 @@
     <Compile Include="BaseLexer.cs" />
     <Compile Include="EnumDef.cs" />
     <Compile Include="EnumReference.cs" />
+    <Compile Include="ExprCell.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="ExpressionFunctions.cs" />
     <Compile Include="ExpressionLexer.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Fields\StrField.cs" />
     <Compile Include="Fields\SwitchField.cs" />
     <Compile Include="Fields\UnixTimeField.cs" />
+    <Compile Include="ValueCell.cs" />
     <Compile Include="Fields\WhileField.cs" />
     <Compile Include="Fields\ZLibDecoder.cs" />
     <Compile Include="FunctionRegistry.cs" />

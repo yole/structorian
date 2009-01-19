@@ -170,14 +170,19 @@ namespace Structorian.Engine
 
         protected StructCell AddCell(StructInstance instance, IConvertible value, int offset)
         {
-            StructCell cell = new StructCell(this, value, offset);
+            StructCell cell = new ValueCell(this, value, offset);
             instance.AddCell(cell, _hidden);
             return cell;
         }
 
         protected void AddCell(StructInstance instance, IConvertible value, string displayValue, int offset)
         {
-            instance.AddCell(new StructCell(this, value, displayValue, offset), _hidden);
+            instance.AddCell(new ValueCell(this, value, displayValue, offset), _hidden);
+        }
+
+        protected void AddCell(StructInstance instance, Expression expr)
+        {
+            instance.AddCell(new ExprCell(this, instance, expr), _hidden);
         }
         
         protected internal virtual bool CanLinkField(StructField nextField)
