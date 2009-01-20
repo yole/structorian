@@ -85,13 +85,41 @@ namespace Structorian.Engine
 
         public int SequenceIndex { get; set; }
 
+        internal bool DataLoaded
+        {
+            get { return _cells != null;  }
+        }
+
+        internal StructInstance FollowInstance
+        {
+            get { return _followInstance;  }
+        }
+
         public long Offset
         {
             get
             {
                 if (_followInstance != null)
+                {
+                    PreloadPreviousInstances();
                     return _followChildren ? _followInstance.EndChildrenOffset : _followInstance.EndOffset;
+                }
                 return _offset;
+            }
+        }
+
+        private void PreloadPreviousInstances()
+        {
+            var instancesToLoad = new List<StructInstance>();
+            var instance = _followInstance;
+            while(instance != null && !instance.DataLoaded)
+            {
+                instancesToLoad.Add(instance);
+                instance = instance.FollowInstance;
+            }
+            for (int i = instancesToLoad.Count - 1; i >= 0; i-- )
+            {
+                instancesToLoad [i].NeedData();
             }
         }
 
