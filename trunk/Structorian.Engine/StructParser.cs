@@ -167,6 +167,7 @@ namespace Structorian.Engine
             try
             {
                 field = _fieldFactory.CreateField(structDef, fieldType, _attributeRegistry);
+                field.Name = fieldType;
                 field.Position = fieldPosition;
             }
             catch(Exception ex)

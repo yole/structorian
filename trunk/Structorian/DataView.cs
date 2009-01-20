@@ -246,6 +246,16 @@ namespace Structorian
                 e.Value = ((int) e.Value - instance.Offset).ToString();
                 e.FormattingApplied = true;
             }
+            else if (e.ColumnIndex == 1)
+            {
+                var cell = (StructCell)_structGridView.Rows[e.RowIndex].DataBoundItem;
+                if (e.Value == null)
+                {
+                    e.Value = cell.GetStructDef().Name;
+                    e.CellStyle.ForeColor = Color.DarkGray;
+                    e.FormattingApplied = true;
+                }
+            }
         }
 
         private void _structGridView_CellContextMenuStripNeeded(object sender, DataGridViewCellContextMenuStripNeededEventArgs e)
