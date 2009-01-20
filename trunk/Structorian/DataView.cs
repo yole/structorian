@@ -129,7 +129,18 @@ namespace Structorian
         private void HandleNodeNameChanged(object sender, NodeNameChangedEventArgs e)
         {
             TreeNode node = _nodeMap[e.Node];
-            node.Text = e.Node.NodeName;
+            node.Text = AppendSequenceIndex(e.Node);
+        }
+
+        private static string AppendSequenceIndex(InstanceTreeNode node)
+        {
+            string name = node.NodeName;
+            var structInstance = node as StructInstance;
+            if (structInstance != null && structInstance.SequenceIndex >= 0)
+            {
+                name = structInstance.SequenceIndex + ". " + name;
+            }
+            return name;
         }
 
         private void FillStructureTree()
@@ -148,13 +159,7 @@ namespace Structorian
                 node = _structTreeView.Nodes.Add(instance.NodeName + " (" + Path.GetFileName(_dataFileName) + ")");
             else
             {
-                var name = instance.NodeName;
-                var structInstance = instance as StructInstance;
-                if (structInstance != null && structInstance.SequenceIndex >= 0)
-                {
-                    name = structInstance.SequenceIndex + ". " + name;
-                }
-                node = parent.Nodes.Add(name);
+                node = parent.Nodes.Add(AppendSequenceIndex(instance));
             }
 
             _nodeMap.Add(instance, node);
