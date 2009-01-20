@@ -1,6 +1,6 @@
 struct UnrealPackage
 {
-  i32 Signature;
+  x32 Signature;
   i32 PackageVersion;
   i32 FirstExportOffset;
   i32 FolderNameLength;
@@ -36,8 +36,8 @@ struct UnrealPackage
   else
   {
     child UnrealName [offset=NamesOffset, count=NamesCount, group=Names];
-    child UnrealImport [offset=ImportsOffset, count=ImportsCount, group=Imports];
-    child UnrealExport [offset=ExportsOffset, count=ExportsCount, group=Exports];
+    child UnrealImport [offset=ImportsOffset, count=ImportsCount, group=Import];
+    child UnrealExport [offset=ExportsOffset, count=ExportsCount, group=Export];
   }
 }
 
@@ -47,6 +47,35 @@ struct LZOChunk
   u32 UncompressedSize;
   u32 CompressedOffset;
   u32 CompressedSize;
+  child CompressedChunk [offset=CompressedOffset];
+}
+
+struct CompressedChunk
+{
+  x32 Signature;
+  u32 BlockSize;
+  u32 CompressedSize;
+  u32 UncompressedSize;
+  
+  local TotalUncompressedSize [value=0];
+  if (UncompressedSize % BlockSize == 0)
+  {
+    calc BlockCount [value=UncompressedSize/BlockSize];
+  }
+  else
+  {
+    calc BlockCount [value=UncompressedSize/BlockSize+1];
+  }
+  local BlockOffset [value=CurOffset+BlockCount*8];
+  repeat(BlockCount)
+  {
+    u32 CompressedBlockSize;
+    u32 UncompressedBlockSize;
+    seek BlockOffset;
+    blob CompressedBlockSize [tag=Data, encoding=minilzo, decodedsize=UncompressedBlockSize];
+    rewind;
+    local BlockOffset [value=BlockOffset+CompressedBlockSize];
+  }
 }
 
 struct UnrealName
@@ -54,6 +83,14 @@ struct UnrealName
   i32 NameLength;
   str Name [len=NameLength];
   x64 Flags;
+  nodename Name;
+}
+
+[fieldlike]
+struct UnrealNameRef
+{
+  [hidden] i32 NameIndex;
+  str ObjectName [value=Root.Child("Names", NameIndex).Name];
 }
 
 struct UnrealImport
@@ -61,23 +98,40 @@ struct UnrealImport
   [hidden] i64 PackageNameIndex;
   str PackageName [value=Root.Child("Names", PackageNameIndex).Name];
   [hidden] i64 ClassNameIndex;
-  str PackageName [value=Root.Child("Names", ClassNameIndex).Name];
+  str ClassName [value=Root.Child("Names", ClassNameIndex).Name];
   i32 Outer;
-  [hidden] i32 NameIndex;
-  str Name [value=Root.Child("Names", NameIndex).Name];
+  include UnrealNameRef [tag=ObjectName];
   i32 Flags;
+}
+
+[fieldlike]
+struct UnrealClassRef
+{
+  [hidden] i32 _value;
+  if (_value < 0)
+  {
+    str Value [value=Root.Child("Import", -_value-1).ObjectName];
+  }
+  elif (_value > 0)
+  {
+    str Value [value=Root.Child("Export", _value-1).ObjectName];
+  }
+  else
+  {
+    str [len=0] Value;
+  }
 }
 
 struct UnrealExport
 {
-  i32 Import;
-  i32 Parent;
-  i32 Outer;
-  [hidden] i32 ExportNameIndex;
-  str ExportName [value=Root.Child("Names", ExportNameIndex).Name];
+  include UnrealClassRef [tag=Class];
+  include UnrealClassRef [tag=Super];
+  include UnrealClassRef [tag=Outer];
+  include UnrealNameRef [tag=ObjectName];
+  nodename ObjectName;
   i32 ExportNameSuffix;
   i32 ArchetypeIndex;
-  i64 Flags;
+  x64 Flags;
   i32 ExportSize;
   i32 ExportOffset;
   i32 ComponentMapCount;
@@ -87,9 +141,55 @@ struct UnrealExport
   }
   i32 ExportFlags;
   i32 NetObjectCount;
-  repeat(NetObjectCount) { i32 NetObject; }
+  if (NetObjectCount > 0)
+  {
+    repeat(NetObjectCount) { i32 NetObject; }
+  }
+  else
+  {
+    i32;
+  }
   repeat(4) { x32 GUID; }
-  
+  if (Class == "BoolProperty")
+  {
+    child UnrealBoolProperty [offset=ExportOffset];
+  }
+  elif (Class == "IntProperty")
+  {
+    child UnrealIntProperty [offset=ExportOffset];
+  }
+  elif (Class == "FloatProperty")
+  {
+    child UnrealFloatProperty [offset=ExportOffset];
+  }
+  elif (Class == "ObjectProperty")
+  {
+    child UnrealObjectProperty [offset=ExportOffset];
+  }
+  elif (Class == "StructProperty")
+  {
+    child UnrealStructProperty [offset=ExportOffset];
+  }
+  elif (Class == "ClassProperty")
+  {
+    child UnrealClassProperty [offset=ExportOffset];
+  }
+  elif (Class == "ByteProperty")
+  {
+    child UnrealByteProperty [offset=ExportOffset];
+  }
+  elif (Class == "ArrayProperty")
+  {
+    child UnrealArrayProperty [offset=ExportOffset];
+  }
+  elif (Class == "Function")
+  {
+    child UnrealFunction [offset=ExportOffset];
+  }
+  elif (Class == "")
+  {
+    child UnrealClass [offset=ExportOffset];
+  }
 }
 
 struct ExportComponent
@@ -99,3 +199,169 @@ struct ExportComponent
   i32 ComponentClassIndex;
 }
 
+enum ClassPropertyFlag
+{
+  CPF_Edit,
+  CPF_Const,
+  CPF_Input,
+  CPF_ExportObject,
+  CPF_OptionalParm, 
+  CPF_Net,
+  CPF_ConstRef,
+  CPF_Parm,
+  CPF_OutParm,
+  CPF_SkipParm,
+  CPF_ReturnParm,
+  CPF_CoerceParm,
+  CPF_Native,
+  CPF_Transient,
+  CPF_Config,
+  CPF_Localized,
+  CPF_Travel,
+  CPF_EditConst,
+  CPF_GlobalConfig,
+  CPF_OnDemand,
+  CPF_New,
+  CPF_NeedCtorLink,
+  CPF_01000000,
+  CPF_EditorData,
+  CPF_EditInlineUse,
+  CPF_EditInline,
+  CPF_Deprecated
+}
+
+struct UnrealProperty
+{
+  repeat(4) { u32; }
+  i32 Next;
+  u32;
+  set32 PropertyFlags [enum=ClassPropertyFlag];
+  u16;
+  u16;
+  include UnrealNameRef [tag=Category];
+  repeat(2) { u32; }
+}
+
+struct UnrealBoolProperty
+{
+  include UnrealProperty;
+}
+
+struct UnrealIntProperty
+{
+  include UnrealProperty;
+}
+
+struct UnrealFloatProperty
+{
+  include UnrealProperty;
+}
+
+struct UnrealObjectProperty
+{
+  include UnrealProperty;
+  include UnrealClassRef [tag=ObjectClass];
+}
+
+struct UnrealStructProperty
+{
+  include UnrealProperty;
+  include UnrealClassRef [tag=StructClass];
+}
+
+struct UnrealClassProperty
+{
+  include UnrealProperty;
+  include UnrealClassRef;
+  include UnrealClassRef;
+}
+
+struct UnrealByteProperty
+{
+  include UnrealProperty;
+  include UnrealClassRef [tag=EnumClass];
+}
+
+struct UnrealArrayProperty
+{
+  include UnrealProperty;
+  u32;
+}
+
+enum FunctionFlag
+{
+  Final,
+  Defined,
+  Iterator,
+  Latent,
+  PreOperator,
+  Singular,
+  Net,
+  NetReliable,
+  Simulated,
+  Exec,
+  Native,
+  Event,
+  Operator,
+  Static,
+  NoExport,
+  Const,
+  Invariant,
+  Unk_20000,
+  Delegate
+}
+
+struct UnrealFunction
+{
+  repeat(3) { u32; }
+  include UnrealClassRef [tag=Super];
+  u32 Children;
+  repeat(3) { u32; }
+  u32 Line;
+  u32 TextPos;  
+  u32 ScriptSize;
+  blob ScriptSize [tag=Script];
+  u16;
+  u8;
+  set32 FunctionFlags [enum=FunctionFlag];
+  repeat(2) { u32; }
+}
+
+struct UnrealClass
+{
+  i32;
+  include UnrealClassRef [tag=Super];
+  i32;
+  u32 ScriptText;
+  repeat(9) { i32; }
+  i16;
+  i32;
+  i32 SomeCount;
+  repeat(SomeCount)
+  {
+    i32;
+    i32;
+    i32;
+  }
+  u8;
+  x32;
+  i32;
+  u32;
+  u32;
+  u32 SomeCount2;
+  repeat(SomeCount2)
+  {
+    u32;
+    u32;
+  }
+  u32 SomeCount3;
+  repeat(SomeCount3)
+  {
+    u32;
+    u32;
+    u32;
+  }
+  u32;
+  u32;
+  include UnrealClassRef [tag=DefaultProperties];
+}

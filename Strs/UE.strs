@@ -56,6 +56,24 @@ struct UnrealNameRef
   str Name [value=Root.Child("Names", x).Name];
 }
 
+[fieldlike]
+struct UnrealClassRef
+{
+  [hidden] include UnrealIndex;
+  if (x < 0)
+  {
+    str Name [value=Root.Child("Import", -x-1).ObjectName];
+  }
+  elif (x > 0)
+  {
+    str Name [value=Root.Child("Export", x-1).ObjectName];
+  }
+  else
+  {
+    str [len=0] Name;
+  }
+}
+
 enum ObjectFlags
 {
   RF_Transactional,
@@ -94,8 +112,8 @@ enum ObjectFlags
 
 struct UnrealExport
 {
-  include UnrealIndex [tag=ClassIndex];
-  include UnrealIndex [tag=SuperIndex];
+  include UnrealClassRef [tag=Class];
+  include UnrealClassRef [tag=Super];
   u32 GroupIndex;
   include UnrealNameRef [tag=ObjectName];
   set32 Flags [enum=ObjectFlags];
@@ -103,8 +121,20 @@ struct UnrealExport
   if (SerialSize > 0)
   {
     include UnrealIndex [tag=SerialOffset];
-    seek SerialOffset;
-    blob SerialSize [tag=Serialized];
+    if (Class == "")
+    {
+      child UnrealClass [offset=SerialOffset];
+    }
+    elif (Class == "Function" || Class == "IntProperty" || Class == "ObjectProperty" 
+        || Class == "StrProperty" || Class == "FloatProperty")
+    {
+      child UnrealDataWithPropertyList [offset=SerialOffset];
+    }
+    else
+    {
+      seek SerialOffset;
+      blob SerialSize [tag=Serialized];
+    }
   }
 }
 
@@ -114,4 +144,246 @@ struct UnrealImport
   include UnrealNameRef[tag=ClassName];
   i32 Package;
   include UnrealNameRef [tag=ObjectName];
+}
+
+struct UnrealField
+{
+  include UnrealIndex [tag=SuperField];
+  include UnrealIndex [tag=Next];
+}
+
+struct UnrealStruct
+{
+  include UnrealField;
+  include UnrealIndex [tag=ScriptText];
+  include UnrealIndex [tag=Children];
+  include UnrealNameRef [tag=FriendlyName];
+  if (Root.Version >= 120)
+  {
+    u32;
+  }
+  i32 Line;
+  i32 TextPos;
+  u32 ScriptSize;
+  if (ScriptSize > 0)
+  {
+    blob ScriptSize [tag=Script];
+  }
+}
+
+struct UnrealState
+{
+  include UnrealStruct;
+  x64 ProbeMask;
+  x64 IgnoreMask;
+  x16 LabelTableOffset;
+  x32 StateFlags;
+}
+
+struct ClassDependency
+{
+  include UnrealIndex [tag=Class];
+  u32 Deep;
+  x32 ScriptTextCRC;
+}
+
+struct UnrealClass
+{
+  include UnrealState;
+  x32 ClassFlags;  
+  repeat(4) { x32 GUID; }
+  include UnrealIndex [tag=DependencyCount];
+  repeat(DependencyCount)
+  {
+   include ClassDependency;
+  }
+  include UnrealIndex [tag=PackageImportCount];
+  repeat(PackageImportCount)
+  {
+    include UnrealNameRef [tag=PackageImport];
+  }
+  if (Root.Version >= 62)
+  {
+    include UnrealIndex [tag=ClassWithin];
+    include UnrealIndex [tag=ClassConfigName];
+  }
+  if (Root.Version >= 100)
+  {
+    include UnrealIndex [tag=HideCategoriesListSize];
+    repeat(HideCategoriesListSize)
+    {
+      include UnrealIndex [tag=HideCategory];
+    }
+  }
+  child UnrealProperty;
+}
+
+struct UnrealDataWithPropertyList
+{
+  child UnrealProperty;
+  if (Parent.Class == "Function")
+  {
+    child UnrealFunctionData [followchildren];
+  }
+  elif (Parent.Class == "IntProperty" || Parent.Class == "StrProperty" || 
+      Parent.Class == "FloatProperty")
+  {
+    child UnrealClassPropertyData [followchildren];
+  }
+  elif (Parent.Class == "ObjectProperty")
+  {
+    child UnrealObjectPropertyData [followchildren];
+  }
+}
+
+enum FunctionFlag
+{
+  Final,
+  Defined,
+  Iterator,
+  Latent,
+  PreOperator,
+  Singular,
+  Net,
+  NetReliable,
+  Simulated,
+  Exec,
+  Native,
+  Event,
+  Operator,
+  Static,
+  NoExport,
+  Const,
+  Invariant,
+  Unk_20000,
+  Delegate
+}
+
+struct UnrealClassProperty
+{
+  child UnrealProperty;
+  child UnrealClassPropertyData [followchildren];
+}
+
+enum ClassPropertyFlag
+{
+  CPF_Edit,
+  CPF_Const,
+  CPF_Input,
+  CPF_ExportObject,
+  CPF_OptionalParm, 
+  CPF_Net,
+  CPF_ConstRef,
+  CPF_Parm,
+  CPF_OutParm,
+  CPF_SkipParm,
+  CPF_ReturnParm,
+  CPF_CoerceParm,
+  CPF_Native,
+  CPF_Transient,
+  CPF_Config,
+  CPF_Localized,
+  CPF_Travel,
+  CPF_EditConst,
+  CPF_GlobalConfig,
+  CPF_OnDemand,
+  CPF_New,
+  CPF_NeedCtorLink,
+  CPF_01000000,
+  CPF_EditorData,
+  CPF_EditInlineUse,
+  CPF_EditInline,
+  CPF_Deprecated
+}
+
+struct UnrealClassPropertyData
+{
+  include UnrealField;
+  u16 ArrayDimension;
+  u16 ElementSize;
+  set32 PropertyFlags [enum=ClassPropertyFlag];
+  include UnrealNameRef [tag=Category];
+}
+
+struct UnrealObjectPropertyData
+{
+  include UnrealClassPropertyData;
+  include UnrealClassRef [tag=Object];
+}
+
+struct UnrealFunctionData
+{
+  include UnrealStruct;
+  u16 iNative;
+  u8 OperatorPrecedence;
+  set32 [enum=FunctionFlag] FunctionFlags;
+}
+
+enum PropertyType
+{
+  otNone,
+  otByte,
+  otInt,
+  otBool,
+  otFloat,
+  otObject,
+  otName,
+  otString,
+  otClass,
+  otArray,
+  otStruct,
+  otVector,
+  otRotator,
+  otStr,
+  otMap,
+  otFixedArray
+}
+
+enum SizeType
+{
+  S1, S2, S4, S12, S16, SByte, SWord, SDword
+}
+
+struct UnrealProperty
+{
+  include UnrealNameRef [tag=Name];
+  if (Name != "None")
+  {
+    bitfield(1)
+    {
+      enum8 Type [frombit=0, tobit=3, enum=PropertyType];
+      enum8 Size [frombit=4, tobit=6, enum=SizeType];
+      u8 Array [bit=7];
+    }
+    if (Size == S1)
+    {
+      local DataSize [value=1];
+    }
+    elif (Size == S2)
+    {
+      local DataSize [value=2];
+    }
+    elif (Size == S4)
+    {
+      local DataSize [value=4];
+    }
+    elif (Size == SByte)
+    {
+      u8 DataSize;
+    }
+    if (Type == otStr)
+    {
+      u8 StrSize;
+      str [len=StrSize] StrValue;
+    }
+    elif (Type == otFloat && DataSize == 4)
+    {
+      float FloatValue;
+    }
+    else
+    {
+      blob DataSize [tag=Data];
+    }
+    sibling UnrealProperty;
+  }
 }
