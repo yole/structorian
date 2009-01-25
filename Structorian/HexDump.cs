@@ -33,7 +33,7 @@ namespace Structorian
                 if (_stream != value)
                 {
                     _stream = value;
-                    _streamSize = _stream.Length;
+                    _streamSize = _stream != null ? _stream.Length : 0;
                     _lineCount = (_streamSize/16 + 1);
                     if (_topLine > _lineCount)
                         _topLine = _lineCount - 1;

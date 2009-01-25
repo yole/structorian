@@ -175,9 +175,9 @@ namespace Structorian
             SaveStructuresToDisk();
             ParseStructures();
 
-            if (_structFile != null && _dataView.DataFileName != null)
+            if (_structFile != null)
             {
-                _dataView.ReloadData(FindMatchingStruct(_dataView.DataFileName), true);
+                _dataView.ReloadData(s => FindMatchingStruct(s));
             }
         }
 
@@ -275,7 +275,7 @@ namespace Structorian
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            var action = new SaveAllBlobsAction(_dataView.InstanceTree, _targetDialog.SelectedPath);
+            var action = new SaveAllBlobsAction(_dataView.ActiveInstanceTree, _targetDialog.SelectedPath);
             action.Run();
         }
 
