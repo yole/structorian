@@ -19,6 +19,8 @@ namespace Structorian
         private long _selectionStart = 0;
         private long _selectionEnd = 1;
         private long _selectionAnchor;
+        private long _selectionLead;
+        private int _lineSize = 16;
 
         public HexDump()
         {
@@ -42,8 +44,15 @@ namespace Structorian
                 }
             }
         }
-        
+
         public void SelectBytes(long startOffset, int count)
+        {
+            SetSelection(startOffset, count);
+            _selectionAnchor = startOffset;
+            _selectionLead = startOffset + count - 1;
+        }
+        
+        public void SetSelection(long startOffset, int count)
         {
             _selectionStart = Math.Max(0, Math.Min(startOffset, _streamSize - 1));
             _selectionEnd = Math.Max(1, Math.Min(startOffset+count, _streamSize));
@@ -163,15 +172,20 @@ namespace Structorian
                 {
                     if ((ModifierKeys & Keys.Shift) != 0)
                     {
-                        SelectBytes(Math.Min(_selectionAnchor, clickOffset), (int) Math.Abs(_selectionAnchor - clickOffset) + 1);
+                        ExtendSelectionTo(clickOffset);
+                        _selectionLead = clickOffset;
                     }
                     else
                     {
                         SelectBytes(clickOffset, 1);
-                        _selectionAnchor = clickOffset;
                     }
                 }
             }
+        }
+
+        private void ExtendSelectionTo(long clickOffset)
+        {
+            SetSelection(Math.Min(_selectionAnchor, clickOffset), (int) Math.Abs(_selectionAnchor - clickOffset) + 1);
         }
 
         private long GetOffsetAt(int x, int y)
@@ -197,6 +211,46 @@ namespace Structorian
         {
             base.OnKeyDown(e);
 
+            if (IsArrowKey(e.KeyData))
+            {
+                long newOffset = _selectionLead;
+                if (e.KeyCode == Keys.Up)
+                    newOffset -= _lineSize;
+                else if (e.KeyCode == Keys.Down)
+                    newOffset += _lineSize;
+                else if (e.KeyCode == Keys.Left)
+                    newOffset--;
+                else if (e.KeyCode == Keys.Right)
+                    newOffset++;
+
+                if (newOffset < 0)
+                    newOffset = 0;
+                else if (newOffset >= _streamSize)
+                    newOffset = _streamSize - 1;
+
+                if (e.Shift)
+                {
+                    ExtendSelectionTo(newOffset);
+                    _selectionLead = newOffset;
+                }
+                else
+                {
+                    SelectBytes(newOffset, 1);
+                }
+            }
+        }
+
+        protected override bool IsInputKey(Keys keyData)
+        {
+            if (IsArrowKey(keyData))
+                return true;
+            return base.IsInputKey(keyData);
+        }
+
+        private static bool IsArrowKey(Keys keyData)
+        {
+            keyData = keyData & ~Keys.Shift;
+            return keyData == Keys.Up || keyData == Keys.Down || keyData == Keys.Left || keyData == Keys.Right;
         }
 
         protected override void OnPaint(PaintEventArgs e)
