@@ -42,7 +42,7 @@ namespace Structorian.Engine
                 return FetchDelimitedString(')', '(', StructTokenType.String);
             else if (_text[_position] == '/')
             {
-                GrabEndOfLineComment();
+                GrabComment();
                 return null;
             }
             throw new ParseException("Unexpected character " + _text[_position], BuildTextPosition(_position));
@@ -76,13 +76,24 @@ namespace Structorian.Engine
             }
         }
         
-        private void GrabEndOfLineComment()
+        private void GrabComment()
         {
-            if (_position == _text.Length - 1 || _text[_position + 1] != '/')
+            if (_position == _text.Length - 1 || (_text[_position + 1] != '/' && _text[_position + 1] != '*'))
                 throw new ParseException("Unexpected character '/'", BuildTextPosition(_position));
-            _position += 2;
-            while (_position < _text.Length && _text[_position] != '\r' && _text[_position] != '\n')
-                _position++;
+            if (_text [_position+1] == '*')
+            {
+                _position += 2;
+                int endIndex = _text.IndexOf("*/", _position);
+                if (endIndex < 0)
+                    throw new ParseException("Unclosed comment", BuildTextPosition(_position - 2));
+                _position = endIndex + 2;
+            }
+            else
+            {
+                _position += 2;
+                while (_position < _text.Length && _text[_position] != '\r' && _text[_position] != '\n')
+                    _position++;
+            }
         }
 
         public bool EndOfStream()

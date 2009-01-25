@@ -85,5 +85,12 @@ namespace Structorian.Engine.Tests
             StructLexer lexer = new StructLexer("(abc");
             lexer.PeekNextToken();
         }
+
+        [Test] public void CStyleComment()
+        {
+            StructLexer lexer = new StructLexer("/* test \nalso test\nend*/ struct A { }");
+            Assert.AreEqual(StructTokenType.String, lexer.PeekNextToken());
+            Assert.AreEqual("struct", lexer.GetNextToken(StructTokenType.String));
+        }
     }
 }
