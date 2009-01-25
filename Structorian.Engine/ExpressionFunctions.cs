@@ -18,6 +18,8 @@ namespace Structorian.Engine
 
         private BaseFunctions()
         {
+            Register("StartsWith", (context, parameters) => 
+                parameters [0].EvaluateString(context).StartsWith(parameters [1].EvaluateString(context)));
             Register("EndsWith", EndsWith);
             Register("Length", Length);
         }
