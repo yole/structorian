@@ -17,9 +17,9 @@ namespace Structorian.Engine
         public abstract StructInstance LastChild { get; }
         public abstract long EndChildrenOffset { get; }
 
-        protected InstanceTree GetInstanceTree()
+        public InstanceTree GetInstanceTree()
         {
-            InstanceTreeNode parent = Parent;
+            InstanceTreeNode parent = this;
             while (!(parent is InstanceTree))
                 parent = parent.Parent;
             return (InstanceTree)parent;

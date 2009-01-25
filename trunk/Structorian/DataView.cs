@@ -8,20 +8,38 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
+using Microsoft.Win32.SafeHandles;
 using Structorian.Engine;
 
 namespace Structorian
 {
     public partial class DataView : UserControl
     {
-        private string _dataFileName;
-        private StructDef _rootStructDef;
-        private InstanceTree _instanceTree;
+        private class DataFile
+        {
+            private string _name;
+
+            public DataFile(string name, StructDef def)
+            {
+                _name = name;
+                RootStructDef = def;
+            }
+
+            public string Name
+            {
+                get { return _name; }
+            }
+
+            public StructDef RootStructDef { get; set; }
+            public Stream Stream { get; set; }
+            public InstanceTree InstanceTree { get; set; }
+        }
+
+        private readonly List<DataFile> _dataFiles = new List<DataFile>();
         private InstanceTreeNode _activeInstance;
         private readonly Dictionary<InstanceTreeNode, TreeNode> _nodeMap = new Dictionary<InstanceTreeNode, TreeNode>();
         private readonly HexDump _hexDump;
         private bool _showLocalOffsets;
-        private Stream _mainStream;
         private Control _nodeControl;
 
         public event CellSelectedEventHandler CellSelected;
@@ -63,47 +81,58 @@ namespace Structorian
             }
         }
 
-        public InstanceTree InstanceTree
+        public InstanceTree ActiveInstanceTree
         {
-            get { return _instanceTree; }
+            get
+            {
+                return _activeInstance != null ? _activeInstance.GetInstanceTree() : null;
+            }
         }
 
-        public string DataFileName
+        private DataFile FindDataFile(InstanceTreeNode instance)
         {
-            get { return _dataFileName; }
+            InstanceTree tree = instance.GetInstanceTree();
+            return _dataFiles.Find(f => f.InstanceTree == tree);
         }
 
         public void LoadData(string fileName, StructDef def)
         {
-            _dataFileName = fileName;
-            ReloadData(def, false);
+            var dataFile = new DataFile(fileName, def);
+            _dataFiles.Add(dataFile);
+            LoadDataFile(dataFile);
         }
 
-        internal void ReloadData(StructDef def, bool keepState)
+        private void LoadDataFile(DataFile dataFile)
         {
-            if (_dataFileName == null)
-                return;
+            dataFile.Stream = new BufferedStream(new FileStream(dataFile.Name, FileMode.Open, FileAccess.Read, FileShare.Read), 16384);
+            dataFile.InstanceTree = dataFile.RootStructDef.LoadData(dataFile.Stream);
+            dataFile.InstanceTree.InstanceAdded += HandleInstanceAdded;
+            dataFile.InstanceTree.NodeNameChanged += HandleNodeNameChanged;
+            FillStructureTree(dataFile.InstanceTree);
+            _hexDump.Stream = dataFile.Stream;
             
-            DataViewState viewState = null;
-            if (keepState)
-                viewState = DataViewState.Save(this);
-            
-            _rootStructDef = def;
-            _mainStream = new BufferedStream(new FileStream(_dataFileName, FileMode.Open, FileAccess.Read, FileShare.Read), 16384);
-            if (_instanceTree != null)
+        }
+
+        public void ReloadData(Func<string, StructDef> structMatcher)
+        {
+            DataViewState viewState = DataViewState.Save(this);
+            _structTreeView.BeginUpdate();
+            try
             {
-                _instanceTree.InstanceAdded -= HandleInstanceAdded;
-                _instanceTree.NodeNameChanged -= HandleNodeNameChanged;
+                _structTreeView.Nodes.Clear();
                 _nodeMap.Clear();
+                foreach (DataFile f in _dataFiles)
+                {
+                    f.RootStructDef = structMatcher.Invoke(f.Name);
+                    LoadDataFile(f);
+                }
+                if (viewState != null)
+                    viewState.Restore(this);
             }
-            _instanceTree = _rootStructDef.LoadData(_mainStream);
-            _instanceTree.InstanceAdded += HandleInstanceAdded;
-            _instanceTree.NodeNameChanged += HandleNodeNameChanged;
-            FillStructureTree();
-            _hexDump.Stream = _mainStream;
-            
-            if (viewState != null)
-                viewState.Restore(this);
+            finally
+            {
+                _structTreeView.EndUpdate();
+            }
         }
 
         private void HandleInstanceAdded(object sender, InstanceAddedEventArgs e)
@@ -143,10 +172,9 @@ namespace Structorian
             return name;
         }
 
-        private void FillStructureTree()
+        private void FillStructureTree(InstanceTree instanceTree)
         {
-            _structTreeView.Nodes.Clear();
-            foreach (InstanceTreeNode instance in _instanceTree.Children)
+            foreach (InstanceTreeNode instance in instanceTree.Children)
             {
                 AddInstanceNode(null, instance);
             }
@@ -156,7 +184,10 @@ namespace Structorian
         {
             TreeNode node;
             if (parent == null)
-                node = _structTreeView.Nodes.Add(instance.NodeName + " (" + Path.GetFileName(_dataFileName) + ")");
+            {
+                string fileName = FindDataFile(instance).Name;
+                node = _structTreeView.Nodes.Add(instance.NodeName + " (" + Path.GetFileName(fileName) + ")");
+            }
             else
             {
                 node = parent.Nodes.Add(AppendSequenceIndex(instance));
@@ -179,22 +210,36 @@ namespace Structorian
                 _nodeControl.Dispose();
                 _nodeControl = null;
             }
-            NodeUI ui = FindNodeUI(_activeInstance);
-            if (ui != null)
+            _structTreeView.BeginUpdate();
+            try
             {
-                _nodeControl = ui.CreateControl();
-                _nodeControl.Dock = DockStyle.Fill;
-                splitContainer1.Panel2.Controls.Add(_nodeControl);
-                _structGridView.Visible = false;
+                NodeUI ui = FindNodeUI(_activeInstance);
+                if (ui != null)
+                {
+                    _nodeControl = ui.CreateControl();
+                    _nodeControl.Dock = DockStyle.Fill;
+                    splitContainer1.Panel2.Controls.Add(_nodeControl);
+                    _structGridView.Visible = false;
+                }
+                else
+                {
+                    _structGridView.Visible = true;
+                    _structGridView.DataSource = _activeInstance.Cells;
+                }
             }
-            else
+            finally
             {
-                _structGridView.Visible = true;
-                _structGridView.DataSource = _activeInstance.Cells;
+                _structTreeView.EndUpdate();
             }
-            StructInstance instance = _activeInstance as StructInstance;
+            var instance = _activeInstance as StructInstance;
             if (instance == null)
-                _hexDump.Stream = _mainStream;
+            {
+                InstanceTree tree = ActiveInstanceTree;
+                if (tree != null)
+                {
+                    _hexDump.Stream = FindDataFile(tree).Stream;
+                }
+            }
             else
                 _hexDump.Stream = instance.Stream;
         }
@@ -214,7 +259,15 @@ namespace Structorian
             if (e.Node.Nodes.Count == 0)
             {
                 InstanceTreeNode instance = (InstanceTreeNode)e.Node.Tag;
-                instance.NeedChildren();
+                _structTreeView.BeginUpdate();
+                try
+                {
+                    instance.NeedChildren();
+                }
+                finally
+                {
+                    _structTreeView.EndUpdate();
+                }
                 if (instance.Children.Count == 0)
                     WindowsAPI.SetHasChildren(e.Node, false);
             }
@@ -281,6 +334,37 @@ namespace Structorian
             IConvertible value = cell.GetValue();
             long offset = value.ToInt64(CultureInfo.CurrentCulture);
             _hexDump.SelectBytes(offset, 1);
+        }
+
+        private void closeDataFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var tree = ActiveInstanceTree;
+            if (tree != null)
+            {
+                foreach(var node in tree.Children)
+                {
+                    _structTreeView.Nodes.Remove(_nodeMap [node]);
+                }
+                var nodesToRemove = new List<InstanceTreeNode>();
+                foreach(var node in _nodeMap.Keys)
+                {
+                    if (node.GetInstanceTree() == tree)
+                        nodesToRemove.Add(node);
+                }
+                foreach(InstanceTreeNode node in nodesToRemove)
+                {
+                    _nodeMap.Remove(node);
+                }
+                tree.InstanceAdded -= HandleInstanceAdded;
+                tree.NodeNameChanged -= HandleNodeNameChanged;
+                var dataFile = FindDataFile(tree);
+                _dataFiles.Remove(dataFile);
+                dataFile.Stream.Close();
+                if (_dataFiles.Count == 0)
+                {
+                    _hexDump.Stream = null;
+                }
+            }
         }
     }
 
