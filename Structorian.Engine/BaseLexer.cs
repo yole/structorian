@@ -6,8 +6,8 @@ namespace Structorian.Engine
     {
         public class Token
         {
-            T _tokenType;
-            V _tokenValue;
+            readonly T _tokenType;
+            readonly V _tokenValue;
 
             public Token(T tokenType)
             {
@@ -39,7 +39,7 @@ namespace Structorian.Engine
         private int _nextTokenEndPosition;
         private int _curLine = 1;
         private int _curLineStart;
-        private T _eofTokenType;
+        private readonly T _eofTokenType;
         private Token[] _charTokens = new Token[128];
         
         protected BaseLexer(string fileName, string text, T eofToken)
@@ -95,7 +95,12 @@ namespace Structorian.Engine
 
         private void SkipWhitespace()
         {
-            while (_position < _text.Length && Char.IsWhiteSpace(_text, _position))
+            SkipWhile(() => Char.IsWhiteSpace(_text, _position));
+        }
+
+        protected void SkipWhile(Func<bool> stop)
+        {
+            while (_position < _text.Length && stop.Invoke())
             {
                 if (_text [_position] == '\r' || _text [_position] == '\n')
                 {
