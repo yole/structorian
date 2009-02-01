@@ -83,10 +83,10 @@ namespace Structorian.Engine
             if (_text [_position+1] == '*')
             {
                 _position += 2;
-                int endIndex = _text.IndexOf("*/", _position);
-                if (endIndex < 0)
+                SkipWhile(() => _position < _text.Length-1 && (_text [_position] != '*' || _text [_position+1] != '/'));
+                _position += 2;
+                if (_position >= _text.Length-1)
                     throw new ParseException("Unclosed comment", BuildTextPosition(_position - 2));
-                _position = endIndex + 2;
             }
             else
             {
