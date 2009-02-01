@@ -120,7 +120,7 @@ namespace Structorian.Engine
                 {
                     break;
                 }
-                _position++;
+                IncrementPosition();
             }
 
             if (_position >= _text.Length || (_text[_position] != ',' && _text[_position] != ']'))

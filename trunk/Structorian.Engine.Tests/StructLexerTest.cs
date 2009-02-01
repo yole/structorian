@@ -93,5 +93,17 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual(3, lexer.CurrentPosition.Line);
             Assert.AreEqual("struct", lexer.GetNextToken(StructTokenType.String));
         }
+
+        [Test] public void MultilineAttributeValue()
+        {
+            var lexer = new StructLexer("[FileName=(a\nb)] struct A { }");
+            Assert.IsTrue(lexer.CheckNextToken(StructTokenType.OpenSquare));
+            Assert.IsTrue(lexer.CheckNextToken(StructTokenType.String));
+            Assert.IsTrue(lexer.CheckNextToken(StructTokenType.Equals));
+            TextPosition pos;
+            var value = lexer.GetAttributeValue(out pos);
+            Assert.AreEqual("(a\nb)", value);
+            Assert.AreEqual(2, lexer.CurrentPosition.Line);
+        }
     }
 }
