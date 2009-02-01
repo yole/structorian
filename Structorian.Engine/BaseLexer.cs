@@ -102,21 +102,26 @@ namespace Structorian.Engine
         {
             while (_position < _text.Length && stop.Invoke())
             {
-                if (_text [_position] == '\r' || _text [_position] == '\n')
+                IncrementPosition();
+            }
+        }
+
+        protected void IncrementPosition()
+        {
+            if (_text [_position] == '\r' || _text [_position] == '\n')
+            {
+                _position++;
+                if (_position < _text.Length && 
+                    (_text [_position] == '\r' || _text [_position] == '\n') &&
+                    _text [_position] != _text [_position-1])
                 {
                     _position++;
-                    if (_position < _text.Length && 
-                        (_text [_position] == '\r' || _text [_position] == '\n') &&
-                        _text [_position] != _text [_position-1])
-                    {
-                        _position++;
-                    }
-                    _curLine++;
-                    _curLineStart = _position;
                 }
-                else
-                    _position++;
+                _curLine++;
+                _curLineStart = _position;
             }
+            else
+                _position++;
         }
 
         protected abstract Token FetchNextToken();

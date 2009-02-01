@@ -203,7 +203,7 @@ namespace Structorian.Engine
             return field;
         }
 
-        private void LoadAttributes(StructLexer lexer, List<Attribute> attrs)
+        private static void LoadAttributes(StructLexer lexer, List<Attribute> attrs)
         {
             if (lexer.PeekNextToken() == StructTokenType.OpenSquare)
             {
