@@ -43,11 +43,6 @@ namespace Structorian.Engine
         }
 
         public abstract IConvertible GetValue();
-
-        public virtual bool IsError()
-        {
-            return false;
-        }
         
         public int GetDataSize(StructInstance instance)
         {

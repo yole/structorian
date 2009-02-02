@@ -46,7 +46,14 @@ namespace Structorian.Engine
 
         public override IConvertible GetValue()
         {
-            return _expression.Evaluate(new DependencyTrackingContext(_instance, this));
+            try
+            {
+                return _expression.Evaluate(new DependencyTrackingContext(_instance, this));
+            }
+            catch (Exception e)
+            {
+                return new ErrValue(e.Message);
+            }
         }
     }
 

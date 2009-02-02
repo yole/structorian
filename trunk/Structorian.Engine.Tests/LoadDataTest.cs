@@ -53,7 +53,7 @@ namespace Structorian.Engine.Tests
         {
             StructInstance instance = PrepareInstance("struct BITMAPFILEHEADER { str [len=4] bfType; }", new byte[] { (byte)'B', (byte)'M' });
             Assert.AreEqual(1, instance.Cells.Count);
-            Assert.IsTrue(instance.Cells[0].IsError());
+            Assert.IsInstanceOfType(typeof(ErrValue), instance.Cells[0].GetValue());
         }
         
         [Test] public void LoadNullTerminatedStr()
@@ -231,7 +231,7 @@ namespace Structorian.Engine.Tests
                 "struct A { u8 a; assert(a == 3); }",
                 new byte[] { 2, 17, 37 });
             Assert.AreEqual(2, instance.Cells.Count);
-            Assert.IsTrue(instance.Cells[1].IsError());
+            Assert.IsInstanceOfType(typeof(ErrValue), instance.Cells[1].GetValue());
         }
 
         [Test] public void FieldId()
@@ -913,7 +913,7 @@ namespace Structorian.Engine.Tests
                 "struct A { str q [len=-1]; }",
                 new byte[0] );
             Assert.AreEqual(1, instance.Cells.Count);
-            Assert.IsTrue(instance.Cells [0].IsError());
+            Assert.IsInstanceOfType(typeof(ErrValue), instance.Cells[0].GetValue());
         }
 
         [Test] public void ZipBlob()

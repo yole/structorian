@@ -19,95 +19,23 @@ namespace Structorian.Engine.Fields
         }
     }
 
-    internal class EnumValue: IConvertible, IComparable
+    internal class EnumValue: ConvertibleWrapper<uint>, IComparable
     {
-        protected readonly uint _intValue;
         private readonly EnumDef _enumDef;
 
-        public EnumValue(uint intValue, EnumDef enumDef)
+        public EnumValue(uint intValue, EnumDef enumDef) : base(intValue)
         {
-            _intValue = intValue;
             _enumDef = enumDef;
         }
 
-        public TypeCode GetTypeCode()
+        public override TypeCode GetTypeCode()
         {
             return TypeCode.Int32;
         }
 
-        public bool ToBoolean(IFormatProvider provider)
-        {
-            return ((IConvertible) _intValue).ToBoolean(provider);
-        }
-
-        public char ToChar(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToChar(provider);
-        }
-
-        public sbyte ToSByte(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToSByte(provider);
-        }
-
-        public byte ToByte(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToByte(provider);
-        }
-
-        public short ToInt16(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToInt16(provider);
-        }
-
-        public ushort ToUInt16(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToUInt16(provider);
-        }
-
-        public int ToInt32(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToInt32(provider);
-        }
-
-        public uint ToUInt32(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToUInt32(provider);
-        }
-
-        public long ToInt64(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToInt64(provider);
-        }
-
-        public ulong ToUInt64(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToUInt64(provider);
-        }
-
-        public float ToSingle(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToSingle(provider);
-        }
-
-        public double ToDouble(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToDouble(provider);
-        }
-
-        public decimal ToDecimal(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToDecimal(provider);
-        }
-
-        public DateTime ToDateTime(IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToDateTime(provider);
-        }
-
         public override string ToString()
         {
-            return _enumDef.ValueToString(_intValue);
+            return _enumDef.ValueToString(_value);
         }
 
         public int CompareTo(object obj)
@@ -119,14 +47,9 @@ namespace Structorian.Engine.Fields
             return 0;
         }
 
-        public string ToString(IFormatProvider provider)
+        public override string ToString(IFormatProvider provider)
         {
             return ToString();
-        }
-
-        public object ToType(Type conversionType, IFormatProvider provider)
-        {
-            return ((IConvertible)_intValue).ToType(conversionType, provider);
         }
 
         public EnumDef EnumDef

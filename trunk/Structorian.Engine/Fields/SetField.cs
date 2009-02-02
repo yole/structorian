@@ -35,7 +35,7 @@ namespace Structorian.Engine.Fields
             var result = new StringBuilder();
             for (int i = 0; i < _size * 8; i++)
             {
-                if ((_intValue & (1ul << i)) != 0)
+                if ((_value & (1ul << i)) != 0)
                 {
                     if (result.Length > 0)
                         result.Append(", ");

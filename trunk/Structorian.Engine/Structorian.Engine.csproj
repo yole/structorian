@@ -113,6 +113,7 @@
     <Compile Include="StructReference.cs" />
     <Compile Include="StructSourceContext.cs" />
     <Compile Include="TextPosition.cs" />
+    <Compile Include="Values.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MiniLZO\MiniLZO.csproj">

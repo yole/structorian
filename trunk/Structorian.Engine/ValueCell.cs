@@ -10,13 +10,10 @@ namespace Structorian.Engine
         private IConvertible _value;
         protected string _displayValue;
         private int _offset;
-        private bool _isError;
 
         public static StructCell CreateErrorCell(StructField def, string errorMessage)
         {
-            ValueCell result = new ValueCell(def, null, errorMessage, -1);
-            result._isError = true;
-            return result;
+            return new ValueCell(def, new ErrValue(errorMessage), -1);
         }
 
         public ValueCell(StructField def, IConvertible value, int offset)
@@ -51,11 +48,6 @@ namespace Structorian.Engine
         public override IConvertible GetValue()
         {
             return _value;
-        }
-
-        public override bool IsError()
-        {
-            return _isError;
         }
     }
 }
