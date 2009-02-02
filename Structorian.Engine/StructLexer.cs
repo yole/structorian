@@ -64,7 +64,7 @@ namespace Structorian.Engine
             return new Token(StructTokenType.String, _text.Substring(startPos, _position - startPos));
         }
 
-        private bool IsStringPunctuation(char c)
+        private static bool IsStringPunctuation(char c)
         {
             switch(c)
             {
@@ -133,7 +133,7 @@ namespace Structorian.Engine
             return result;
         }
 
-        private bool IsAttributeEnd(char c)
+        private static bool IsAttributeEnd(char c)
         {
             switch(c)
             {

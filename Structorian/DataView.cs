@@ -280,7 +280,7 @@ namespace Structorian
         {
             if (_structGridView.SelectedRows.Count > 0)
             {
-                StructCell cell = (StructCell)_structGridView.SelectedRows[0].DataBoundItem;
+                var cell = (StructCell)_structGridView.SelectedRows[0].DataBoundItem;
                 int offset = cell.Offset;
                 if (offset >= 0)
                 {
