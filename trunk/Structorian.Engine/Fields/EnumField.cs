@@ -47,11 +47,6 @@ namespace Structorian.Engine.Fields
             return 0;
         }
 
-        public override string ToString(IFormatProvider provider)
-        {
-            return ToString();
-        }
-
         public EnumDef EnumDef
         {
             get { return _enumDef; }
