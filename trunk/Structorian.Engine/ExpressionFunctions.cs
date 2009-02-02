@@ -154,10 +154,17 @@ namespace Structorian.Engine
                     }
                 }
                 if (!groupFound) throw new LoadDataException("Could not find child group " + groupName);
-                childIndex = parameters[1].ToInt32(null);
+                try
+                {
+                    childIndex = parameters[1].ToInt32(null);
+                }
+                catch (OverflowException e)
+                {
+                    throw new LoadDataException(e.Message);
+                }
             }
             else
-                throw new Exception("'child' context requires 1 or 2 parameters");
+                throw new LoadDataException("'child' context requires 1 or 2 parameters");
             parent.NeedChildren();
             var children = parent.Children;
             if (childIndex < 0 || childIndex >= children.Count)

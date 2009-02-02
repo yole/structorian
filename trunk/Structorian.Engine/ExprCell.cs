@@ -21,7 +21,14 @@ namespace Structorian.Engine
                 if (_offset == -2)
                 {
                     var context = new DependencyTrackingContext(_instance, this);
-                    _expression.Evaluate(context);
+                    try
+                    {
+                        _expression.Evaluate(context);
+                    }
+                    catch (LoadDataException)
+                    {
+                        return -1;    // will be reported when the cell is displayed
+                    }
                     _offset = context.DependencyStartOffset;
                     if (context.DependencyStartOffset >= 0)
                     {
