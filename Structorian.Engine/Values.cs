@@ -86,7 +86,10 @@ namespace Structorian.Engine
             return ((IConvertible)_value).ToDateTime(provider);
         }
 
-        public abstract string ToString(IFormatProvider provider);
+        public string ToString(IFormatProvider provider)
+        {
+            return ToString();
+        }
 
         public object ToType(Type conversionType, IFormatProvider provider)
         {
@@ -105,7 +108,7 @@ namespace Structorian.Engine
             return TypeCode.String;
         }
 
-        public override string ToString(IFormatProvider provider)
+        public override string ToString()
         {
             return _value;
         }
