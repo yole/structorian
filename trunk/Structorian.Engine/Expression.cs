@@ -183,7 +183,7 @@ namespace Structorian.Engine
         protected static IEvaluateContext GetRHSContext(IEvaluateContext context, object lhsValue)
         {
             if (lhsValue is EnumValue)
-                return new EnumEvaluateContext(context, ((EnumValue) lhsValue).EnumDef);
+                return new EnumEvaluateContext(context, ((EnumValue) lhsValue).EnumDef, lhsValue is SetValue);
             return context;
         }
     }
@@ -191,10 +191,12 @@ namespace Structorian.Engine
     internal class EnumEvaluateContext : DelegatingEvaluateContext
     {
         private readonly EnumDef _def;
+        private bool _set;
 
-        public EnumEvaluateContext(IEvaluateContext context, EnumDef def) : base(context)
+        public EnumEvaluateContext(IEvaluateContext context, EnumDef def, bool set) : base(context)
         {
             _def = def;
+            _set = set;
         }
 
         public override IConvertible EvaluateSymbol(string symbol)
@@ -203,7 +205,10 @@ namespace Structorian.Engine
             {
                 uint? value = _def.StringToValue(symbol);
                 if (value.HasValue)
+                {
+                    if (_set) return 1 << (int) value.Value;
                     return value.Value;
+                }
             }
             return base.EvaluateSymbol(symbol);
         }
