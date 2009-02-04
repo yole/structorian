@@ -1036,7 +1036,17 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("42", instance.Cells[1].Value);
         }
 
-        [Test] public void While()
+        [Test]
+        public void EvalSetSymbol()
+        {
+            StructInstance instance = PrepareInstance(
+                "enum e { a, b, c } struct A { set8 q [enum=e]; if ((q & c) != 0) { calc n [value=42]; } } ",
+                new byte[] { 4 });
+            Assert.AreEqual("42", instance.Cells[1].Value);
+        }
+
+        [Test]
+        public void While()
         {
             StructInstance instance = PrepareInstance(
                 "struct A { local x [value=0]; while(x<5) { u8 v; local x [value=x+v]; } }",
