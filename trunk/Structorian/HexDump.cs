@@ -21,6 +21,9 @@ namespace Structorian
         private long _selectionAnchor;
         private long _selectionLead;
         private int _lineSize = 16;
+        private const int BUFFER_SIZE = 4096;
+        private byte[] _buffer = new byte[BUFFER_SIZE];
+        private long _bufferStart;
 
         public HexDump()
         {
@@ -35,6 +38,7 @@ namespace Structorian
                 if (_stream != value)
                 {
                     _stream = value;
+                    _bufferStart = -1;
                     _streamSize = _stream != null ? _stream.Length : 0;
                     _lineCount = (_streamSize/16 + 1);
                     if (_topLine > _lineCount)
@@ -258,14 +262,27 @@ namespace Structorian
             base.OnPaint(e);
             if (_stream == null) return;
             long offset = _topLine * 16;
+
+            EnsureBuffered(offset, _visibleLines*_lineSize);
+
             int y = 0;
             for (int i = 0; i < _visibleLines; i++)
             {
                 DrawHexLine(e.Graphics, y, offset);
-                offset += 16;
+                offset += _lineSize;
                 y += _charHeight;
                 if (offset >= _streamSize)
                     break;
+            }
+        }
+
+        private void EnsureBuffered(long offset, int size)
+        {
+            if (_bufferStart == -1 || offset < _bufferStart || offset + size >= _bufferStart + BUFFER_SIZE)
+            {
+                _stream.Position = offset;
+                _stream.Read(_buffer, 0, Math.Min((int) (_streamSize - offset), BUFFER_SIZE));
+                _bufferStart = offset;
             }
         }
 
@@ -273,9 +290,8 @@ namespace Structorian
         {
             long bytesToEnd = _streamSize - offset;
             int bytesInLine = bytesToEnd < 16 ? (int) bytesToEnd : 16;
-            _stream.Position = offset;
             byte[] bytes = new byte[bytesInLine];
-            _stream.Read(bytes, 0, bytesInLine);
+            Array.Copy(_buffer, offset - _bufferStart, bytes, 0, bytesInLine);
 
             List<LineSpan> spans = GetHighlightedSpans(offset, offset + 16);
             new LineRenderer(g, Font, top, (int) offset, bytes, spans).DrawLine();
