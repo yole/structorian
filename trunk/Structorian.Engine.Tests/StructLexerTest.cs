@@ -105,5 +105,17 @@ namespace Structorian.Engine.Tests
             Assert.AreEqual("(a\nb)", value);
             Assert.AreEqual(2, lexer.CurrentPosition.Line);
         }
+
+        [Test] public void MultilineDelimitedString()
+        {
+            var lexer = new StructLexer("struct A { if (\na)");
+            Assert.IsTrue(lexer.CheckNextToken(StructTokenType.String));
+            Assert.IsTrue(lexer.CheckNextToken(StructTokenType.String));
+            Assert.IsTrue(lexer.CheckNextToken(StructTokenType.OpenCurly));
+            Assert.IsTrue(lexer.CheckNextToken(StructTokenType.String));
+            var token = lexer.GetNextToken(StructTokenType.String);
+            Assert.AreEqual("\na", token);
+            Assert.AreEqual(2, lexer.CurrentPosition.Line);
+        }
     }
 }

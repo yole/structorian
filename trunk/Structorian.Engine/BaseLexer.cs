@@ -187,7 +187,7 @@ namespace Structorian.Engine
 
         protected Token FetchDelimitedString(char delimiterEnd, char delimiterStart, T tokenType)
         {
-            _position++;
+            IncrementPosition();
             int startPos = _position;
             int nestingLevel = 1;
             while (_position < _text.Length)
@@ -199,7 +199,7 @@ namespace Structorian.Engine
                 }
                 else if (delimiterStart != 0 && _text[_position] == delimiterStart)
                     nestingLevel++;
-                _position++;
+                IncrementPosition();
             }
 
             if (nestingLevel > 0)
@@ -207,7 +207,7 @@ namespace Structorian.Engine
 
             string stringValue = _text.Substring(startPos, _position - startPos);
             Token result = new Token(tokenType, EvaluateStringValue(stringValue));
-            _position++;
+            IncrementPosition();
             return result;
         }
 
