@@ -83,9 +83,13 @@ namespace Structorian.Engine.Fields
         {
             Expression offsetExpr = GetExpressionAttribute("offset");
             if (offsetExpr != null)
-                return offsetExpr.EvaluateLong(instance);
-            else
-                return null;
+            {
+                var result = offsetExpr.EvaluateLong(instance);
+                if (result < 0)
+                    throw new LoadDataException("Negative child offset");
+                return result;
+            }
+            return null;
         }
 
         private int EvaluateCount(StructInstance instance)
@@ -106,6 +110,8 @@ namespace Structorian.Engine.Fields
 
             public ChildSeed(ChildField field, long? offset, int count, bool isSibling)
             {
+                if (offset.HasValue && offset.Value < 0)
+                    throw new ArgumentOutOfRangeException("offset");
                 _field = field;
                 _offset = offset;
                 _count = count;

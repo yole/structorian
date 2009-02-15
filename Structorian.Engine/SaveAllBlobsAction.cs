@@ -7,7 +7,13 @@ using Structorian.Engine.Fields;
 
 namespace Structorian.Engine
 {
-    public class SaveAllBlobsAction
+    public interface StructorianAction
+    {
+        string Text { get; }
+        void Run();
+    }
+
+    public class SaveAllBlobsAction: StructorianAction
     {
         private readonly InstanceTree _tree;
         private readonly string _outDir;
@@ -20,21 +26,14 @@ namespace Structorian.Engine
             _outDir = outDir;
         }
 
-        public void Run()
+        public string Text
         {
-            SaveBlobsIn(_tree);
+            get { return "Saving blobs"; }
         }
 
-        private void SaveBlobsIn(InstanceTreeNode node)
+        public void Run()
         {
-            SaveBlobCells(node);
-
-            int i = 0;
-            while (i < node.Children.Count)
-            {
-                SaveBlobsIn(node.Children [i]);
-                i++;
-            }
+            _tree.EachNode(SaveBlobCells);
         }
 
         private void SaveBlobCells(InstanceTreeNode node)

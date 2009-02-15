@@ -35,8 +35,12 @@ namespace Structorian
             this.loadStructuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStructuresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.miFindStructure = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showLocalOffsetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.miSaveAllBlobs = new System.Windows.Forms.ToolStripMenuItem();
             this._openStructsDialog = new System.Windows.Forms.OpenFileDialog();
             this._openDataDialog = new System.Windows.Forms.OpenFileDialog();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -45,15 +49,13 @@ namespace Structorian
             this._btnLoadStuctures = new System.Windows.Forms.ToolStripButton();
             this._btnSaveStructures = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tslSelection = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tslProgress = new System.Windows.Forms.ToolStripStatusLabel();
             this._saveStructsDialog = new System.Windows.Forms.SaveFileDialog();
-            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.miSaveAllBlobs = new System.Windows.Forms.ToolStripMenuItem();
             this._targetDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             this.splitContainer2.Panel1.SuspendLayout();
-            this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -63,6 +65,7 @@ namespace Structorian
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
+            this.toolStripMenuItem1,
             this.viewToolStripMenuItem,
             this.toolsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -110,6 +113,21 @@ namespace Structorian
             this.loadDataToolStripMenuItem.Text = "Load Data...";
             this.loadDataToolStripMenuItem.Click += new System.EventHandler(this.loadDataToolStripMenuItem_Click);
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miFindStructure});
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(37, 20);
+            this.toolStripMenuItem1.Text = "&Edit";
+            // 
+            // miFindStructure
+            // 
+            this.miFindStructure.Name = "miFindStructure";
+            this.miFindStructure.Size = new System.Drawing.Size(170, 22);
+            this.miFindStructure.Text = "&Find Structures...";
+            this.miFindStructure.Click += new System.EventHandler(this.miFindStructure_Click);
+            // 
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -124,6 +142,21 @@ namespace Structorian
             this.showLocalOffsetsToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.showLocalOffsetsToolStripMenuItem.Text = "Show &Local Offsets";
             this.showLocalOffsetsToolStripMenuItem.Click += new System.EventHandler(this.showLocalOffsetsToolStripMenuItem_Click);
+            // 
+            // toolsToolStripMenuItem
+            // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miSaveAllBlobs});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.toolsToolStripMenuItem.Text = "&Tools";
+            // 
+            // miSaveAllBlobs
+            // 
+            this.miSaveAllBlobs.Name = "miSaveAllBlobs";
+            this.miSaveAllBlobs.Size = new System.Drawing.Size(163, 22);
+            this.miSaveAllBlobs.Text = "&Save All Blobs...";
+            this.miSaveAllBlobs.Click += new System.EventHandler(this.miSaveAllBlobs_Click);
             // 
             // _openStructsDialog
             // 
@@ -140,11 +173,8 @@ namespace Structorian
             // 
             this.splitContainer2.Panel1.Controls.Add(this._structEditControl);
             this.splitContainer2.Panel1.Controls.Add(this.toolStrip1);
-            // 
-            // splitContainer2.Panel2
-            // 
-            this.splitContainer2.Size = new System.Drawing.Size(438, 400);
-            this.splitContainer2.SplitterDistance = 108;
+            this.splitContainer2.Size = new System.Drawing.Size(438, 378);
+            this.splitContainer2.SplitterDistance = 102;
             this.splitContainer2.TabIndex = 4;
             // 
             // _structEditControl
@@ -158,7 +188,7 @@ namespace Structorian
             this._structEditControl.ShowSpaces = true;
             this._structEditControl.ShowTabs = true;
             this._structEditControl.ShowVRuler = true;
-            this._structEditControl.Size = new System.Drawing.Size(438, 83);
+            this._structEditControl.Size = new System.Drawing.Size(438, 77);
             this._structEditControl.TabIndex = 0;
             // 
             // toolStrip1
@@ -196,36 +226,32 @@ namespace Structorian
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 266);
+            this.tslSelection,
+            this.tslProgress});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 402);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(438, 22);
             this.statusStrip1.TabIndex = 0;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // toolStripStatusLabel1
+            // tslSelection
             // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 17);
+            this.tslSelection.AutoSize = false;
+            this.tslSelection.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tslSelection.Name = "tslSelection";
+            this.tslSelection.Size = new System.Drawing.Size(400, 17);
+            this.tslSelection.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // tslProgress
+            // 
+            this.tslProgress.Name = "tslProgress";
+            this.tslProgress.Size = new System.Drawing.Size(23, 17);
+            this.tslProgress.Spring = true;
+            this.tslProgress.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // _saveStructsDialog
             // 
             this._saveStructsDialog.Filter = "Structure Definitions (*.strs)|*.strs|All files|*.*";
-            // 
-            // toolsToolStripMenuItem
-            // 
-            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.miSaveAllBlobs});
-            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.toolsToolStripMenuItem.Text = "&Tools";
-            // 
-            // miSaveAllBlobs
-            // 
-            this.miSaveAllBlobs.Name = "miSaveAllBlobs";
-            this.miSaveAllBlobs.Size = new System.Drawing.Size(163, 22);
-            this.miSaveAllBlobs.Text = "&Save All Blobs...";
-            this.miSaveAllBlobs.Click += new System.EventHandler(this.miSaveAllBlobs_Click);
             // 
             // backgroundWorker1
             // 
@@ -251,8 +277,6 @@ namespace Structorian
             this.menuStrip1.PerformLayout();
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel1.PerformLayout();
-            this.splitContainer2.Panel2.ResumeLayout(false);
-            this.splitContainer2.Panel2.PerformLayout();
             this.splitContainer2.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
@@ -282,11 +306,14 @@ namespace Structorian
         private System.Windows.Forms.SaveFileDialog _saveStructsDialog;
         private System.Windows.Forms.ToolStripMenuItem saveStructuresToolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel tslSelection;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem miSaveAllBlobs;
         private System.Windows.Forms.FolderBrowserDialog _targetDialog;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem miFindStructure;
+        private System.Windows.Forms.ToolStripStatusLabel tslProgress;
     }
 }
 

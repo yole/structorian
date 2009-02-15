@@ -77,8 +77,14 @@ namespace Structorian.Engine
                 uint value = result.ToUInt32(CultureInfo.CurrentCulture);
                 return (int) value;
             }
-            else
+            try
+            {
                 return result.ToInt32(CultureInfo.CurrentCulture);
+            }
+            catch (OverflowException e)
+            {
+                throw new LoadDataException(e.Message);
+            }
         }
 
         public string Source

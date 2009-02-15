@@ -12,7 +12,15 @@ namespace Structorian.Engine.Fields
         public override void LoadData(BinaryReader reader, StructInstance instance)
         {
             int offset = (int)reader.BaseStream.Position;
-            int len = GetExpressionAttribute("len").EvaluateInt(instance);
+            int len;
+            try
+            {
+                len = GetExpressionAttribute("len").EvaluateInt(instance);
+            }
+            catch (OverflowException)
+            {
+                throw new LoadDataException("Blob size is larger than Int32");
+            }
             if (offset + len > reader.BaseStream.Length)
                 throw new LoadDataException("Blob size " + len + " exceeds stream length");
             if (len < 0)

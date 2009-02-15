@@ -24,5 +24,23 @@ namespace Structorian.Engine
                 parent = parent.Parent;
             return (InstanceTree)parent;
         }
+
+        public void EachNode(Action<InstanceTreeNode> action)
+        {
+            action(this);
+            int i = 0;
+            try
+            {
+                while (i < Children.Count)
+                {
+                    Children [i].EachNode(action);
+                    i++;
+                }
+            }
+            catch (LoadDataException)
+            {
+                // ignore
+            }
+        }
     }
 }

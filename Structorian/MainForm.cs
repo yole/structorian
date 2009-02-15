@@ -34,7 +34,7 @@ namespace Structorian
             if (lastStrsFile != null && lastStrsFile.Length > 0)
                 LoadStructsFile(lastStrsFile);
             _structEditControl.Document.DocumentChanged += delegate { _structuresModified = true; };
-            _dataView.HexDump.StatusTextChanged += (sender, e) => toolStripStatusLabel1.Text = e.Text;
+            _dataView.HexDump.StatusTextChanged += (sender, e) => tslSelection.Text = e.Text;
             
             RestoreFormPosition();
             _settingsLoaded = true;
@@ -250,8 +250,7 @@ namespace Structorian
         private void HighlightErrors(ReadOnlyCollection<ParseException> exceptions)
         {
             IDocument doc = _structEditControl.Document;
-            doc.MarkerStrategy.RemoveAll(
-                delegate(TextMarker m) { return m.TextMarkerType == TextMarkerType.WaveLine; } );
+            doc.MarkerStrategy.RemoveAll(m => m.TextMarkerType == TextMarkerType.WaveLine);
             foreach(ParseException ex in exceptions)
             {
                 int offset = doc.PositionToOffset(new Point(ex.Position.Col, ex.Position.Line - 1));
@@ -270,18 +269,37 @@ namespace Structorian
         private void miSaveAllBlobs_Click(object sender, EventArgs e)
         {
             if (_targetDialog.ShowDialog(this) != DialogResult.OK) return;
-            backgroundWorker1.RunWorkerAsync();
+            var action = new SaveAllBlobsAction(_dataView.ActiveInstanceTree, _targetDialog.SelectedPath);
+            RunBackgroundAction(action, null);
+        }
+
+        private void RunBackgroundAction(StructorianAction action, Action callback)
+        {
+            tslProgress.Text = action.Text;
+            backgroundWorker1.RunWorkerAsync(new BackgroundTask(action, callback));
         }
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            var action = new SaveAllBlobsAction(_dataView.ActiveInstanceTree, _targetDialog.SelectedPath);
-            action.Run();
+            ((BackgroundTask) e.Argument).Action.Run();
+            e.Result = ((BackgroundTask) e.Argument).Callback;
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-            MessageBox.Show(this, "Done saving");
+            _dataView.FlushPendingNodes();
+            if (e.Result != null)
+                ((Action) e.Result).Invoke();
+            tslProgress.Text = "";
+        }
+
+        private void miFindStructure_Click(object sender, EventArgs e)
+        {
+            var dlg = new FindStructureDialog(_structFile);
+            if (dlg.ShowDialog(this) != DialogResult.OK)
+                return;
+            var action = new FindStructuresAction(_dataView.InstanceTrees, dlg.SelectedDef, dlg.Expression);
+            RunBackgroundAction(action, () => _dataView.ShowSearchResults(action.Results));
         }
 
         private class WheelMessageFilter : IMessageFilter
@@ -299,6 +317,18 @@ namespace Structorian
                     }
                 }
                 return false;
+            }
+        }
+
+        private class BackgroundTask
+        {
+            public StructorianAction Action { get; set; }
+            public Action Callback { get; set; }
+
+            public BackgroundTask(StructorianAction action, Action callback)
+            {
+                Action = action;
+                Callback = callback;
             }
         }
     }
