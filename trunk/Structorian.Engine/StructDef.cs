@@ -10,8 +10,8 @@ namespace Structorian.Engine
     public class StructDef
     {
         private string _name;
-        private StructFile _structFile;
-        private List<StructField> _fields = new List<StructField>();
+        private readonly StructFile _structFile;
+        private readonly List<StructField> _fields = new List<StructField>();
         private string _fileMask;
         private ByteOrder _byteOrder = ByteOrder.Default;
         private bool _hidden;
@@ -137,6 +137,11 @@ namespace Structorian.Engine
                     result += field.GetDataSize();
             }
             return result;
+        }
+
+        public override string ToString()
+        {
+            return _name;
         }
     }
 }

@@ -56,6 +56,12 @@
     <Compile Include="DataView.Designer.cs">
       <DependentUpon>DataView.cs</DependentUpon>
     </Compile>
+    <Compile Include="FindStructureDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FindStructureDialog.Designer.cs">
+      <DependentUpon>FindStructureDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="HexDump.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -71,6 +77,9 @@
     <EmbeddedResource Include="DataView.resx">
       <SubType>Designer</SubType>
       <DependentUpon>DataView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FindStructureDialog.resx">
+      <DependentUpon>FindStructureDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <SubType>Designer</SubType>

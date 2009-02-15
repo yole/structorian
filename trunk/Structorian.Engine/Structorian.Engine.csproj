@@ -91,6 +91,7 @@
     <Compile Include="Fields\StrField.cs" />
     <Compile Include="Fields\SwitchField.cs" />
     <Compile Include="Fields\UnixTimeField.cs" />
+    <Compile Include="FindStructuresAction.cs" />
     <Compile Include="ValueCell.cs" />
     <Compile Include="Fields\WhileField.cs" />
     <Compile Include="Fields\ZLibDecoder.cs" />

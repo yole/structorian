@@ -42,6 +42,9 @@ namespace Structorian
         private readonly HexDump _hexDump;
         private bool _showLocalOffsets;
         private Control _nodeControl;
+        private TreeNode _searchResultsRoot;
+        private readonly List<InstanceAddedEventArgs> _pendingNodes = new List<InstanceAddedEventArgs>();
+        private readonly List<InstanceTreeNode> _nameChangedNodes = new List<InstanceTreeNode>();
 
         public event CellSelectedEventHandler CellSelected;
 
@@ -84,10 +87,12 @@ namespace Structorian
 
         public InstanceTree ActiveInstanceTree
         {
-            get
-            {
-                return _activeInstance != null ? _activeInstance.GetInstanceTree() : null;
-            }
+            get { return _activeInstance != null ? _activeInstance.GetInstanceTree() : null; }
+        }
+
+        public List<InstanceTree> InstanceTrees
+        {
+            get { return _dataFiles.ConvertAll(f => f.InstanceTree); }
         }
 
         private DataFile FindDataFile(InstanceTreeNode instance)
@@ -122,6 +127,7 @@ namespace Structorian
             {
                 _structTreeView.Nodes.Clear();
                 _nodeMap.Clear();
+                _searchResultsRoot = null;
                 foreach (DataFile f in _dataFiles)
                 {
                     f.RootStructDef = structMatcher.Invoke(f.Name);
@@ -140,7 +146,7 @@ namespace Structorian
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new InstanceAddedEventHandler(HandleInstanceAdded), sender, e);
+                _pendingNodes.Add(e);
                 return;
             }
             
@@ -158,8 +164,23 @@ namespace Structorian
 
         private void HandleNodeNameChanged(object sender, NodeNameChangedEventArgs e)
         {
-            TreeNode node = _nodeMap[e.Node];
-            node.Text = AppendSequenceIndex(e.Node);
+            UpdateNodeName(e.Node);
+        }
+
+        private void UpdateNodeName(InstanceTreeNode instance)
+        {
+            TreeNode node;
+            if (_nodeMap.TryGetValue(instance, out node))
+            {
+                if (InvokeRequired)
+                {
+                    _nameChangedNodes.Add(instance);
+                }
+                else
+                {
+                    node.Text = AppendSequenceIndex(instance);
+                }
+            }
         }
 
         private static string AppendSequenceIndex(InstanceTreeNode node)
@@ -171,6 +192,22 @@ namespace Structorian
                 name = structInstance.SequenceIndex + ". " + name;
             }
             return name;
+        }
+
+        public void FlushPendingNodes()
+        {
+            _structTreeView.BeginUpdate();
+            try
+            {
+                _pendingNodes.ForEach(n => HandleInstanceAdded(this, n));
+                _nameChangedNodes.ForEach(UpdateNodeName);
+                _pendingNodes.Clear();
+                _nameChangedNodes.Clear();
+            }
+            finally
+            {
+                _structTreeView.EndUpdate();
+            }
         }
 
         private void FillStructureTree(InstanceTree instanceTree)
@@ -214,21 +251,28 @@ namespace Structorian
             _structTreeView.BeginUpdate();
             try
             {
-                NodeUI ui = FindNodeUI(_activeInstance);
-                if (ui != null)
+                if (_activeInstance == null)
                 {
-                    _nodeControl = ui.CreateControl();
-                    _nodeControl.Dock = DockStyle.Fill;
-                    splitContainer1.Panel2.Controls.Add(_nodeControl);
-                    _structGridView.Visible = false;
+                    _structGridView.DataSource = new List<StructCell>();
                 }
                 else
                 {
-                    _structGridView.Visible = true;
-                    _structGridView.DataSource = _activeInstance.Cells;
+                    NodeUI ui = FindNodeUI(_activeInstance);
+                    if (ui != null)
+                    {
+                        _nodeControl = ui.CreateControl();
+                        _nodeControl.Dock = DockStyle.Fill;
+                        splitContainer1.Panel2.Controls.Add(_nodeControl);
+                        _structGridView.Visible = false;
+                    }
+                    else
+                    {
+                        _structGridView.Visible = true;
+                        _structGridView.DataSource = _activeInstance.Cells;
+                    }
+                    // while we're in BeginUpdate, pre-evaluate all cell values
+                    _activeInstance.Cells.ToList().ForEach(cell => cell.Value.ToString());
                 }
-                // while we're in BeginUpdate, pre-evaluate all cell values
-                _activeInstance.Cells.ToList().ForEach(cell => cell.Value.ToString());
             }
             finally
             {
@@ -367,6 +411,41 @@ namespace Structorian
                 {
                     _hexDump.Stream = null;
                 }
+            }
+        }
+
+        public void ShowSearchResults(List<InstanceTreeNode> results)
+        {
+            if (results.Count == 1)
+            {
+                if (_searchResultsRoot != null)
+                {
+                    _searchResultsRoot.Nodes.Clear();
+                    _searchResultsRoot.Remove();
+                    _searchResultsRoot = null;
+                }
+                _structTreeView.SelectedNode = _nodeMap[results[0]];
+            }
+            else
+            {
+                ShowSearchResultsNode(results);
+            }
+        }
+
+        private void ShowSearchResultsNode(List<InstanceTreeNode> results)
+        {
+            if (_searchResultsRoot == null)
+            {
+                _searchResultsRoot = _structTreeView.Nodes.Add("Search Results");
+            }
+            else
+            {
+                _searchResultsRoot.Nodes.Clear();
+            }
+            foreach (InstanceTreeNode result in results)
+            {
+                var resultNode = _searchResultsRoot.Nodes.Add(result.NodeName);
+                resultNode.Tag = result;
             }
         }
     }

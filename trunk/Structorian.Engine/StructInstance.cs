@@ -36,6 +36,7 @@ namespace Structorian.Engine
 
         public StructInstance(StructDef def, InstanceTreeNode parent, Stream stream, long offset)
         {
+            if (offset < 0) throw new ArgumentOutOfRangeException("offset");
             SequenceIndex = -1;
             _def = def;
             _parent = parent;
