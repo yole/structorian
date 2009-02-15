@@ -18,7 +18,7 @@ namespace Structorian
     {
         private class DataFile
         {
-            private string _name;
+            private readonly string _name;
 
             public DataFile(string name, StructDef def)
             {
@@ -45,6 +45,7 @@ namespace Structorian
         private TreeNode _searchResultsRoot;
         private readonly List<InstanceAddedEventArgs> _pendingNodes = new List<InstanceAddedEventArgs>();
         private readonly List<InstanceTreeNode> _nameChangedNodes = new List<InstanceTreeNode>();
+        private readonly HexDump.Highlighter _currentStructureHighlighter;
 
         public event CellSelectedEventHandler CellSelected;
 
@@ -57,6 +58,7 @@ namespace Structorian
                                BackColor = SystemColors.Window,
                                Dock = DockStyle.Fill
                            };
+            _currentStructureHighlighter = _hexDump.AddHighlighter(null, Color.LightGoldenrodYellow);
             splitContainer2.Panel2.Controls.Add(_hexDump);
         }
 
@@ -286,9 +288,13 @@ namespace Structorian
                 {
                     _hexDump.Stream = FindDataFile(tree).Stream;
                 }
+                _currentStructureHighlighter.SetRange(-1, -1);
             }
             else
+            {
                 _hexDump.Stream = instance.Stream;
+                _currentStructureHighlighter.SetRange(instance.Offset, instance.EndOffset);
+            }
         }
 
         private static NodeUI FindNodeUI(InstanceTreeNode instance)
