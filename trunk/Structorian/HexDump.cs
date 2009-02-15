@@ -25,9 +25,48 @@ namespace Structorian
         private byte[] _buffer = new byte[BUFFER_SIZE];
         private long _bufferStart;
 
+        internal class Highlighter
+        {
+            private long _startOffset;
+            private long _endOffset;
+            private readonly HexDump _hexDump;
+            private readonly Color? _textColor;
+            private readonly Color? _backgroundColor;
+
+            public Highlighter(HexDump hexDump, Color? foreground, Color? background)
+            {
+                _startOffset = -1;
+                _endOffset = -1;
+                _hexDump = hexDump;
+                _textColor = foreground;
+                _backgroundColor = background;
+            }
+
+            internal long StartOffset { get { return _startOffset; } }
+            internal long EndOffset { get { return _endOffset; } }
+            internal Color? TextColor { get { return _textColor; } }
+            internal Color? BackgroundColor { get { return _backgroundColor; } }
+
+            public void SetRange(long startOffset, long endOffset)
+            {
+                _startOffset = startOffset;
+                _endOffset = endOffset;
+                _hexDump.Invalidate();
+            }
+
+            public bool Intersects(long startOffset, long endOffset)
+            {
+                return _endOffset > startOffset && _startOffset < endOffset;
+            }
+        }
+
+        private readonly List<Highlighter> _highlighters = new List<Highlighter>();
+        private readonly Highlighter _selectionHighlighter;
+
         public HexDump()
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.DoubleBuffer, true);
+            _selectionHighlighter = AddHighlighter(SystemColors.HighlightText, SystemColors.Highlight);
         }
 
         public Stream Stream
@@ -60,6 +99,7 @@ namespace Structorian
         {
             _selectionStart = Math.Max(0, Math.Min(startOffset, _streamSize - 1));
             _selectionEnd = Math.Max(1, Math.Min(startOffset+count, _streamSize));
+            _selectionHighlighter.SetRange(_selectionStart, _selectionEnd);
             ScrollInView();
             Invalidate();
             UpdateStatusText();
@@ -297,24 +337,6 @@ namespace Structorian
             new LineRenderer(g, Font, top, (int) offset, bytes, spans).DrawLine();
         }
 
-        private List<LineSpan> GetHighlightedSpans(long startOffset, long endOffset)
-        {
-            int selectionStartInLine = (int)((_selectionStart < startOffset) ? 0 : _selectionStart - startOffset);
-            int lineLength = (int) (endOffset - startOffset);
-            int selectionEndInLine = (int)((_selectionEnd >= endOffset) ? lineLength : _selectionEnd - startOffset);
-            if (selectionStartInLine < 16 && selectionEndInLine > 0 && selectionStartInLine != selectionEndInLine)
-            {
-                var result = new List<LineSpan>();
-                if (selectionStartInLine > 0)
-                    result.Add(new LineSpan(0, selectionStartInLine, SystemColors.WindowText, SystemColors.Window));
-                result.Add(new LineSpan(selectionStartInLine, selectionEndInLine, SystemColors.HighlightText, SystemColors.Highlight));
-                if (selectionEndInLine < lineLength)
-                    result.Add(new LineSpan(selectionEndInLine, lineLength, SystemColors.WindowText, SystemColors.Window));
-                return result;
-            }
-            return null;
-        }
-
         private void UpdateStatusText()
         {
             long selectedBytes = _selectionEnd - _selectionStart;
@@ -340,6 +362,61 @@ namespace Structorian
                 result += selection[offset] << mask;
                 mask += 8;    
             }
+            return result;
+        }
+
+        public Highlighter AddHighlighter(Color? textColor, Color? backgroundColor)
+        {
+            var result = new Highlighter(this, textColor, backgroundColor);
+            _highlighters.Insert(0, result);
+            return result;
+        }
+
+        private List<LineSpan> GetHighlightedSpans(long startOffset, long endOffset)
+        {
+            foreach (Highlighter highlighter in _highlighters)
+            {
+                if (highlighter.Intersects(startOffset, endOffset))
+                {
+                    var entireLine = new LineSpan(startOffset, endOffset, SystemColors.WindowText, SystemColors.Window, true);
+                    return BreakIntoHighlightedSpans(entireLine);
+                }
+            }
+            return null;
+        }
+
+        private List<LineSpan> BreakIntoHighlightedSpans(LineSpan lineSpan)
+        {
+            List<LineSpan> result = BreakIntoSpans(_highlighters[0], lineSpan);
+            for (int i = 1; i < _highlighters.Count; i++)
+            {
+                var curHighlighter = _highlighters[i];
+                var nextResult = new List<LineSpan>();
+                result.ForEach(span => nextResult.AddRange(BreakIntoSpans(curHighlighter, span)));
+                result = nextResult;
+            }
+            return result;
+        }
+
+        private static List<LineSpan> BreakIntoSpans(Highlighter highlighter, LineSpan span)
+        {
+            var result = new List<LineSpan>();
+            if (highlighter.Intersects(span.Start, span.End))
+            {
+                if (highlighter.StartOffset > span.Start)
+                {
+                    result.Add(new LineSpan(span.Start, highlighter.StartOffset, span.TextColor, span.BackgroundColor, true));
+                }
+                result.Add(new LineSpan(Math.Max(span.Start, highlighter.StartOffset), Math.Min(span.End, highlighter.EndOffset),
+                    highlighter.TextColor.HasValue ? highlighter.TextColor.Value : span.TextColor,
+                    highlighter.BackgroundColor.HasValue ? highlighter.BackgroundColor.Value : span.BackgroundColor, false));
+                if (highlighter.EndOffset < span.End)
+                {
+                    result.Add(new LineSpan(highlighter.EndOffset, span.End, span.TextColor, span.BackgroundColor, true));
+                }
+            }
+            else
+                result.Add(span);
             return result;
         }
 
@@ -390,8 +467,8 @@ namespace Structorian
                 int carry = 0;
                 foreach (LineSpan span in _spans)
                 {
-                    int length = 3*(span.End - span.Start) + carry;
-                    if (span.BackgroundColor != SystemColors.Window)
+                    int length = 3*span.Length + carry;
+                    if (!span.IncludeAdjacentWS)
                     {
                         length--;
                         carry = 1;
@@ -405,7 +482,7 @@ namespace Structorian
                 DrawSpan(2, SystemColors.WindowText, SystemColors.Window);
                 foreach (LineSpan span in _spans)
                 {
-                    DrawSpan(span.End - span.Start, span.TextColor, span.BackgroundColor);
+                    DrawSpan(span.Length, span.TextColor, span.BackgroundColor);
                 }
             }
             else
@@ -428,33 +505,24 @@ namespace Structorian
     {
         private readonly Color _textColor;
         private readonly Color _backgroundColor;
+        private readonly bool _includeAdjacentWS;
 
-        public LineSpan(int start, int end, Color textColor, Color backgroundColor) : this()
+        public LineSpan(long start, long end, Color textColor, Color backgroundColor, bool includeAdjacentWS) : this()
         {
             _textColor = textColor;
+            _includeAdjacentWS = includeAdjacentWS;
             _backgroundColor = backgroundColor;
             Start = start;
             End = end;
         }
 
-        public LineSpan(Color textColor, Color backgroundColor): this()
-        {
-            _textColor = textColor;
-            _backgroundColor = backgroundColor;
-        }
+        public Color TextColor { get { return _textColor; } }
+        public Color BackgroundColor { get { return _backgroundColor; } }
+        public bool IncludeAdjacentWS { get { return _includeAdjacentWS; } }
 
-        public Color TextColor
-        {
-            get { return _textColor; }
-        }
-
-        public Color BackgroundColor
-        {
-            get { return _backgroundColor; }
-        }
-
-        public int Start { get; set; }
-        public int End { get; set; }
+        public long Start { get; set; }
+        public long End { get; set; }
+        internal int Length { get { return (int) (End - Start); } }
     }
 
     class StatusTextEventArgs: EventArgs
