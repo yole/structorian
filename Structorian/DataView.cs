@@ -447,6 +447,19 @@ namespace Structorian
                 var resultNode = _searchResultsRoot.Nodes.Add(result.NodeName);
                 resultNode.Tag = result;
             }
+            _structTreeView.SelectedNode = _searchResultsRoot;
+        }
+
+        private void contextMenuStrip2_Opening(object sender, CancelEventArgs e)
+        {
+            var node = _structTreeView.SelectedNode;
+            miShowInStructureTree.Visible = (node != null && node.Parent == _searchResultsRoot);
+        }
+
+        private void miShowInStructureTree_Click(object sender, EventArgs e)
+        {
+            var node = (InstanceTreeNode) _structTreeView.SelectedNode.Tag;
+            _structTreeView.SelectedNode = _nodeMap[node];
         }
     }
 
