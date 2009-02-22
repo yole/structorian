@@ -465,10 +465,13 @@ namespace Structorian
             {
                 DrawSpan(10, SystemColors.WindowText, SystemColors.Window);
                 int carry = 0;
-                foreach (LineSpan span in _spans)
+                for (int i = 0; i < _spans.Count; i++ )
                 {
-                    int length = 3*span.Length + carry;
-                    if (!span.IncludeAdjacentWS)
+                    var span = _spans[i];
+                    int length = 3 * span.Length + carry;
+                    if (i == _spans.Count - 1)
+                        length--;
+                    else if (!span.IncludeAdjacentWS)
                     {
                         length--;
                         carry = 1;
@@ -479,7 +482,7 @@ namespace Structorian
                     }
                     DrawSpan(length, span.TextColor, span.BackgroundColor);
                 }
-                DrawSpan(2, SystemColors.WindowText, SystemColors.Window);
+                DrawSpan(3, SystemColors.WindowText, SystemColors.Window);
                 foreach (LineSpan span in _spans)
                 {
                     DrawSpan(span.Length, span.TextColor, span.BackgroundColor);
