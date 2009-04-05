@@ -62,9 +62,6 @@
     <Compile Include="FindStructureDialog.Designer.cs">
       <DependentUpon>FindStructureDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="HexDump.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -107,12 +104,15 @@
     </Compile>
     <Compile Include="DataViewState.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="WindowsAPI.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Structorian.Engine\Structorian.Engine.csproj">
       <Project>{7275C649-8EDB-4BD2-AC99-9E0D2B610DE0}</Project>
       <Name>Structorian.Engine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UI\UI.csproj">
+      <Project>{5308EC10-F408-4B0A-AB69-E83192BD2AC6}</Project>
+      <Name>UI</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

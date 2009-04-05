@@ -5,9 +5,9 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Structorian
+namespace Structorian.UI
 {
-    class HexDump: ScrollableControl
+    public class HexDump: ScrollableControl
     {
         private Stream _stream;
         private long _streamSize;
@@ -25,7 +25,7 @@ namespace Structorian
         private byte[] _buffer = new byte[BUFFER_SIZE];
         private long _bufferStart;
 
-        internal class Highlighter
+        public class Highlighter
         {
             private long _startOffset;
             private long _endOffset;
@@ -528,7 +528,7 @@ namespace Structorian
         internal int Length { get { return (int) (End - Start); } }
     }
 
-    class StatusTextEventArgs: EventArgs
+    public class StatusTextEventArgs: EventArgs
     {
         private readonly string _text;
 
@@ -543,5 +543,5 @@ namespace Structorian
         }
     }
 
-    delegate void StatusTextEventHandler(object sender, StatusTextEventArgs e);
+    public delegate void StatusTextEventHandler(object sender, StatusTextEventArgs e);
 }

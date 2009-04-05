@@ -11,6 +11,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Microsoft.Win32.SafeHandles;
 using Structorian.Engine;
+using Structorian.UI;
 
 namespace Structorian
 {

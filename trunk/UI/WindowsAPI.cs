@@ -4,9 +4,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Structorian
+namespace Structorian.UI
 {
-    class WindowsAPI
+    public class WindowsAPI
     {
         public enum TreeViewItemFlags
         {
