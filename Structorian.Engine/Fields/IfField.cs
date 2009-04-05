@@ -25,7 +25,16 @@ namespace Structorian.Engine.Fields
                     if (field is ElseIfField)
                     {
                         Expression expr = field.GetExpressionAttribute("expr");
-                        if (expr.EvaluateBool(instance))
+                        bool result;
+                        try
+                        {
+                             result = expr.EvaluateBool(instance);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new LoadDataException("Error evaluating if condition: " + e.Message);
+                        }
+                        if (result)
                         {
                             field.LoadData(reader, instance);
                             break;
