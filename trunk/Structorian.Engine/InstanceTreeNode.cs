@@ -41,6 +41,10 @@ namespace Structorian.Engine
             {
                 // ignore
             }
+            catch(OverflowException)
+            {
+                // ignore
+            }
         }
     }
 }
