@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -458,6 +459,7 @@ namespace Structorian.UI
             _lineCharsBuilder.Append(' ', 2 + (16 - bytesInLine) * 3);
             string byteChars = Encoding.Default.GetString(_data).Replace('\n', (char)1).Replace('\r', (char)1);
             byteChars = byteChars.Replace('\0', (char)1);
+            Debug.Assert(byteChars.Length == bytesInLine);
             _lineCharsBuilder.Append(byteChars);
             _lineCharsBuilder.Append(' ', 16 - bytesInLine);
 
@@ -490,7 +492,8 @@ namespace Structorian.UI
             }
             else
             {
-                TextRenderer.DrawText(_graphics, _lineCharsBuilder.ToString(), _font, new Point(0, _top), SystemColors.WindowText);
+                TextRenderer.DrawText(_graphics, _lineCharsBuilder.ToString(), _font, new Point(0, _top), SystemColors.WindowText, 
+                    TextFormatFlags.NoPrefix);
             }
         }
 
@@ -499,8 +502,8 @@ namespace Structorian.UI
             Size defSize = new Size(100, 100);
             string part = _lineCharsBuilder.ToString(_lastIndex, chars);
             _lastIndex += chars;
-            TextRenderer.DrawText(_graphics, part, _font, new Point(_lastX, _top), text, background);
-            _lastX += TextRenderer.MeasureText(_graphics, part, _font, defSize, TextFormatFlags.NoPadding).Width;
+            TextRenderer.DrawText(_graphics, part, _font, new Point(_lastX, _top), text, background, TextFormatFlags.NoPrefix);
+            _lastX += TextRenderer.MeasureText(_graphics, part, _font, defSize, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width;
         } 
     }
 
