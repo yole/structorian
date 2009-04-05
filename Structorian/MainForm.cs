@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using ICSharpCode.TextEditor.Document;
 using Structorian.Engine;
 using Structorian.Properties;
+using Structorian.UI;
 
 namespace Structorian
 {
